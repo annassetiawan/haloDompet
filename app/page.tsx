@@ -129,14 +129,14 @@ export default function HomePage() {
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-between p-6 md:p-24 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
-      {/* Decorative Background */}
+      {/* Decorative Background - Animated */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 dark:bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 dark:bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 dark:bg-primary/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 dark:bg-primary/10 rounded-full blur-3xl animate-float-delayed" />
       </div>
 
-      {/* Header */}
-      <div className="relative z-10 w-full max-w-2xl flex justify-between items-center">
+      {/* Header - Fade in from top */}
+      <div className="relative z-10 w-full max-w-2xl flex justify-between items-center animate-slide-down">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
             HaloDompet
@@ -184,15 +184,15 @@ export default function HomePage() {
         </Dialog>
       </div>
 
-      {/* Main Content - Tombol Rekam 3D */}
-      <div className="relative z-10 flex flex-col items-center gap-8">
+      {/* Main Content - Tombol Rekam 3D - Scale in animation */}
+      <div className="relative z-10 flex flex-col items-center gap-8 animate-scale-in">
         {/* Glow effect ring */}
         <div className={`absolute w-40 h-40 rounded-full transition-all duration-500 ${
           isListening
             ? 'bg-red-500/20 dark:bg-red-500/30 blur-2xl animate-pulse'
             : isProcessing
             ? 'bg-blue-500/20 dark:bg-blue-500/30 blur-2xl animate-pulse'
-            : 'bg-primary/10 dark:bg-primary/20 blur-xl'
+            : 'bg-primary/10 dark:bg-primary/20 blur-xl animate-glow-pulse'
         }`} />
 
         <button
@@ -207,9 +207,9 @@ export default function HomePage() {
               ? 'bg-gradient-to-br from-red-500 via-red-600 to-red-700 shadow-[0_8px_30px_rgb(239,68,68,0.5)] hover:shadow-[0_12px_40px_rgb(239,68,68,0.6)]'
               : isProcessing
               ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 shadow-[0_8px_30px_rgb(59,130,246,0.5)]'
-              : 'bg-gradient-to-br from-primary via-primary/90 to-primary/80 shadow-[0_8px_30px_rgb(0,0,0,0.3)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.4)] dark:shadow-[0_8px_30px_rgb(255,255,255,0.1)] dark:hover:shadow-[0_12px_40px_rgb(255,255,255,0.15)]'
+              : 'bg-gradient-to-br from-primary via-primary/90 to-primary/80 shadow-[0_8px_30px_rgb(0,0,0,0.3)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.4)] dark:shadow-[0_8px_30px_rgb(255,255,255,0.1)] dark:hover:shadow-[0_12px_40px_rgb(255,255,255,0.15)] animate-button-bounce'
             }
-            hover:scale-105 active:scale-95
+            hover:scale-105 active:scale-95 hover:animate-none
             before:content-[''] before:absolute before:inset-0 before:rounded-full
             before:bg-gradient-to-br before:from-white/20 before:to-transparent
             before:opacity-0 hover:before:opacity-100 before:transition-opacity
@@ -253,10 +253,11 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="relative z-10 text-center space-y-2">
+      {/* Footer - Fade in from bottom */}
+      <div className="relative z-10 text-center space-y-2 animate-slide-up">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/30 dark:bg-muted/50 backdrop-blur-sm border border-border/30 dark:border-border/50">
-          <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 animate-pulse" />
+          <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 animate-ping" />
+          <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 absolute left-[18px]" />
           <p className="text-sm text-muted-foreground dark:text-muted-foreground/90">Tekan tombol dan ucapkan pengeluaran Anda</p>
         </div>
         <p className="text-xs text-muted-foreground/70 dark:text-muted-foreground/60">
