@@ -151,32 +151,29 @@ export default function HomePage() {
               variant="outline"
               size="icon"
               onClick={() => setTempWebhookUrl(webhookUrl)}
-              className="relative overflow-hidden group border-2 hover:border-primary/50 transition-all duration-300"
             >
-              <Settings className="h-4 w-4 transition-transform group-hover:rotate-90 duration-300" />
-              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Settings className="h-4 w-4" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Pengaturan Webhook</DialogTitle>
               <DialogDescription>
-                Masukkan URL webhook n8n Anda. Data JSON akan dikirim ke URL ini setelah diproses.
+                Masukkan URL webhook n8n Anda untuk mengirim data pengeluaran.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <Input
-                placeholder="https://your-n8n-instance.com/webhook/..."
-                value={tempWebhookUrl}
-                onChange={(e) => setTempWebhookUrl(e.target.value)}
-                className="border-2 focus-visible:border-primary/50"
-              />
+              <div className="grid gap-2">
+                <Input
+                  id="webhook-url"
+                  placeholder="https://your-n8n-instance.com/webhook/..."
+                  value={tempWebhookUrl}
+                  onChange={(e) => setTempWebhookUrl(e.target.value)}
+                />
+              </div>
             </div>
             <DialogFooter>
-              <Button
-                onClick={saveWebhookUrl}
-                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300"
-              >
+              <Button onClick={saveWebhookUrl}>
                 Simpan
               </Button>
             </DialogFooter>
