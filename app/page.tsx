@@ -128,20 +128,20 @@ export default function HomePage() {
   };
 
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-between p-6 md:p-24 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
-      {/* Decorative Background - Animated */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <main className="relative min-h-screen flex flex-col p-4 md:p-24 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
+      {/* Decorative Background - Animated (hidden on mobile) */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none hidden md:block">
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 dark:bg-primary/10 rounded-full blur-3xl animate-float" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 dark:bg-primary/10 rounded-full blur-3xl animate-float-delayed" />
       </div>
 
       {/* Header - Fade in from top */}
-      <div className="relative z-10 w-full max-w-2xl flex justify-between items-center animate-slide-down">
+      <div className="relative z-10 w-full max-w-2xl mx-auto flex justify-between items-center animate-slide-down pt-2 md:pt-0">
         <div>
-          <h1 className="text-3xl font-normal text-foreground">
+          <h1 className="text-2xl md:text-3xl font-normal text-foreground">
             HaloDompet
           </h1>
-          <p className="text-sm font-normal text-muted-foreground mt-1">Voice-powered expense tracker</p>
+          <p className="text-xs md:text-sm font-normal text-muted-foreground mt-0.5">Voice-powered expense tracker</p>
         </div>
 
         {/* Dialog Pengaturan */}
@@ -185,9 +185,9 @@ export default function HomePage() {
       </div>
 
       {/* Main Content - Tombol Rekam 3D - Scale in animation */}
-      <div className="relative z-10 flex flex-col items-center gap-8 animate-scale-in">
+      <div className="relative z-10 flex-grow flex flex-col items-center justify-center gap-6 md:gap-8 animate-scale-in max-w-2xl mx-auto w-full py-8 md:py-0">
         {/* Glow effect ring */}
-        <div className={`absolute w-40 h-40 rounded-full transition-all duration-500 ${
+        <div className={`absolute w-32 h-32 md:w-40 md:h-40 rounded-full transition-all duration-500 ${
           isListening
             ? 'bg-red-500/20 dark:bg-red-500/30 blur-2xl animate-pulse'
             : isProcessing
@@ -199,7 +199,7 @@ export default function HomePage() {
           onClick={handleListen}
           disabled={isListening || isProcessing}
           className={`
-            relative h-40 w-40 rounded-full
+            relative h-32 w-32 md:h-40 md:w-40 rounded-full
             font-normal text-lg
             transition-all duration-300 ease-out
             disabled:opacity-50 disabled:cursor-not-allowed
@@ -207,7 +207,7 @@ export default function HomePage() {
               ? 'bg-gradient-to-br from-red-500 via-red-600 to-red-700 shadow-[0_8px_30px_rgb(239,68,68,0.5)] hover:shadow-[0_12px_40px_rgb(239,68,68,0.6)]'
               : isProcessing
               ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 shadow-[0_8px_30px_rgb(59,130,246,0.5)]'
-              : 'bg-gradient-to-br from-primary via-primary/90 to-primary/80 shadow-[0_8px_30px_rgb(0,0,0,0.3)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.4)] dark:shadow-[0_8px_30px_rgb(255,255,255,0.1)] dark:hover:shadow-[0_12px_40px_rgb(255,255,255,0.15)] animate-button-bounce'
+              : 'bg-gradient-to-br from-primary via-primary/90 to-primary/80 shadow-[0_8px_30px_rgb(0,0,0,0.3)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.4)] dark:shadow-[0_8px_30px_rgb(255,255,255,0.1)] dark:hover:shadow-[0_12px_40px_rgb(255,255,255,0.15)] md:animate-button-bounce'
             }
             hover:scale-105 active:scale-95 hover:animate-none
             before:content-[''] before:absolute before:inset-0 before:rounded-full
@@ -224,43 +224,43 @@ export default function HomePage() {
           {/* Icon container */}
           <div className="relative z-10 flex items-center justify-center h-full w-full text-white">
             {isListening ? (
-              <Mic className="h-16 w-16 animate-pulse drop-shadow-lg" />
+              <Mic className="h-12 w-12 md:h-16 md:w-16 animate-pulse drop-shadow-lg" />
             ) : isProcessing ? (
-              <Loader2 className="h-16 w-16 animate-spin drop-shadow-lg" />
+              <Loader2 className="h-12 w-12 md:h-16 md:w-16 animate-spin drop-shadow-lg" />
             ) : (
-              <MicOff className="h-16 w-16 drop-shadow-lg group-hover:scale-110 transition-transform" />
+              <MicOff className="h-12 w-12 md:h-16 md:w-16 drop-shadow-lg group-hover:scale-110 transition-transform" />
             )}
           </div>
 
           {/* Bottom shadow untuk efek 3D */}
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-32 h-4 bg-black/20 rounded-full blur-md" />
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-24 h-3 md:w-32 md:h-4 bg-black/20 rounded-full blur-md" />
         </button>
 
         {/* Status Card */}
-        <div className="text-center space-y-3 max-w-md">
-          <div className="px-6 py-3 rounded-2xl bg-card/50 dark:bg-card/80 backdrop-blur-sm shadow-lg">
-            <p className="text-lg font-normal text-foreground">
+        <div className="text-center space-y-2 md:space-y-3 max-w-md px-2">
+          <div className="px-4 py-2 md:px-6 md:py-3 rounded-2xl bg-card/50 dark:bg-card/80 backdrop-blur-sm shadow-lg">
+            <p className="text-sm md:text-lg font-normal text-foreground">
               {status}
             </p>
           </div>
 
           {!webhookUrl && (
-            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 dark:border-amber-500/30 rounded-xl px-4 py-2">
-              <Settings className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-              <span>Klik ikon pengaturan untuk setup webhook URL</span>
+            <div className="flex items-center justify-center gap-2 text-xs md:text-sm text-muted-foreground bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 dark:border-amber-500/30 rounded-xl px-3 py-1.5 md:px-4 md:py-2">
+              <Settings className="h-3 w-3 md:h-3.5 md:w-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+              <span className="text-left">Klik ikon pengaturan untuk setup webhook URL</span>
             </div>
           )}
         </div>
       </div>
 
       {/* Footer - Fade in from bottom */}
-      <div className="relative z-10 text-center space-y-2 animate-slide-up">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/30 dark:bg-muted/50 backdrop-blur-sm border border-border/30 dark:border-border/50">
+      <div className="relative z-10 text-center space-y-1.5 md:space-y-2 animate-slide-up px-2 pb-4 md:pb-0 max-w-2xl mx-auto w-full">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-muted/30 dark:bg-muted/50 backdrop-blur-sm border border-border/30 dark:border-border/50">
           <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 animate-ping" />
-          <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 absolute left-[18px]" />
-          <p className="text-sm font-normal text-muted-foreground dark:text-muted-foreground/90">Tekan tombol dan ucapkan pengeluaran Anda</p>
+          <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 absolute left-[14px] md:left-[18px]" />
+          <p className="text-xs md:text-sm font-normal text-muted-foreground dark:text-muted-foreground/90">Tekan tombol dan ucapkan pengeluaran Anda</p>
         </div>
-        <p className="text-xs font-normal text-muted-foreground/70 dark:text-muted-foreground/60">
+        <p className="text-[10px] md:text-xs font-normal text-muted-foreground/70 dark:text-muted-foreground/60">
           Contoh: &quot;Beli kopi 25000&quot; atau &quot;Makan siang 50000&quot;
         </p>
       </div>
