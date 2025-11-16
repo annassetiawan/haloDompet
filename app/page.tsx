@@ -138,7 +138,7 @@ export default function HomePage() {
       {/* Header */}
       <div className="relative z-10 w-full max-w-2xl flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold text-foreground">
             HaloDompet
           </h1>
           <p className="text-sm text-muted-foreground mt-1">Voice-powered expense tracker</p>
@@ -239,7 +239,7 @@ export default function HomePage() {
         {/* Status Card */}
         <div className="text-center space-y-3 max-w-md">
           <div className="px-6 py-3 rounded-2xl bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 dark:border-border shadow-lg">
-            <p className="text-lg font-semibold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            <p className="text-lg font-semibold text-foreground">
               {status}
             </p>
           </div>
