@@ -128,10 +128,21 @@ export default function HomePage() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-6 md:p-24">
+    <main className="relative flex min-h-screen flex-col items-center justify-between p-6 md:p-24 bg-gradient-to-br from-background via-background to-muted/20">
+      {/* Decorative Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      </div>
+
       {/* Header */}
-      <div className="w-full max-w-2xl flex justify-between items-center">
-        <h1 className="text-2xl font-bold">HaloDompet</h1>
+      <div className="relative z-10 w-full max-w-2xl flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            HaloDompet
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">Voice-powered expense tracker</p>
+        </div>
 
         {/* Dialog Pengaturan */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -140,11 +151,13 @@ export default function HomePage() {
               variant="outline"
               size="icon"
               onClick={() => setTempWebhookUrl(webhookUrl)}
+              className="relative overflow-hidden group border-2 hover:border-primary/50 transition-all duration-300"
             >
-              <Settings className="h-4 w-4" />
+              <Settings className="h-4 w-4 transition-transform group-hover:rotate-90 duration-300" />
+              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Pengaturan Webhook</DialogTitle>
               <DialogDescription>
@@ -156,48 +169,99 @@ export default function HomePage() {
                 placeholder="https://your-n8n-instance.com/webhook/..."
                 value={tempWebhookUrl}
                 onChange={(e) => setTempWebhookUrl(e.target.value)}
+                className="border-2 focus-visible:border-primary/50"
               />
             </div>
             <DialogFooter>
-              <Button onClick={saveWebhookUrl}>Simpan</Button>
+              <Button
+                onClick={saveWebhookUrl}
+                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                Simpan
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* Main Content - Tombol Rekam */}
-      <div className="flex flex-col items-center gap-8">
-        <Button
+      {/* Main Content - Tombol Rekam 3D */}
+      <div className="relative z-10 flex flex-col items-center gap-8">
+        {/* Glow effect ring */}
+        <div className={`absolute w-40 h-40 rounded-full transition-all duration-500 ${
+          isListening
+            ? 'bg-red-500/20 blur-2xl animate-pulse'
+            : isProcessing
+            ? 'bg-blue-500/20 blur-2xl animate-pulse'
+            : 'bg-primary/10 blur-xl'
+        }`} />
+
+        <button
           onClick={handleListen}
           disabled={isListening || isProcessing}
-          size="lg"
-          className="h-32 w-32 rounded-full text-lg font-bold shadow-xl hover:shadow-2xl transition-all"
+          className={`
+            relative h-40 w-40 rounded-full
+            font-bold text-lg
+            transition-all duration-300 ease-out
+            disabled:opacity-50 disabled:cursor-not-allowed
+            ${isListening
+              ? 'bg-gradient-to-br from-red-500 via-red-600 to-red-700 shadow-[0_8px_30px_rgb(239,68,68,0.5)] hover:shadow-[0_12px_40px_rgb(239,68,68,0.6)]'
+              : isProcessing
+              ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 shadow-[0_8px_30px_rgb(59,130,246,0.5)]'
+              : 'bg-gradient-to-br from-primary via-primary/90 to-primary/80 shadow-[0_8px_30px_rgb(0,0,0,0.3)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.4)]'
+            }
+            hover:scale-105 active:scale-95
+            before:content-[''] before:absolute before:inset-0 before:rounded-full
+            before:bg-gradient-to-br before:from-white/20 before:to-transparent
+            before:opacity-0 hover:before:opacity-100 before:transition-opacity
+            after:content-[''] after:absolute after:inset-[2px] after:rounded-full
+            after:bg-gradient-to-br after:from-transparent after:via-transparent after:to-black/10
+            group
+          `}
         >
-          {isListening ? (
-            <Mic className="h-12 w-12 animate-pulse" />
-          ) : isProcessing ? (
-            <Loader2 className="h-12 w-12 animate-spin" />
-          ) : (
-            <MicOff className="h-12 w-12" />
-          )}
-        </Button>
+          {/* Inner shadow untuk efek depth */}
+          <div className="absolute inset-[3px] rounded-full bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
 
-        <div className="text-center">
-          <p className="text-lg font-medium">
-            {status}
-          </p>
-          {!webhookUrl && (
-            <p className="text-sm text-muted-foreground mt-2">
-              Klik ikon <Settings className="inline h-3 w-3" /> untuk mengatur webhook URL
+          {/* Icon container */}
+          <div className="relative z-10 flex items-center justify-center h-full w-full text-white">
+            {isListening ? (
+              <Mic className="h-16 w-16 animate-pulse drop-shadow-lg" />
+            ) : isProcessing ? (
+              <Loader2 className="h-16 w-16 animate-spin drop-shadow-lg" />
+            ) : (
+              <MicOff className="h-16 w-16 drop-shadow-lg group-hover:scale-110 transition-transform" />
+            )}
+          </div>
+
+          {/* Bottom shadow untuk efek 3D */}
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-32 h-4 bg-black/20 rounded-full blur-md" />
+        </button>
+
+        {/* Status Card */}
+        <div className="text-center space-y-3 max-w-md">
+          <div className="px-6 py-3 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 shadow-lg">
+            <p className="text-lg font-semibold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              {status}
             </p>
+          </div>
+
+          {!webhookUrl && (
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-2">
+              <Settings className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+              <span>Klik ikon pengaturan untuk setup webhook URL</span>
+            </div>
           )}
         </div>
       </div>
 
       {/* Footer */}
-      <div className="text-center text-sm text-muted-foreground">
-        <p>Tekan tombol mikrofon dan ucapkan pengeluaran Anda</p>
-        <p className="text-xs mt-1">Contoh: &quot;Beli kopi 25000&quot; atau &quot;Makan siang 50000&quot;</p>
+      <div className="relative z-10 text-center space-y-2">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/30 backdrop-blur-sm border border-border/30">
+          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          <p className="text-sm text-muted-foreground">Tekan tombol dan ucapkan pengeluaran Anda</p>
+        </div>
+        <p className="text-xs text-muted-foreground/70">
+          Contoh: &quot;Beli kopi 25000&quot; atau &quot;Makan siang 50000&quot;
+        </p>
       </div>
     </main>
   );
