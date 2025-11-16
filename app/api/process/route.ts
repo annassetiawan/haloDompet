@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Panggil Gemini API untuk ekstraksi JSON
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
 
     const prompt = `
 Kamu adalah asisten AI yang mengekstrak data keuangan dari teks bahasa Indonesia.
