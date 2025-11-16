@@ -138,10 +138,10 @@ export default function HomePage() {
       {/* Header - Fade in from top */}
       <div className="relative z-10 w-full max-w-2xl flex justify-between items-center animate-slide-down">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">
+          <h1 className="text-3xl font-normal text-foreground">
             HaloDompet
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Voice-powered expense tracker</p>
+          <p className="text-sm font-normal text-muted-foreground mt-1">Voice-powered expense tracker</p>
         </div>
 
         {/* Dialog Pengaturan */}
@@ -192,7 +192,7 @@ export default function HomePage() {
             ? 'bg-red-500/20 dark:bg-red-500/30 blur-2xl animate-pulse'
             : isProcessing
             ? 'bg-blue-500/20 dark:bg-blue-500/30 blur-2xl animate-pulse'
-            : 'bg-primary/10 dark:bg-primary/20 blur-xl animate-glow-pulse'
+            : 'hidden'
         }`} />
 
         <button
@@ -200,7 +200,7 @@ export default function HomePage() {
           disabled={isListening || isProcessing}
           className={`
             relative h-40 w-40 rounded-full
-            font-bold text-lg
+            font-normal text-lg
             transition-all duration-300 ease-out
             disabled:opacity-50 disabled:cursor-not-allowed
             ${isListening
@@ -238,8 +238,8 @@ export default function HomePage() {
 
         {/* Status Card */}
         <div className="text-center space-y-3 max-w-md">
-          <div className="px-6 py-3 rounded-2xl bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 dark:border-border shadow-lg">
-            <p className="text-lg font-semibold text-foreground">
+          <div className="px-6 py-3 rounded-2xl bg-card/50 dark:bg-card/80 backdrop-blur-sm shadow-lg">
+            <p className="text-lg font-normal text-foreground">
               {status}
             </p>
           </div>
@@ -258,9 +258,9 @@ export default function HomePage() {
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/30 dark:bg-muted/50 backdrop-blur-sm border border-border/30 dark:border-border/50">
           <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 animate-ping" />
           <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 absolute left-[18px]" />
-          <p className="text-sm text-muted-foreground dark:text-muted-foreground/90">Tekan tombol dan ucapkan pengeluaran Anda</p>
+          <p className="text-sm font-normal text-muted-foreground dark:text-muted-foreground/90">Tekan tombol dan ucapkan pengeluaran Anda</p>
         </div>
-        <p className="text-xs text-muted-foreground/70 dark:text-muted-foreground/60">
+        <p className="text-xs font-normal text-muted-foreground/70 dark:text-muted-foreground/60">
           Contoh: &quot;Beli kopi 25000&quot; atau &quot;Makan siang 50000&quot;
         </p>
       </div>
