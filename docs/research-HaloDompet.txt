@@ -1,0 +1,29 @@
+## Draf Riset Mendalam: Pencatat Keuangan Suara Otomatis
+
+Saya seorang *non-technical founder* yang sedang membangun **website pencatat pengeluaran yang menggunakan *input* suara dan otomatisasi n8n**. Idenya adalah pengguna bisa bilang "beli makanan 20000", dan datanya (dalam format JSON) otomatis terkirim via API/n8n ke *dashboard* pilihan mereka (seperti Google Sheets, Notion, dll.).
+
+Saya perlu riset yang ramah bagi pemula, menggunakan *tools* AI dan *no-code* terbaru tahun 2025, dengan fokus pada **bujet Rp 0 (Gratis)** dan target peluncuran dalam **beberapa minggu**.
+
+### 🎯 Pertanyaan Kunci:
+1.  **Teknologi Website (Gratis):** Apa cara termudah di tahun 2025 untuk membuat *website* yang bisa merekam suara dari *browser*? (Contoh: Menggunakan API Web Speech di Chrome?)
+2.  **Pemrosesan Suara (Gratis):** *Tools* AI apa (seperti API Whisper dari OpenAI atau lainnya) yang punya *tier* gratis terbaik untuk mengubah audio "beli makanan 20000" menjadi teks?
+3.  **Ekstraksi Data (Gratis):** Setelah jadi teks, *tools* AI gratis apa (mungkin model AI *on-device* atau *tier* gratis Gemini/Claude) yang bisa mengekstrak data itu menjadi format JSON seperti `{ "item": "makanan", "jumlah": 20000 }`?
+4.  **Otomatisasi (Gratis):** Bagaimana cara terbaik menghubungkan ini ke **n8n**? Apakah saya harus *self-host* n8n (gratis) di *platform* seperti Railway/Render, atau ada cara yang lebih mudah?
+5.  **Database (Gratis):** Apa *database* atau *backend* gratis terbaik (Airtable, Supabase, Google Sheets) untuk menerima data dari n8n sebelum dikirim ke pengguna?
+6.  **Pesaing:** Aplikasi apa yang sudah melakukan "input suara ke API" (seperti Voicash, TalkieMoney)? Apa kelemahan mereka yang bisa saya manfaatkan?
+
+### 🔎 Fokus Riset:
+* Berikan **panduan langkah demi langkah** yang sangat sederhana (contoh: "Langkah 1: Gunakan *tool* X untuk membuat *frontend*. Langkah 2: Hubungkan API Y...").
+* Rekomendasi *tools* terbaru tahun 2025 (prioritaskan yang gratis, *no-code*, atau *low-code* seperti **Bubble**, **Softr**, **Glide**, atau *framework website* sederhana).
+* Berikan estimasi biaya yang realistis, dengan fokus pada opsi gratis.
+* Contoh proyek serupa yang berhasil dibuat oleh *solo-founder*.
+* Rekomendasi *AI agent* atau *AI coding assistant* (seperti **Cursor**, **Claude Code**) yang bisa membantu saya merakit ini jika saya sedikit *stuck*.
+
+### deliverables YANG DIBUTUHKAN:
+1.  **Tabel Perbandingan Pesaing:** Fokus pada fitur *input* suara dan fleksibilitas API/ekspor data.
+2.  **Rekomendasi Tumpukan Teknologi (Tech Stack) Gratis:** *Tools* apa yang harus saya gunakan untuk *frontend* (website), pemrosesan suara, ekstraksi AI, dan *backend* (n8n + database)?
+3.  **Prioritas Fitur MVP:** (Sudah ada: 1. Rekam suara, 2. Proses data, 3. Ekspor n8n). Tolong konfirmasi apakah ini yang paling efisien.
+4.  **Peta Jalan (Roadmap) Pengembangan:** Langkah-langkah apa yang harus saya lakukan minggu ini, minggu depan, dst, dengan bantuan AI.
+5.  **Rincian Bujet (Gratis):** Di mana "jebakan" biaya tersembunyi dari *tools* yang kelihatannya gratis?
+
+Tolong gunakan Gemini 2.5 Pro untuk analisis komprehensif atau Claude Sonnet 4.5 untuk akurasi teknis. Jelaskan semuanya dalam bahasa yang mudah dimengerti dengan contoh. Sertakan URL dan nama *tools* spesifik.
