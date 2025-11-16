@@ -14,12 +14,14 @@ export async function GET(request: NextRequest) {
 
     // Test beberapa model yang mungkin tersedia
     const modelsToTest = [
-      'gemini-pro',
-      'gemini-1.5-pro',
-      'gemini-1.5-pro-latest',
+      'gemini-2.0-flash-exp',
+      'gemini-2.5-flash',
       'gemini-1.5-flash',
       'gemini-1.5-flash-latest',
-      'models/gemini-pro',
+      'gemini-1.5-pro',
+      'gemini-1.5-pro-latest',
+      'gemini-pro',
+      'models/gemini-2.0-flash-exp',
       'models/gemini-1.5-flash-latest',
     ];
 
