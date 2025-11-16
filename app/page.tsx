@@ -128,11 +128,11 @@ export default function HomePage() {
   };
 
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-between p-6 md:p-24 bg-gradient-to-br from-background via-background to-muted/20">
+    <main className="relative flex min-h-screen flex-col items-center justify-between p-6 md:p-24 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
       {/* Decorative Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 dark:bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 dark:bg-primary/10 rounded-full blur-3xl" />
       </div>
 
       {/* Header */}
@@ -189,10 +189,10 @@ export default function HomePage() {
         {/* Glow effect ring */}
         <div className={`absolute w-40 h-40 rounded-full transition-all duration-500 ${
           isListening
-            ? 'bg-red-500/20 blur-2xl animate-pulse'
+            ? 'bg-red-500/20 dark:bg-red-500/30 blur-2xl animate-pulse'
             : isProcessing
-            ? 'bg-blue-500/20 blur-2xl animate-pulse'
-            : 'bg-primary/10 blur-xl'
+            ? 'bg-blue-500/20 dark:bg-blue-500/30 blur-2xl animate-pulse'
+            : 'bg-primary/10 dark:bg-primary/20 blur-xl'
         }`} />
 
         <button
@@ -207,7 +207,7 @@ export default function HomePage() {
               ? 'bg-gradient-to-br from-red-500 via-red-600 to-red-700 shadow-[0_8px_30px_rgb(239,68,68,0.5)] hover:shadow-[0_12px_40px_rgb(239,68,68,0.6)]'
               : isProcessing
               ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 shadow-[0_8px_30px_rgb(59,130,246,0.5)]'
-              : 'bg-gradient-to-br from-primary via-primary/90 to-primary/80 shadow-[0_8px_30px_rgb(0,0,0,0.3)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.4)]'
+              : 'bg-gradient-to-br from-primary via-primary/90 to-primary/80 shadow-[0_8px_30px_rgb(0,0,0,0.3)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.4)] dark:shadow-[0_8px_30px_rgb(255,255,255,0.1)] dark:hover:shadow-[0_12px_40px_rgb(255,255,255,0.15)]'
             }
             hover:scale-105 active:scale-95
             before:content-[''] before:absolute before:inset-0 before:rounded-full
@@ -238,14 +238,14 @@ export default function HomePage() {
 
         {/* Status Card */}
         <div className="text-center space-y-3 max-w-md">
-          <div className="px-6 py-3 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 shadow-lg">
+          <div className="px-6 py-3 rounded-2xl bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 dark:border-border shadow-lg">
             <p className="text-lg font-semibold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               {status}
             </p>
           </div>
 
           {!webhookUrl && (
-            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-2">
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 dark:border-amber-500/30 rounded-xl px-4 py-2">
               <Settings className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
               <span>Klik ikon pengaturan untuk setup webhook URL</span>
             </div>
@@ -255,11 +255,11 @@ export default function HomePage() {
 
       {/* Footer */}
       <div className="relative z-10 text-center space-y-2">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/30 backdrop-blur-sm border border-border/30">
-          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          <p className="text-sm text-muted-foreground">Tekan tombol dan ucapkan pengeluaran Anda</p>
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/30 dark:bg-muted/50 backdrop-blur-sm border border-border/30 dark:border-border/50">
+          <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 animate-pulse" />
+          <p className="text-sm text-muted-foreground dark:text-muted-foreground/90">Tekan tombol dan ucapkan pengeluaran Anda</p>
         </div>
-        <p className="text-xs text-muted-foreground/70">
+        <p className="text-xs text-muted-foreground/70 dark:text-muted-foreground/60">
           Contoh: &quot;Beli kopi 25000&quot; atau &quot;Makan siang 50000&quot;
         </p>
       </div>
