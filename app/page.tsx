@@ -37,11 +37,6 @@ export default function HomePage() {
       setUser(user);
       loadUserProfile();
       loadRecentTransactions();
-      // Load webhook URL from localStorage
-      const savedUrl = localStorage.getItem('halodompet_webhook_url');
-      if (savedUrl) {
-        setWebhookUrl(savedUrl);
-      }
     }
   };
 
@@ -53,6 +48,10 @@ export default function HomePage() {
 
       if (response.ok) {
         setUserProfile(data.user);
+        // Load webhook URL jika mode webhook
+        if (data.user.mode === 'webhook' && data.user.webhook_url) {
+          setWebhookUrl(data.user.webhook_url);
+        }
       }
     } catch (error) {
       console.error('Error loading profile:', error);
@@ -87,8 +86,8 @@ export default function HomePage() {
       return;
     }
 
-    // Cek apakah webhook URL sudah diset
-    if (!webhookUrl) {
+    // Cek apakah webhook URL sudah diset (hanya untuk mode webhook)
+    if (userProfile?.mode === 'webhook' && !webhookUrl) {
       setStatus("Atur webhook URL di halaman Settings!");
       router.push('/settings');
       return;
@@ -306,7 +305,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          {!webhookUrl && (
+          {userProfile?.mode === 'webhook' && !webhookUrl && (
             <Link href="/settings">
               <div className="flex items-center justify-center gap-2 text-xs md:text-sm text-muted-foreground bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 dark:border-amber-500/30 rounded-xl px-3 py-1.5 md:px-4 md:py-2 cursor-pointer hover:bg-amber-500/20 dark:hover:bg-amber-500/30 transition-colors">
                 <Settings className="h-3 w-3 md:h-3.5 md:w-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
