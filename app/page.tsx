@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,24 +14,44 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Mic, MicOff, Settings, Loader2 } from 'lucide-react';
+import { Mic, MicOff, Settings, Loader2, LogOut } from 'lucide-react';
+import type { User } from '@supabase/supabase-js';
 
 export default function HomePage() {
   // State Management
+  const [user, setUser] = useState<User | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [status, setStatus] = useState("Siap merekam");
   const [webhookUrl, setWebhookUrl] = useState("");
   const [tempWebhookUrl, setTempWebhookUrl] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const router = useRouter();
+  const supabase = createClient();
 
-  // Load webhook URL from localStorage on mount
+  // Check authentication on mount
   useEffect(() => {
-    const savedUrl = localStorage.getItem('halodompet_webhook_url');
-    if (savedUrl) {
-      setWebhookUrl(savedUrl);
-    }
+    checkUser();
   }, []);
+
+  const checkUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      router.push('/login');
+    } else {
+      setUser(user);
+      // Load webhook URL from localStorage
+      const savedUrl = localStorage.getItem('halodompet_webhook_url');
+      if (savedUrl) {
+        setWebhookUrl(savedUrl);
+      }
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
 
   // Save webhook URL to localStorage
   const saveWebhookUrl = () => {
@@ -141,11 +163,14 @@ export default function HomePage() {
           <h1 className="text-2xl md:text-3xl font-normal text-foreground">
             HaloDompet
           </h1>
-          <p className="text-xs md:text-sm font-normal text-muted-foreground mt-0.5">Voice-powered expense tracker</p>
+          <p className="text-xs md:text-sm font-normal text-muted-foreground mt-0.5">
+            {user?.email || 'Voice-powered expense tracker'}
+          </p>
         </div>
 
-        {/* Dialog Pengaturan */}
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <div className="flex gap-2">
+          {/* Dialog Pengaturan */}
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button
               variant="outline"
@@ -179,6 +204,17 @@ export default function HomePage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+          {/* Logout Button */}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleLogout}
+            title="Logout"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {/* Main Content - Tombol Rekam 3D - Scale in animation */}
