@@ -9,7 +9,7 @@ import { TransactionCard } from '@/components/TransactionCard';
 import { DarkModeToggle } from '@/components/DarkModeToggle';
 import { TransactionListSkeleton } from '@/components/TransactionSkeleton';
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, Settings, Loader2, LogOut, History, ArrowRight, BarChart3, Menu } from 'lucide-react';
+import { Mic, MicOff, Settings, Loader2, LogOut, History, ArrowRight, BarChart3, Menu, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import type { User } from '@supabase/supabase-js';
 import type { User as UserProfile, Transaction } from '@/types';
@@ -212,18 +212,23 @@ export default function HomePage() {
           <div className="flex items-center justify-between h-16">
             {/* Left side - Menu items */}
             <div className="flex items-center gap-1">
+              <Link href="/advisor">
+                <Button variant="ghost" size="icon" className="h-9 w-9" title="AI Advisor">
+                  <Sparkles className="h-4 w-4" />
+                </Button>
+              </Link>
               <Link href="/history">
-                <Button variant="ghost" size="icon" className="h-9 w-9">
+                <Button variant="ghost" size="icon" className="h-9 w-9" title="Riwayat">
                   <History className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/reports">
-                <Button variant="ghost" size="icon" className="h-9 w-9">
+                <Button variant="ghost" size="icon" className="h-9 w-9" title="Laporan">
                   <BarChart3 className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/settings">
-                <Button variant="ghost" size="icon" className="h-9 w-9">
+                <Button variant="ghost" size="icon" className="h-9 w-9" title="Pengaturan">
                   <Settings className="h-4 w-4" />
                 </Button>
               </Link>
