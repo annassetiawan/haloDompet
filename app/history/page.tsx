@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { TransactionCard } from '@/components/TransactionCard'
+import { TransactionListSkeleton } from '@/components/TransactionSkeleton'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ArrowLeft, Search, Filter, Loader2 } from 'lucide-react'
+import { ArrowLeft, Search, Filter } from 'lucide-react'
 import type { Transaction } from '@/types'
 import type { User } from '@supabase/supabase-js'
 
@@ -151,9 +152,7 @@ export default function HistoryPage() {
         {/* Transaction List */}
         <div className="space-y-6 animate-scale-in">
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
+            <TransactionListSkeleton count={8} />
           ) : filteredTransactions.length === 0 ? (
             <div className="text-center py-12 bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl">
               <div className="text-5xl mb-4">📭</div>

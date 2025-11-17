@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { SaldoDisplay } from '@/components/SaldoDisplay';
 import { TransactionCard } from '@/components/TransactionCard';
 import { DarkModeToggle } from '@/components/DarkModeToggle';
+import { TransactionListSkeleton } from '@/components/TransactionSkeleton';
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Settings, Loader2, LogOut, History, ArrowRight, BarChart3, Menu } from 'lucide-react';
 import { toast } from 'sonner';
@@ -23,6 +24,7 @@ export default function HomePage() {
   const [webhookUrl, setWebhookUrl] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
   const router = useRouter();
   const supabase = createClient();
 
@@ -64,6 +66,7 @@ export default function HomePage() {
 
   const loadRecentTransactions = async () => {
     try {
+      setIsLoadingTransactions(true);
       const response = await fetch('/api/transaction?limit=5');
       const data = await response.json();
 
@@ -72,6 +75,8 @@ export default function HomePage() {
       }
     } catch (error) {
       console.error('Error loading transactions:', error);
+    } finally {
+      setIsLoadingTransactions(false);
     }
   };
 
@@ -368,7 +373,51 @@ export default function HomePage() {
             </div>
           )}
         </div>
-      </main>
-    </div>
+
+        {/* Instruction Text */}
+        <div className="text-center space-y-1.5 md:space-y-2 px-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-muted/30 dark:bg-muted/50 backdrop-blur-sm border border-border/30 dark:border-border/50">
+            <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 animate-ping" />
+            <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 absolute left-[14px] md:left-[18px]" />
+            <p className="text-xs md:text-sm font-normal text-muted-foreground dark:text-muted-foreground/90">Tekan tombol dan ucapkan pengeluaran Anda</p>
+          </div>
+          <p className="text-[10px] md:text-xs font-normal text-muted-foreground/70 dark:text-muted-foreground/60">
+            Contoh: &quot;Beli kopi 25000&quot; atau &quot;Makan siang 50000&quot;
+          </p>
+        </div>
+        </div>
+
+        {/* Recent Transactions */}
+        {(isLoadingTransactions || recentTransactions.length > 0) && (
+          <div className="space-y-4 animate-slide-up">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-normal text-foreground">
+                Transaksi Terakhir
+              </h2>
+              <Link href="/history">
+                <Button variant="ghost" size="sm" className="gap-1">
+                  Lihat Semua
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+
+            {isLoadingTransactions ? (
+              <TransactionListSkeleton count={3} />
+            ) : (
+              <div className="space-y-2">
+                {recentTransactions.map((transaction) => (
+                  <TransactionCard
+                    key={transaction.id}
+                    transaction={transaction}
+                    onClick={() => router.push('/history')}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </main>
   );
 }
