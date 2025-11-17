@@ -61,24 +61,72 @@ Setelah project ready:
 - Klik hasil pertama
 - Klik **"Enable"**
 
-### 4. Configure OAuth Consent Screen
+### 4. Configure OAuth Consent Screen (LENGKAP - JANGAN SKIP!)
 - Di sidebar: **APIs & Services** > **OAuth consent screen**
 - User Type: **External**
 - Klik **"Create"**
+
+**⚠️ PENTING: Isi form dengan LENGKAP, jangan skip field apapun!**
 
 Fill in form:
 ```
 App name: HaloDompet
 User support email: [your email]
-Developer contact: [your email]
+
+App domain (opsional tapi disarankan):
+  Application home page: https://your-app.vercel.app
+  Application privacy policy link: https://your-app.vercel.app
+  Application terms of service link: https://your-app.vercel.app
+
+Authorized domains:
+  vercel.app
+  supabase.co
+
+Developer contact information:
+  Email addresses: [your email]
 ```
+
 - Klik **"Save and Continue"**
-- Skip "Scopes" (klik Continue)
-- Skip "Test users" (klik Continue)
+
+**Scopes (WAJIB):**
+- Klik **"Add or Remove Scopes"**
+- Cari dan centang scopes ini:
+  - ✅ `.../auth/userinfo.email`
+  - ✅ `.../auth/userinfo.profile`
+  - ✅ `openid`
+- Klik **"Update"**
+- Klik **"Save and Continue"**
+
+**Test Users (WAJIB untuk Testing mode):**
+- Klik **"+ Add Users"**
+- Masukkan **email Google Anda** yang akan login (e.g., `yourname@gmail.com`)
+- Klik **"Add"**
+- Klik **"Save and Continue"**
+- Review summary
 - Klik **"Back to Dashboard"**
 
+**📌 Catatan:**
+- App akan dalam status **"Testing"** - ini normal
+- **HANYA test users yang bisa login** saat mode Testing
+- Untuk production (semua orang bisa login), nanti perlu "Publish App"
+
 ### 5. Create OAuth 2.0 Credentials
-- Di sidebar: **APIs & Services** > **Credentials**
+**⚠️ CRITICAL: Redirect URI harus PERSIS dari Supabase!**
+
+**BEFORE creating credentials, get the callback URL from Supabase:**
+
+1. **Buka Supabase Dashboard dulu**
+2. Go to: **Authentication** > **Providers**
+3. Scroll ke **Google** (belum perlu enable)
+4. **COPY** the **"Callback URL (for OAuth)"**:
+   ```
+   Format: https://xxxxxxxxxxxxx.supabase.co/auth/v1/callback
+   ```
+   **SIMPAN URL INI!** ← Akan dipakai di step berikutnya
+
+**NOW create Google OAuth credentials:**
+
+- Di Google Console sidebar: **APIs & Services** > **Credentials**
 - Klik **"+ Create Credentials"** > **OAuth client ID**
 
 Fill in:
@@ -87,18 +135,22 @@ Application type: Web application
 Name: HaloDompet Web
 
 Authorized JavaScript origins:
-  - https://xxxxx.supabase.co
+  - https://xxxxxxxxxxxxx.supabase.co
 
 Authorized redirect URIs:
-  - https://xxxxx.supabase.co/auth/v1/callback
+  - https://xxxxxxxxxxxxx.supabase.co/auth/v1/callback
 ```
 
-**PENTING:** Ganti `xxxxx` dengan Project URL dari Supabase!
+**⚠️ SANGAT PENTING:**
+- Paste PERSIS callback URL yang di-copy dari Supabase
+- JANGAN tambahkan Vercel domain di sini (tidak perlu!)
+- JANGAN typo di `/auth/v1/callback` (harus lowercase, dengan /v1/)
+- Ganti `xxxxxxxxxxxxx` dengan Supabase project ID Anda
 
 - Klik **"Create"**
 - **COPY** Client ID dan Client Secret (akan muncul popup)
 
-### 6. Configure di Supabase
+### 6. Configure di Supabase - Google Provider
 Kembali ke Supabase Dashboard:
 
 1. Go to: **Authentication** > **Providers**
@@ -110,6 +162,51 @@ Kembali ke Supabase Dashboard:
    Client Secret: [dari Google Console]
    ```
 5. Klik **"Save"**
+
+### 7. Configure Site URL & Redirect URLs
+**🚨 CRITICAL:** Ini langkah yang WAJIB dan sering terlewat - menyebabkan redirect ke localhost!
+
+**BEFORE configuring, get your Vercel domain:**
+1. Buka **Vercel Dashboard**: https://vercel.com
+2. Pilih project **halodompet**
+3. Copy domain yang aktif (terlihat di bagian atas):
+   - Format: `halodompet-xxxx.vercel.app` atau
+   - Custom domain jika ada: `halodompet.com`
+
+**NOW configure Supabase:**
+
+1. Go to: **Authentication** > **URL Configuration**
+
+2. Set **Site URL** (ini domain UTAMA production):
+   ```
+   https://halodompet-xxxx.vercel.app
+   ```
+   ⚠️ **Ganti dengan domain Vercel Anda yang AKTIF!**
+
+   ❌ **JANGAN** pakai `http://localhost:3000`
+   ❌ **JANGAN** pakai `your-app.vercel.app` (contoh saja)
+   ✅ **HARUS** domain Vercel yang real
+
+3. Set **Redirect URLs** (tambahkan SEMUA domain yang boleh redirect):
+   ```
+   https://halodompet-xxxx.vercel.app/**
+   http://localhost:3000/**
+   ```
+   *Klik "Add URL" untuk setiap entry*
+
+   💡 Wildcard `/**` = semua path di domain tersebut
+
+4. Klik **"Save"**
+
+**Test:**
+- Clear browser cache
+- Buka production URL: `https://halodompet-xxxx.vercel.app`
+- Coba login → should stay in production! ✅
+
+**Penjelasan:**
+- **Site URL** = domain utama yang digunakan Supabase untuk redirect setelah OAuth
+- Jika Site URL masih `localhost:3000` → login akan redirect ke localhost
+- **Redirect URLs** = whitelist semua domain yang BOLEH menerima redirect
 
 ---
 
@@ -255,10 +352,132 @@ Di Supabase:
 
 ## 🐛 Troubleshooting
 
+### 🚨 "Error 400: redirect_uri_mismatch" (MOST COMMON!)
+**Pesan error:**
+```
+Access blocked: This app's request is invalid
+Error 400: redirect_uri_mismatch
+```
+
+**Penyebab:** Redirect URI di Google Console tidak match dengan callback URL Supabase
+
+**Fix (Step-by-step):**
+
+1. **Dapatkan Callback URL dari Supabase:**
+   - Go to: Supabase Dashboard > **Authentication** > **Providers**
+   - Scroll ke **Google**
+   - Copy **"Callback URL (for OAuth)"**
+   - Format: `https://xxxxxxxxxxxxx.supabase.co/auth/v1/callback`
+
+2. **Update Google Cloud Console:**
+   - Go to: **APIs & Services** > **Credentials**
+   - Klik **OAuth Client ID** yang sudah dibuat
+   - Di **Authorized redirect URIs**, pastikan ada PERSIS:
+     ```
+     https://xxxxxxxxxxxxx.supabase.co/auth/v1/callback
+     ```
+   - **HAPUS** redirect URI lain jika ada (e.g., Vercel domain)
+   - Klik **"Save"**
+
+3. **Common Mistakes:**
+   - ❌ Typo: `auth/V1/callback` (huruf besar V)
+   - ❌ Typo: `auth/callback` (tanpa /v1/)
+   - ❌ Salah domain: pakai Vercel domain bukan Supabase
+   - ❌ HTTP instead of HTTPS
+   - ✅ Correct: `https://xxxxx.supabase.co/auth/v1/callback`
+
+4. **Wait & Test:**
+   - Tunggu 1-2 menit
+   - Clear cache atau buka Incognito
+   - Coba login lagi
+
+### 🚨 "Access blocked: This app's request is invalid" (without redirect_uri error)
+**Penyebab:** OAuth Consent Screen tidak dikonfigurasi lengkap atau Test User belum ditambahkan
+
+**Fix (Step-by-step):**
+
+1. **Cek Status App di Google Console:**
+   - Go to: APIs & Services > OAuth consent screen
+   - Pastikan status: **"Testing"** atau **"In production"**
+   - Jika belum ada status, konfigurasi belum selesai!
+
+2. **Tambahkan Test Users (WAJIB saat Testing mode):**
+   - Di halaman OAuth consent screen
+   - Scroll ke bagian **"Test users"**
+   - Klik **"+ Add Users"**
+   - Masukkan email Google yang akan login (e.g., `yourname@gmail.com`)
+   - Klik **"Save"**
+
+3. **Pastikan Scopes Sudah Benar:**
+   - Kembali ke OAuth consent screen
+   - Klik **"Edit App"**
+   - Di step "Scopes", pastikan ada:
+     - `.../auth/userinfo.email`
+     - `.../auth/userinfo.profile`
+     - `openid`
+   - Klik **"Update"** dan **"Save and Continue"**
+
+4. **Cek Authorized Domains:**
+   - Di OAuth consent screen
+   - Pastikan **Authorized domains** ada:
+     - `vercel.app`
+     - `supabase.co`
+
+5. **Wait & Retry:**
+   - Tunggu 5 menit setelah perubahan
+   - Clear browser cache atau buka Incognito
+   - Coba login lagi
+
+6. **Jika masih error, coba Publish App:**
+   - Go to: OAuth consent screen
+   - Klik **"Publish App"**
+   - Confirm **"Prepare for verification"**
+   - Status berubah jadi "In production"
+   - Sekarang semua orang bisa login (tidak perlu test users)
+
+### 🚨 Login redirect ke localhost:3000 (VERY COMMON!)
+**Symptoms:** Login berhasil di Google, tapi redirect ke `http://localhost:3000` instead of production
+
+**Penyebab:** Site URL di Supabase masih default ke localhost
+
+**Fix (Step-by-step):**
+
+1. **Cek Domain Vercel Anda:**
+   - Buka Vercel Dashboard: https://vercel.com
+   - Pilih project halodompet
+   - Copy domain aktif (e.g., `halodompet-abc123.vercel.app`)
+
+2. **Update Supabase Site URL:**
+   - Go to: Supabase Dashboard > **Authentication** > **URL Configuration**
+   - **Site URL:** Ubah dari `http://localhost:3000` ke:
+     ```
+     https://halodompet-abc123.vercel.app
+     ```
+     *(Ganti dengan domain Vercel Anda yang real!)*
+
+3. **Update Redirect URLs:**
+   - Di bagian **Redirect URLs**, pastikan ada:
+     ```
+     https://halodompet-abc123.vercel.app/**
+     http://localhost:3000/**
+     ```
+   - Klik **"Save"**
+
+4. **Test dari Production URL:**
+   - **JANGAN** test dari localhost
+   - Buka production: `https://halodompet-abc123.vercel.app`
+   - Klik login → should stay in production! ✅
+
+**Verification:**
+- Site URL ≠ `http://localhost:3000` ✅
+- Site URL = domain Vercel production ✅
+- Redirect URLs contains `https://your-vercel.app/**` ✅
+
 ### Error: "Unauthorized" saat login
 **Fix:**
 1. Check Google OAuth redirect URI di Google Console
-2. Harus match: `https://xxxxx.supabase.co/auth/v1/callback`
+2. Harus ada: `https://xxxxx.supabase.co/auth/v1/callback`
+3. Pastikan Client ID dan Secret sudah benar di Supabase
 
 ### Error: "relation users does not exist"
 **Fix:**
@@ -279,12 +498,6 @@ Di Supabase:
    WHERE tgname = 'auto_update_balance';
    ```
 2. Re-run schema jika trigger tidak ada
-
-### Login redirect ke error page
-**Fix:**
-1. Check Supabase > Authentication > URL Configuration
-2. Site URL harus: `https://halodompet.vercel.app`
-3. Redirect URLs tambahkan: `https://halodompet.vercel.app/**`
 
 ---
 
