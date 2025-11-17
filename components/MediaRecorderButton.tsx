@@ -29,9 +29,20 @@ export function MediaRecorderButton({
 
   // Detect best supported audio format for browser
   const getSupportedMimeType = (): string => {
+    console.log('🔍 Detecting MIME type...')
+    alert('🔍 Detecting format...')
+
     if (!isMediaRecorderSupported()) {
       console.error('MediaRecorder not supported')
+      alert('❌ MediaRecorder not supported!')
       return ''
+    }
+
+    // Check if isTypeSupported exists
+    if (typeof MediaRecorder.isTypeSupported !== 'function') {
+      console.warn('MediaRecorder.isTypeSupported not available, using default')
+      alert('⚠️ isTypeSupported not available, using mp4')
+      return 'audio/mp4' // Safari iOS default
     }
 
     const types = [
@@ -42,18 +53,29 @@ export function MediaRecorderButton({
       'audio/wav',
     ]
 
+    console.log('Testing formats:', types)
+
     for (const type of types) {
-      if (MediaRecorder.isTypeSupported(type)) {
-        console.log('Using MIME type:', type)
-        alert(`✅ Format detected: ${type}`) // Debug alert for iPhone
-        return type
+      console.log(`Testing: ${type}`)
+      try {
+        const isSupported = MediaRecorder.isTypeSupported(type)
+        console.log(`${type}: ${isSupported ? 'YES' : 'NO'}`)
+
+        if (isSupported) {
+          console.log('Using MIME type:', type)
+          alert(`✅ Format detected: ${type}`)
+          return type
+        }
+      } catch (error) {
+        console.error(`Error testing ${type}:`, error)
+        alert(`❌ Error testing ${type}`)
       }
     }
 
     // Fallback to default
-    console.warn('No supported MIME type found, using default')
-    alert('⚠️ No MIME type supported, will use default') // Debug alert
-    return ''
+    console.warn('No supported MIME type found, using mp4 fallback')
+    alert('⚠️ No format found, using mp4 fallback')
+    return 'audio/mp4' // Safari fallback
   }
 
   const startRecording = async () => {
@@ -82,15 +104,28 @@ export function MediaRecorderButton({
       alert('✅ Permission granted!')
 
       // Get supported MIME type
+      console.log('Calling getSupportedMimeType...')
       const mimeType = getSupportedMimeType()
+      console.log('Got MIME type:', mimeType)
+      alert(`📝 MIME type result: ${mimeType || 'empty'}`)
+
       mimeTypeRef.current = mimeType
 
       // Create MediaRecorder instance with supported format
       const options = mimeType ? { mimeType } : {}
       console.log('Creating MediaRecorder with options:', options)
+      alert(`🎬 Creating recorder with: ${JSON.stringify(options)}`)
 
-      const mediaRecorder = new MediaRecorder(stream, options)
-      console.log('MediaRecorder created, state:', mediaRecorder.state)
+      let mediaRecorder: MediaRecorder
+      try {
+        mediaRecorder = new MediaRecorder(stream, options)
+        console.log('MediaRecorder created, state:', mediaRecorder.state)
+        alert(`✅ MediaRecorder created! State: ${mediaRecorder.state}`)
+      } catch (constructorError: any) {
+        console.error('Error creating MediaRecorder:', constructorError)
+        alert(`❌ MediaRecorder constructor failed: ${constructorError.message}`)
+        throw constructorError
+      }
 
       mediaRecorderRef.current = mediaRecorder
       audioChunksRef.current = []
