@@ -103,11 +103,49 @@ export function MediaRecorderButton({
       console.log('✅ Microphone permission granted')
       alert('✅ Permission granted!')
 
-      // Get supported MIME type
-      console.log('Calling getSupportedMimeType...')
-      const mimeType = getSupportedMimeType()
-      console.log('Got MIME type:', mimeType)
-      alert(`📝 MIME type result: ${mimeType || 'empty'}`)
+      // Get supported MIME type - INLINE to avoid function call issues
+      console.log('🔍 Step 1: About to detect MIME type...')
+      alert('🔍 Step 1: About to detect MIME type...')
+
+      let mimeType = ''
+
+      // Check if isTypeSupported exists
+      if (typeof MediaRecorder.isTypeSupported !== 'function') {
+        console.warn('MediaRecorder.isTypeSupported not available')
+        alert('⚠️ isTypeSupported not available, using mp4')
+        mimeType = 'audio/mp4'
+      } else {
+        console.log('🔍 Step 2: Testing formats...')
+        alert('🔍 Step 2: Testing formats...')
+
+        const types = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/wav']
+
+        for (const type of types) {
+          console.log(`Testing: ${type}`)
+          try {
+            const isSupported = MediaRecorder.isTypeSupported(type)
+            console.log(`${type}: ${isSupported ? 'YES' : 'NO'}`)
+
+            if (isSupported) {
+              console.log('Found supported format:', type)
+              alert(`✅ Format found: ${type}`)
+              mimeType = type
+              break
+            }
+          } catch (error) {
+            console.error(`Error testing ${type}:`, error)
+          }
+        }
+
+        if (!mimeType) {
+          console.warn('No format found, using mp4 fallback')
+          alert('⚠️ No format found, using mp4 fallback')
+          mimeType = 'audio/mp4'
+        }
+      }
+
+      console.log('🔍 Step 3: MIME type selected:', mimeType)
+      alert(`📝 MIME type: ${mimeType}`)
 
       mimeTypeRef.current = mimeType
 
