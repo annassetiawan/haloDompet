@@ -17,7 +17,7 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Mic, MicOff, Settings, Loader2, LogOut, History, ArrowRight } from 'lucide-react';
+import { Mic, MicOff, Settings, Loader2, LogOut, History, ArrowRight, BarChart3 } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 import type { User as UserProfile, Transaction } from '@/types';
 
@@ -242,7 +242,29 @@ export default function HomePage() {
             </Button>
           </Link>
 
-          {/* Dialog Pengaturan */}
+          {/* Reports Button */}
+          <Link href="/reports">
+            <Button
+              variant="outline"
+              size="icon"
+              title="Laporan & Analisis"
+            >
+              <BarChart3 className="h-4 w-4" />
+            </Button>
+          </Link>
+
+          {/* Settings Button */}
+          <Link href="/settings">
+            <Button
+              variant="outline"
+              size="icon"
+              title="Pengaturan"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          </Link>
+
+          {/* Dialog Pengaturan (old - keeping for webhook) */}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button
