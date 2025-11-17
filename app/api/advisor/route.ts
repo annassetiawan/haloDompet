@@ -90,8 +90,8 @@ Catatan Penting:
     // Initialize Gemini AI
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
 
-    // Initialize Gemini model
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
+    // Initialize Gemini model (using gemini-1.5-flash for fast responses)
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
 
     // Build conversation history for context
     const chatHistory = conversationHistory.map((msg: any) => ({
