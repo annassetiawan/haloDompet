@@ -134,46 +134,42 @@ export default function OnboardingPage() {
               </p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* Simple Mode */}
-              <button
+              <Button
+                type="button"
+                variant={mode === 'simple' ? 'default' : 'outline'}
                 onClick={() => setMode('simple')}
-                className={`w-full p-4 rounded-xl border-2 transition-all ${
-                  mode === 'simple'
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
-                }`}
+                className="w-full h-auto p-4 justify-start"
               >
                 <div className="flex items-start gap-3 text-left">
                   <div className="text-2xl">📱</div>
-                  <div>
-                    <h3 className="font-normal text-foreground">Mode Sederhana</h3>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Data tersimpan di browser Anda. Cocok untuk penggunaan pribadi.
+                  <div className="flex-1">
+                    <h3 className="font-medium text-base">Mode Sederhana</h3>
+                    <p className="text-xs opacity-80 mt-1 font-normal">
+                      Data tersimpan di browser. Cocok untuk penggunaan pribadi.
                     </p>
                   </div>
                 </div>
-              </button>
+              </Button>
 
               {/* Webhook Mode */}
-              <button
+              <Button
+                type="button"
+                variant={mode === 'webhook' ? 'default' : 'outline'}
                 onClick={() => setMode('webhook')}
-                className={`w-full p-4 rounded-xl border-2 transition-all ${
-                  mode === 'webhook'
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
-                }`}
+                className="w-full h-auto p-4 justify-start"
               >
                 <div className="flex items-start gap-3 text-left">
                   <div className="text-2xl">🔗</div>
-                  <div>
-                    <h3 className="font-normal text-foreground">Mode Webhook</h3>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Kirim data ke n8n atau layanan lainnya. Untuk pengguna advanced.
+                  <div className="flex-1">
+                    <h3 className="font-medium text-base">Mode Webhook</h3>
+                    <p className="text-xs opacity-80 mt-1 font-normal">
+                      Kirim data ke n8n atau layanan lainnya. Untuk advanced.
                     </p>
                   </div>
                 </div>
-              </button>
+              </Button>
 
               {/* Webhook URL Input (if webhook mode selected) */}
               {mode === 'webhook' && (
