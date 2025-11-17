@@ -7,16 +7,6 @@ import { createClient } from '@/lib/supabase/client';
 import { SaldoDisplay } from '@/components/SaldoDisplay';
 import { TransactionCard } from '@/components/TransactionCard';
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogTrigger
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Mic, MicOff, Settings, Loader2, LogOut, History, ArrowRight, BarChart3 } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 import type { User as UserProfile, Transaction } from '@/types';
@@ -29,8 +19,6 @@ export default function HomePage() {
   const [isListening, setIsListening] = useState(false);
   const [status, setStatus] = useState("Siap merekam");
   const [webhookUrl, setWebhookUrl] = useState("");
-  const [tempWebhookUrl, setTempWebhookUrl] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const router = useRouter();
@@ -91,15 +79,6 @@ export default function HomePage() {
     router.push('/login');
   };
 
-  // Save webhook URL to localStorage
-  const saveWebhookUrl = () => {
-    localStorage.setItem('halodompet_webhook_url', tempWebhookUrl);
-    setWebhookUrl(tempWebhookUrl);
-    setIsDialogOpen(false);
-    setStatus("Webhook URL tersimpan!");
-    setTimeout(() => setStatus("Siap merekam"), 2000);
-  };
-
   // Web Speech API Handler
   const handleListen = async () => {
     // Cek apakah browser support Web Speech API
@@ -110,8 +89,8 @@ export default function HomePage() {
 
     // Cek apakah webhook URL sudah diset
     if (!webhookUrl) {
-      setStatus("Atur webhook URL terlebih dahulu!");
-      setIsDialogOpen(true);
+      setStatus("Atur webhook URL di halaman Settings!");
+      router.push('/settings');
       return;
     }
 
@@ -222,7 +201,7 @@ export default function HomePage() {
       {/* Header - Fade in from top */}
       <div className="relative z-10 w-full max-w-2xl mx-auto flex justify-between items-center animate-slide-down pt-2 md:pt-0">
         <div>
-          <h1 className="text-2xl md:text-3xl font-normal text-foreground">
+          <h1 className="text-2xl md:text-3xl font-medium text-foreground">
             HaloDompet
           </h1>
           <p className="text-xs md:text-sm font-normal text-muted-foreground mt-0.5">
@@ -263,42 +242,6 @@ export default function HomePage() {
               <Settings className="h-4 w-4" />
             </Button>
           </Link>
-
-          {/* Dialog Pengaturan (old - keeping for webhook) */}
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setTempWebhookUrl(webhookUrl)}
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Pengaturan Webhook</DialogTitle>
-              <DialogDescription>
-                Masukkan URL webhook n8n Anda untuk mengirim data pengeluaran.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Input
-                  id="webhook-url"
-                  placeholder="https://your-n8n-instance.com/webhook/..."
-                  value={tempWebhookUrl}
-                  onChange={(e) => setTempWebhookUrl(e.target.value)}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button onClick={saveWebhookUrl}>
-                Simpan
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
 
           {/* Logout Button */}
           <Button
@@ -364,10 +307,12 @@ export default function HomePage() {
           </div>
 
           {!webhookUrl && (
-            <div className="flex items-center justify-center gap-2 text-xs md:text-sm text-muted-foreground bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 dark:border-amber-500/30 rounded-xl px-3 py-1.5 md:px-4 md:py-2">
-              <Settings className="h-3 w-3 md:h-3.5 md:w-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-              <span className="text-left">Klik ikon pengaturan untuk setup webhook URL</span>
-            </div>
+            <Link href="/settings">
+              <div className="flex items-center justify-center gap-2 text-xs md:text-sm text-muted-foreground bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 dark:border-amber-500/30 rounded-xl px-3 py-1.5 md:px-4 md:py-2 cursor-pointer hover:bg-amber-500/20 dark:hover:bg-amber-500/30 transition-colors">
+                <Settings className="h-3 w-3 md:h-3.5 md:w-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                <span className="text-left">Klik untuk setup webhook URL di Settings</span>
+              </div>
+            </Link>
           )}
         </div>
 
