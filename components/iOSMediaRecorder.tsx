@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Mic, MicOff, Loader2, Square } from 'lucide-react'
 import { toast } from 'sonner'
-import RecordRTC from 'recordrtc'
 import { useAudioLevel } from '@/hooks/useAudioLevel'
 
 interface IOSMediaRecorderProps {
@@ -26,7 +25,7 @@ export function IOSMediaRecorder({
   const [isRecording, setIsRecording] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [stream, setStream] = useState<MediaStream | null>(null)
-  const recorderRef = useRef<RecordRTC | null>(null)
+  const recorderRef = useRef<any>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const recordingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -42,6 +41,10 @@ export function IOSMediaRecorder({
     try {
       console.log('🎤 [iOS] Starting recording with RecordRTC...')
       onStatusChange?.("Meminta izin mikrofon...")
+
+      // Dynamic import RecordRTC to avoid SSR issues
+      const RecordRTCModule = await import('recordrtc')
+      const RecordRTC = RecordRTCModule.default
 
       // Request microphone with iOS-optimized constraints
       const mediaStream = await navigator.mediaDevices.getUserMedia({

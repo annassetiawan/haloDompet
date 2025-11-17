@@ -17,9 +17,11 @@ export function useAudioLevel(stream: MediaStream | null, isActive: boolean) {
       // Clean up
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
+        animationFrameRef.current = null
       }
-      if (audioContextRef.current) {
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
         audioContextRef.current.close()
+        audioContextRef.current = null
       }
       setAudioLevel(0)
       return
@@ -63,10 +65,13 @@ export function useAudioLevel(stream: MediaStream | null, isActive: boolean) {
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
+        animationFrameRef.current = null
       }
-      if (audioContextRef.current) {
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
         audioContextRef.current.close()
+        audioContextRef.current = null
       }
+      analyserRef.current = null
     }
   }, [stream, isActive])
 
