@@ -6,8 +6,9 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { SaldoDisplay } from '@/components/SaldoDisplay';
 import { TransactionCard } from '@/components/TransactionCard';
+import { DarkModeToggle } from '@/components/DarkModeToggle';
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, Settings, Loader2, LogOut, History, ArrowRight, BarChart3 } from 'lucide-react';
+import { Mic, MicOff, Settings, Loader2, LogOut, History, ArrowRight, BarChart3, Menu } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 import type { User as UserProfile, Transaction } from '@/types';
 
@@ -196,171 +197,175 @@ export default function HomePage() {
   };
 
   return (
-    <main className="relative min-h-screen flex flex-col p-4 md:p-24 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
-      {/* Decorative Background - Animated (hidden on mobile) */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none hidden md:block">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 dark:bg-primary/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 dark:bg-primary/10 rounded-full blur-3xl animate-float-delayed" />
-      </div>
+    <div className="min-h-screen bg-background">
+      {/* Top Navigation - Fixed */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Left side - Menu items */}
+            <div className="flex items-center gap-1">
+              <Link href="/history">
+                <Button variant="ghost" size="icon" className="h-9 w-9">
+                  <History className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Link href="/reports">
+                <Button variant="ghost" size="icon" className="h-9 w-9">
+                  <BarChart3 className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Link href="/settings">
+                <Button variant="ghost" size="icon" className="h-9 w-9">
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
 
-      {/* Header - Fade in from top */}
-      <div className="relative z-10 w-full max-w-2xl mx-auto flex justify-between items-center animate-slide-down pt-2 md:pt-0">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-medium text-foreground">
-            HaloDompet
-          </h1>
-          <p className="text-xs md:text-sm font-normal text-muted-foreground mt-0.5">
-            {user?.email || 'Voice-powered expense tracker'}
-          </p>
+            {/* Right side - Dark mode & Logout */}
+            <div className="flex items-center gap-1">
+              <DarkModeToggle />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                className="h-9 w-9"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </div>
+      </nav>
 
-        <div className="flex gap-2">
-          {/* History Button */}
-          <Link href="/history">
-            <Button
-              variant="outline"
-              size="icon"
-              title="Riwayat Transaksi"
-            >
-              <History className="h-4 w-4" />
-            </Button>
-          </Link>
+      {/* Main Content */}
+      <main className="pt-16">
+        <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+          {/* Header Section */}
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight">
+              HaloDompet
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {user?.email || 'Voice-powered expense tracker'}
+            </p>
+          </div>
 
-          {/* Reports Button */}
-          <Link href="/reports">
-            <Button
-              variant="outline"
-              size="icon"
-              title="Laporan & Analisis"
-            >
-              <BarChart3 className="h-4 w-4" />
-            </Button>
-          </Link>
-
-          {/* Settings Button */}
-          <Link href="/settings">
-            <Button
-              variant="outline"
-              size="icon"
-              title="Pengaturan"
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
-          </Link>
-
-          {/* Logout Button */}
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleLogout}
-            title="Logout"
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Main Content Container */}
-      <div className="relative z-10 flex-grow max-w-2xl mx-auto w-full space-y-6 py-6 md:py-12">
-        {/* Balance Display */}
-        <div className="animate-slide-down">
+          {/* Balance Card */}
           <SaldoDisplay
             currentBalance={userProfile?.current_balance || 0}
             initialBalance={userProfile?.initial_balance}
             isLoading={isLoadingProfile}
           />
-        </div>
 
-        {/* Voice Recording Button */}
-        <div className="flex flex-col items-center gap-6 md:gap-8 animate-scale-in">
-        <div className="neomorphic-container">
-          <input
-            id="record-checkbox"
-            type="checkbox"
-            checked={isListening}
-            onChange={() => {}}
-            className="neomorphic-input"
-          />
-          <label
-            className={`neomorphic-button ${isListening ? 'active' : ''} ${isProcessing ? 'processing' : ''}`}
-            htmlFor="record-checkbox"
-            onClick={(e) => {
-              e.preventDefault();
-              if (!isListening && !isProcessing) {
-                handleListen();
-              }
-            }}
-          >
-            <span className="neomorphic-icon">
-              {isListening ? (
-                <Mic className="h-12 w-12 md:h-16 md:w-16" />
-              ) : isProcessing ? (
-                <Loader2 className="h-12 w-12 md:h-16 md:w-16 animate-spin" />
-              ) : (
-                <MicOff className="h-12 w-12 md:h-16 md:w-16" />
+          {/* Voice Recording Section */}
+          <div className="flex flex-col items-center gap-6 py-8">
+            <div className="neomorphic-container">
+              <input
+                id="record-checkbox"
+                type="checkbox"
+                checked={isListening}
+                onChange={() => {}}
+                className="neomorphic-input"
+              />
+              <label
+                className={`neomorphic-button ${isListening ? 'active' : ''} ${isProcessing ? 'processing' : ''}`}
+                htmlFor="record-checkbox"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (!isListening && !isProcessing) {
+                    handleListen();
+                  }
+                }}
+              >
+                <span className="neomorphic-icon">
+                  {isListening ? (
+                    <Mic className="h-12 w-12 md:h-16 md:w-16" />
+                  ) : isProcessing ? (
+                    <Loader2 className="h-12 w-12 md:h-16 md:w-16 animate-spin" />
+                  ) : (
+                    <MicOff className="h-12 w-12 md:h-16 md:w-16" />
+                  )}
+                </span>
+              </label>
+            </div>
+
+            {/* Status Card */}
+            <div className="w-full max-w-md space-y-3">
+              <div className="px-6 py-3 rounded-2xl bg-card border border-border shadow-sm">
+                <p className="text-sm text-center font-medium text-foreground">
+                  {status}
+                </p>
+              </div>
+
+              {userProfile?.mode === 'webhook' && !webhookUrl && (
+                <Link href="/settings">
+                  <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 rounded-xl px-4 py-2 cursor-pointer hover:bg-amber-500/20 transition-colors">
+                    <Settings className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                    <span>Klik untuk setup webhook URL di Settings</span>
+                  </div>
+                </Link>
               )}
-            </span>
-          </label>
-        </div>
+            </div>
 
-        {/* Status Card */}
-        <div className="text-center space-y-2 md:space-y-3 max-w-md px-2">
-          <div className="px-4 py-2 md:px-6 md:py-3 rounded-2xl bg-card/50 dark:bg-card/80 backdrop-blur-sm shadow-lg">
-            <p className="text-sm md:text-lg font-normal text-foreground">
-              {status}
-            </p>
+            {/* Instruction */}
+            <div className="text-center space-y-2">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border border-border/50">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <p className="text-xs font-medium text-muted-foreground">
+                  Tekan tombol dan ucapkan pengeluaran Anda
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground/70">
+                Contoh: &quot;Beli kopi 25000&quot; atau &quot;Makan siang 50000&quot;
+              </p>
+            </div>
           </div>
 
-          {userProfile?.mode === 'webhook' && !webhookUrl && (
-            <Link href="/settings">
-              <div className="flex items-center justify-center gap-2 text-xs md:text-sm text-muted-foreground bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 dark:border-amber-500/30 rounded-xl px-3 py-1.5 md:px-4 md:py-2 cursor-pointer hover:bg-amber-500/20 dark:hover:bg-amber-500/30 transition-colors">
-                <Settings className="h-3 w-3 md:h-3.5 md:w-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-                <span className="text-left">Klik untuk setup webhook URL di Settings</span>
+          {/* Recent Transactions */}
+          {recentTransactions.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">
+                  Transaksi Terakhir
+                </h2>
+                <Link href="/history">
+                  <Button variant="ghost" size="sm" className="gap-1 h-8">
+                    Lihat Semua
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
               </div>
-            </Link>
+
+              <div className="space-y-2">
+                {recentTransactions.map((transaction) => (
+                  <TransactionCard
+                    key={transaction.id}
+                    transaction={transaction}
+                    onClick={() => router.push('/history')}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {recentTransactions.length === 0 && !isLoadingProfile && (
+            <div className="text-center py-12 space-y-3">
+              <div className="w-16 h-16 mx-auto rounded-full bg-muted/50 flex items-center justify-center">
+                <History className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-semibold text-foreground">
+                  Belum ada transaksi
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Mulai rekam pengeluaran Anda dengan menekan tombol di atas
+                </p>
+              </div>
+            </div>
           )}
         </div>
-
-        {/* Instruction Text */}
-        <div className="text-center space-y-1.5 md:space-y-2 px-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-muted/30 dark:bg-muted/50 backdrop-blur-sm border border-border/30 dark:border-border/50">
-            <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 animate-ping" />
-            <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 absolute left-[14px] md:left-[18px]" />
-            <p className="text-xs md:text-sm font-normal text-muted-foreground dark:text-muted-foreground/90">Tekan tombol dan ucapkan pengeluaran Anda</p>
-          </div>
-          <p className="text-[10px] md:text-xs font-normal text-muted-foreground/70 dark:text-muted-foreground/60">
-            Contoh: &quot;Beli kopi 25000&quot; atau &quot;Makan siang 50000&quot;
-          </p>
-        </div>
-        </div>
-
-        {/* Recent Transactions */}
-        {recentTransactions.length > 0 && (
-          <div className="space-y-4 animate-slide-up">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-normal text-foreground">
-                Transaksi Terakhir
-              </h2>
-              <Link href="/history">
-                <Button variant="ghost" size="sm" className="gap-1">
-                  Lihat Semua
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-
-            <div className="space-y-2">
-              {recentTransactions.map((transaction) => (
-                <TransactionCard
-                  key={transaction.id}
-                  transaction={transaction}
-                  onClick={() => router.push('/history')}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
