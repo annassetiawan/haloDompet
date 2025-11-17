@@ -12,19 +12,25 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     try {
       setIsLoading(true);
+
+      const redirectUrl = `${window.location.origin}/auth/callback`
+      console.log('🔐 Starting Google OAuth login...')
+      console.log('📍 Current origin:', window.location.origin)
+      console.log('🔄 Redirect URL:', redirectUrl)
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: redirectUrl,
         },
       });
 
       if (error) {
-        console.error('Error logging in:', error.message);
+        console.error('❌ Error logging in:', error.message);
         alert('Gagal login. Silakan coba lagi.');
       }
     } catch (error) {
-      console.error('Unexpected error:', error);
+      console.error('❌ Unexpected error:', error);
     } finally {
       setIsLoading(false);
     }
