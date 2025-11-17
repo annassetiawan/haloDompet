@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { isSpeechRecognitionSupported, isIOSDevice } from '@/lib/utils'
-import { WebSpeechRecorder } from './WebSpeechRecorder'
+import { AnimatedRecordButton, RecordingState } from './AnimatedRecordButton'
 import { MediaRecorderButton } from './MediaRecorderButton'
-import { iOSMediaRecorder } from './iOSMediaRecorder'
+import { IOSMediaRecorder } from './iOSMediaRecorder'
 
 interface RecordButtonProps {
   onTranscript: (text: string) => void
@@ -19,6 +19,9 @@ export function RecordButton({
 }: RecordButtonProps) {
   const [isClient, setIsClient] = useState(false)
   const [recorderType, setRecorderType] = useState<'webspeech' | 'ios' | 'mediarecorder'>('mediarecorder')
+  const [recordingState, setRecordingState] = useState<RecordingState>('idle')
+  const [audioLevel, setAudioLevel] = useState(0)
+  const buttonClickRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setIsClient(true)
@@ -37,50 +40,88 @@ export function RecordButton({
     }
   }, [])
 
+  // Map status text to recording state
+  const handleInternalStatusChange = (status: string) => {
+    onStatusChange?.(status)
+
+    // Update recording state based on status
+    if (status.includes('Merekam') || status.includes('Mendengarkan')) {
+      setRecordingState('recording')
+    } else if (status.includes('Memproses') || status.includes('Mengirim')) {
+      setRecordingState('processing')
+    } else if (status.includes('Terdeteksi') || status.includes('Berhasil')) {
+      setRecordingState('success')
+      // Reset to idle after 2 seconds
+      setTimeout(() => setRecordingState('idle'), 2000)
+    } else if (status.includes('Gagal') || status.includes('kesalahan') || status.includes('Error')) {
+      setRecordingState('error')
+      // Reset to idle after 2 seconds
+      setTimeout(() => setRecordingState('idle'), 2000)
+    } else {
+      setRecordingState('idle')
+    }
+  }
+
+  const handleAudioLevelChange = (level: number) => {
+    setAudioLevel(level)
+  }
+
+  const handleAnimatedButtonClick = () => {
+    // Trigger click on the hidden recorder component
+    const hiddenButton = document.querySelector('.hidden-recorder-button label') as HTMLElement
+    if (hiddenButton) {
+      hiddenButton.click()
+    }
+  }
+
   // Don't render anything on server
   if (!isClient) {
     return (
-      <div className="neomorphic-container">
-        <div className="neomorphic-button">
-          <span className="neomorphic-icon">
-            <div className="h-12 w-12 md:h-16 md:w-16" />
-          </span>
-        </div>
+      <div className="flex flex-col items-center">
+        <div className="h-40 w-40" />
       </div>
     )
   }
 
-  // Render appropriate recorder based on device/browser
-  switch (recorderType) {
-    case 'webspeech':
-      // Chrome, Edge (Desktop & Android) - Fast, real-time
-      return (
-        <WebSpeechRecorder
-          onTranscript={onTranscript}
-          onError={onError}
-          onStatusChange={onStatusChange}
-        />
-      )
+  return (
+    <div className="relative">
+      {/* Animated Button (Visible) */}
+      <AnimatedRecordButton
+        state={recordingState}
+        onClick={handleAnimatedButtonClick}
+        audioLevel={audioLevel}
+        size="large"
+      />
 
-    case 'ios':
-      // iOS (iPhone/iPad) - RecordRTC for better Safari compatibility
-      return (
-        <iOSMediaRecorder
-          onTranscript={onTranscript}
-          onError={onError}
-          onStatusChange={onStatusChange}
-        />
-      )
+      {/* Hidden Recorder (Logic Only) */}
+      <div className="hidden-recorder-button absolute opacity-0 pointer-events-none -z-10">
+        {recorderType === 'ios' && (
+          <IOSMediaRecorder
+            onTranscript={onTranscript}
+            onError={onError}
+            onStatusChange={handleInternalStatusChange}
+            onAudioLevelChange={handleAudioLevelChange}
+          />
+        )}
 
-    case 'mediarecorder':
-    default:
-      // Firefox, Safari Desktop, others - Standard MediaRecorder
-      return (
-        <MediaRecorderButton
-          onTranscript={onTranscript}
-          onError={onError}
-          onStatusChange={onStatusChange}
-        />
-      )
-  }
+        {recorderType === 'mediarecorder' && (
+          <MediaRecorderButton
+            onTranscript={onTranscript}
+            onError={onError}
+            onStatusChange={handleInternalStatusChange}
+            onAudioLevelChange={handleAudioLevelChange}
+          />
+        )}
+      </div>
+
+      {/* WebSpeech API doesn't support audio level detection */}
+      {recorderType === 'webspeech' && (
+        <div className="mt-2 text-center">
+          <p className="text-xs text-muted-foreground">
+            Deteksi level audio tidak tersedia untuk WebSpeech API
+          </p>
+        </div>
+      )}
+    </div>
+  )
 }

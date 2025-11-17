@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Lottie from 'lottie-react'
 import confetti from 'canvas-confetti'
 import { Mic, Loader2, Check, X } from 'lucide-react'
+import { VoiceLevelBars } from './VoiceLevelBars'
 
 // Animation imports (will load dynamically)
 import micPulseAnimation from '@/public/lottie/mic-pulse.json'
@@ -18,6 +19,7 @@ interface AnimatedRecordButtonProps {
   size?: 'small' | 'medium' | 'large'
   disabled?: boolean
   className?: string
+  audioLevel?: number // 0-1 normalized audio level
 }
 
 const sizeMap = {
@@ -32,6 +34,7 @@ export function AnimatedRecordButton({
   size = 'large',
   disabled = false,
   className = '',
+  audioLevel = 0,
 }: AnimatedRecordButtonProps) {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -206,6 +209,20 @@ export function AnimatedRecordButton({
       >
         {getLabel()}
       </motion.p>
+
+      {/* Voice Level Indicator */}
+      <AnimatePresence mode="wait">
+        {state === 'recording' && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.2 }}
+          >
+            <VoiceLevelBars level={audioLevel} barCount={5} color="#ef4444" />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Screen reader only live region */}
       <div className="sr-only" role="status" aria-live="assertive">

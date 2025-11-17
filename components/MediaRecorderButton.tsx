@@ -1,26 +1,38 @@
 "use client"
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Mic, MicOff, Loader2, Square } from 'lucide-react'
 import { toast } from 'sonner'
+import { useAudioLevel } from '@/hooks/useAudioLevel'
 
 interface MediaRecorderButtonProps {
   onTranscript: (text: string) => void
   onError?: (error: string) => void
   onStatusChange?: (status: string) => void
+  onAudioLevelChange?: (level: number) => void
 }
 
 export function MediaRecorderButton({
   onTranscript,
   onError,
-  onStatusChange
+  onStatusChange,
+  onAudioLevelChange
 }: MediaRecorderButtonProps) {
   const [isRecording, setIsRecording] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [stream, setStream] = useState<MediaStream | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
   const recordingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const mimeTypeRef = useRef<string>('audio/webm')
+
+  // Track audio level
+  const audioLevel = useAudioLevel(stream, isRecording)
+
+  // Pass audio level to parent
+  useEffect(() => {
+    onAudioLevelChange?.(audioLevel)
+  }, [audioLevel, onAudioLevelChange])
 
   // Check if MediaRecorder is supported
   const isMediaRecorderSupported = () => {
@@ -96,12 +108,15 @@ export function MediaRecorderButton({
       console.log('📱 Requesting microphone permission...')
       alert('📱 Requesting mic permission...')
 
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
         audio: true  // Simplified for iOS compatibility
       })
 
       console.log('✅ Microphone permission granted')
       alert('✅ Permission granted!')
+
+      // Store stream for audio level detection
+      setStream(mediaStream)
 
       // SIMPLIFIED: Skip format detection for Safari iOS, just use default
       console.log('🔍 Creating MediaRecorder with default settings for iOS...')
@@ -116,7 +131,7 @@ export function MediaRecorderButton({
       let mediaRecorder: MediaRecorder
       try {
         // Try without options first (most compatible)
-        mediaRecorder = new MediaRecorder(stream)
+        mediaRecorder = new MediaRecorder(mediaStream)
         console.log('MediaRecorder created with default, state:', mediaRecorder.state)
         alert(`✅ Recorder created! State: ${mediaRecorder.state}`)
 
@@ -129,7 +144,8 @@ export function MediaRecorderButton({
       } catch (constructorError: any) {
         console.error('Error creating MediaRecorder:', constructorError)
         alert(`❌ Cannot create recorder: ${constructorError.message}`)
-        stream.getTracks().forEach(track => track.stop())
+        mediaStream.getTracks().forEach(track => track.stop())
+        setStream(null)
         throw constructorError
       }
 
@@ -162,7 +178,8 @@ export function MediaRecorderButton({
         console.log('📦 Audio blob created:', audioBlob.size, 'bytes')
 
         // Stop all tracks to release microphone
-        stream.getTracks().forEach(track => track.stop())
+        mediaStream.getTracks().forEach(track => track.stop())
+        setStream(null)
 
         // Upload and transcribe
         await uploadAndTranscribe(audioBlob)
@@ -179,7 +196,8 @@ export function MediaRecorderButton({
         onStatusChange?.("Siap merekam")
 
         // Stop all tracks
-        stream.getTracks().forEach(track => track.stop())
+        mediaStream.getTracks().forEach(track => track.stop())
+        setStream(null)
       }
 
       // Start recording with timeslice (Safari iOS requires this)
