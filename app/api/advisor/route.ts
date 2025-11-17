@@ -3,9 +3,6 @@ import { createClient } from '@/lib/supabase/server'
 import { getTransactions, getTransactionStats } from '@/lib/db'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
-
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
@@ -25,6 +22,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Message is required' },
         { status: 400 }
+      )
+    }
+
+    // Check if API key is configured
+    if (!process.env.GEMINI_API_KEY) {
+      console.error('GEMINI_API_KEY is not set')
+      return NextResponse.json(
+        {
+          error: 'AI service not configured',
+          details: 'GEMINI_API_KEY belum di-set. Silakan tambahkan API key di environment variables. Lihat GEMINI_SETUP.md untuk panduan lengkap.'
+        },
+        { status: 503 }
       )
     }
 
@@ -78,6 +87,9 @@ Catatan Penting:
 - Format angka dengan Rp dan separator ribuan
 `
 
+    // Initialize Gemini AI
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+
     // Initialize Gemini model
     const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
 
@@ -113,8 +125,28 @@ Catatan Penting:
     })
   } catch (error) {
     console.error('AI Advisor API error:', error)
+
+    // Better error messages
+    let errorMessage = 'Terjadi kesalahan saat berkomunikasi dengan AI'
+    let errorDetails = error instanceof Error ? error.message : 'Unknown error'
+
+    // Check for specific Gemini API errors
+    if (errorDetails.includes('API_KEY_INVALID')) {
+      errorMessage = 'API key tidak valid'
+      errorDetails = 'Gemini API key yang Anda gunakan tidak valid. Silakan periksa kembali API key di environment variables.'
+    } else if (errorDetails.includes('QUOTA_EXCEEDED')) {
+      errorMessage = 'Quota API telah habis'
+      errorDetails = 'Quota Gemini API untuk hari ini sudah habis. Silakan coba lagi besok atau upgrade ke paid plan.'
+    } else if (errorDetails.includes('RATE_LIMIT')) {
+      errorMessage = 'Terlalu banyak request'
+      errorDetails = 'Anda mengirim terlalu banyak pesan. Silakan tunggu beberapa saat sebelum mencoba lagi.'
+    }
+
     return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: errorMessage,
+        details: errorDetails
+      },
       { status: 500 }
     )
   }
