@@ -13,6 +13,7 @@ export default function AdminPanel() {
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [debugInfo, setDebugInfo] = useState<string>('')
   const [processingUserId, setProcessingUserId] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
@@ -29,21 +30,31 @@ export default function AdminPanel() {
       return
     }
 
-    // Check if user is admin
-    const { data: adminData } = await supabase
-      .from('admin_users')
-      .select('id')
-      .eq('user_id', user.id)
-      .single()
+    // Check if user is admin via debug endpoint
+    try {
+      const response = await fetch('/api/admin/check')
+      const debug = await response.json()
 
-    if (!adminData) {
-      toast.error('Akses ditolak. Anda bukan admin.')
-      router.push('/')
-      return
+      console.log('Admin check response:', debug)
+
+      if (!debug.is_admin) {
+        const errorMsg = debug.table_exists
+          ? `Akses ditolak. User ID: ${user.id} bukan admin.\n\nJalankan SQL ini di Supabase:\n\nINSERT INTO public.admin_users (user_id, email) VALUES ('${user.id}', '${user.email}');\n\nLalu refresh halaman.`
+          : 'Tabel admin_users belum ada. Jalankan migration di TRIAL_SETUP.md terlebih dahulu.'
+
+        setDebugInfo(errorMsg)
+        toast.error('Akses ditolak')
+        setTimeout(() => router.push('/'), 3000)
+        return
+      }
+
+      setIsAdmin(true)
+      loadUsers()
+    } catch (error) {
+      console.error('Error checking admin:', error)
+      toast.error('Gagal cek akses admin')
+      setTimeout(() => router.push('/'), 3000)
     }
-
-    setIsAdmin(true)
-    loadUsers()
   }
 
   const loadUsers = async () => {
@@ -128,6 +139,22 @@ export default function AdminPanel() {
   }
 
   if (!isAdmin && !isLoading) {
+    if (debugInfo) {
+      return (
+        <main className="min-h-screen bg-background flex items-center justify-center p-4">
+          <div className="max-w-2xl w-full bg-card border border-border rounded-2xl p-8 text-center">
+            <div className="text-6xl mb-4">🚫</div>
+            <h1 className="text-2xl font-bold mb-4">Akses Ditolak</h1>
+            <pre className="text-left bg-muted p-4 rounded-lg text-xs overflow-auto whitespace-pre-wrap mb-6">
+              {debugInfo}
+            </pre>
+            <Button onClick={() => router.push('/')} variant="outline">
+              Kembali ke Dashboard
+            </Button>
+          </div>
+        </main>
+      )
+    }
     return null
   }
 
