@@ -138,7 +138,7 @@ export default function HomePage() {
       {/* Header - Fade in from top */}
       <div className="relative z-10 w-full max-w-2xl mx-auto flex justify-between items-center animate-slide-down pt-2 md:pt-0">
         <div>
-          <h1 className="text-2xl md:text-3xl font-normal text-foreground">
+          <h1 className="text-2xl md:text-3xl font-medium text-foreground">
             HaloDompet
           </h1>
           <p className="text-xs md:text-sm font-normal text-muted-foreground mt-0.5">Voice-powered expense tracker</p>
@@ -187,13 +187,12 @@ export default function HomePage() {
       {/* Main Content - Tombol Rekam 3D - Scale in animation */}
       <div className="relative z-10 flex-grow flex flex-col items-center justify-center gap-6 md:gap-8 animate-scale-in max-w-2xl mx-auto w-full py-8 md:py-0">
         {/* Glow effect ring */}
-        <div className={`absolute w-32 h-32 md:w-40 md:h-40 rounded-full transition-all duration-500 ${
-          isListening
-            ? 'bg-red-500/20 dark:bg-red-500/30 blur-2xl animate-pulse'
-            : isProcessing
+        <div className={`absolute w-32 h-32 md:w-40 md:h-40 rounded-full transition-all duration-500 ${isListening
+          ? 'bg-red-500/20 dark:bg-red-500/30 blur-2xl animate-pulse'
+          : isProcessing
             ? 'bg-blue-500/20 dark:bg-blue-500/30 blur-2xl animate-pulse'
             : 'hidden'
-        }`} />
+          }`} />
 
         <button
           onClick={handleListen}
@@ -206,8 +205,8 @@ export default function HomePage() {
             ${isListening
               ? 'bg-gradient-to-br from-red-500 via-red-600 to-red-700 shadow-[0_8px_30px_rgb(239,68,68,0.5)] hover:shadow-[0_12px_40px_rgb(239,68,68,0.6)]'
               : isProcessing
-              ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 shadow-[0_8px_30px_rgb(59,130,246,0.5)]'
-              : 'bg-gradient-to-br from-primary via-primary/90 to-primary/80 shadow-[0_8px_30px_rgb(0,0,0,0.3)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.4)] dark:shadow-[0_8px_30px_rgb(255,255,255,0.1)] dark:hover:shadow-[0_12px_40px_rgb(255,255,255,0.15)] md:animate-button-bounce'
+                ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 shadow-[0_8px_30px_rgb(59,130,246,0.5)]'
+                : 'bg-gradient-to-br from-primary via-primary/90 to-primary/80 shadow-[0_8px_30px_rgb(0,0,0,0.3)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.4)] dark:shadow-[0_8px_30px_rgb(255,255,255,0.1)] dark:hover:shadow-[0_12px_40px_rgb(255,255,255,0.15)] md:animate-button-bounce'
             }
             hover:scale-105 active:scale-95 hover:animate-none
             before:content-[''] before:absolute before:inset-0 before:rounded-full
