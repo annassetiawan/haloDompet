@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
@@ -64,10 +65,11 @@ export default function OnboardingPage() {
       }
 
       // Redirect to main app
-      router.push('/');
+      toast.success('Selamat datang di HaloDompet!');
+      setTimeout(() => router.push('/'), 500);
     } catch (error) {
       console.error('Error completing onboarding:', error);
-      alert('Gagal menyimpan pengaturan. Silakan coba lagi.');
+      toast.error('Gagal menyimpan pengaturan. Silakan coba lagi.');
     } finally {
       setIsLoading(false);
     }

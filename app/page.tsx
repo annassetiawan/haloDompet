@@ -9,6 +9,7 @@ import { TransactionCard } from '@/components/TransactionCard';
 import { DarkModeToggle } from '@/components/DarkModeToggle';
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Settings, Loader2, LogOut, History, ArrowRight, BarChart3, Menu } from 'lucide-react';
+import { toast } from 'sonner';
 import type { User } from '@supabase/supabase-js';
 import type { User as UserProfile, Transaction } from '@/types';
 
@@ -83,14 +84,14 @@ export default function HomePage() {
   const handleListen = async () => {
     // Cek apakah browser support Web Speech API
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      setStatus("Browser tidak mendukung Web Speech API. Gunakan Chrome.");
+      toast.error("Browser tidak mendukung Web Speech API. Gunakan Chrome.");
       return;
     }
 
     // Cek apakah webhook URL sudah diset (hanya untuk mode webhook)
     if (userProfile?.mode === 'webhook' && !webhookUrl) {
-      setStatus("Atur webhook URL di halaman Settings!");
-      router.push('/settings');
+      toast.warning("Atur webhook URL di halaman Settings!");
+      setTimeout(() => router.push('/settings'), 1000);
       return;
     }
 
@@ -162,12 +163,14 @@ export default function HomePage() {
         loadUserProfile();
         loadRecentTransactions();
 
-        setStatus(`Berhasil! ${processData.data.item} - Rp ${processData.data.amount.toLocaleString('id-ID')} 🎉`);
-        setTimeout(() => setStatus("Siap merekam"), 3000);
+        // Show success toast
+        toast.success(`${processData.data.item} - Rp ${processData.data.amount.toLocaleString('id-ID')} tercatat!`);
+        setStatus("Siap merekam");
       } catch (error) {
         console.error('Error:', error);
-        setStatus(`Error: ${error instanceof Error ? error.message : 'Gagal memproses'}`);
-        setTimeout(() => setStatus("Siap merekam"), 3000);
+        const errorMessage = error instanceof Error ? error.message : 'Gagal memproses';
+        toast.error(errorMessage);
+        setStatus("Siap merekam");
       } finally {
         setIsProcessing(false);
       }
@@ -178,14 +181,14 @@ export default function HomePage() {
       setIsProcessing(false);
 
       if (event.error === 'no-speech') {
-        setStatus("Tidak mendengar suara. Coba lagi!");
+        toast.error("Tidak mendengar suara. Coba lagi!");
       } else if (event.error === 'not-allowed') {
-        setStatus("Izinkan akses mikrofon di browser!");
+        toast.error("Izinkan akses mikrofon di browser!");
       } else {
-        setStatus(`Error: ${event.error}`);
+        toast.error(`Error: ${event.error}`);
       }
 
-      setTimeout(() => setStatus("Siap merekam"), 3000);
+      setStatus("Siap merekam");
     };
 
     recognition.onend = () => {
