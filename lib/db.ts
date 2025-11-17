@@ -34,12 +34,36 @@ export async function createOrUpdateUserProfile(
 ): Promise<User | null> {
   const supabase = await createClient()
 
+  // Verify authentication
+  const { data: { user: authUser } } = await supabase.auth.getUser()
+  if (!authUser) {
+    console.error('No authenticated user in createOrUpdateUserProfile')
+    return null
+  }
+  if (authUser.id !== userId) {
+    console.error('Authenticated user ID does not match target user ID:', {
+      authUserId: authUser.id,
+      targetUserId: userId,
+    })
+    return null
+  }
+
   // Check if user exists
-  const { data: existingUser } = await supabase
+  const { data: existingUser, error: fetchError } = await supabase
     .from('users')
     .select('*')
     .eq('id', userId)
     .single()
+
+  if (fetchError && fetchError.code !== 'PGRST116') {
+    console.error('Error fetching existing user:', {
+      code: fetchError.code,
+      message: fetchError.message,
+      details: fetchError.details,
+      hint: fetchError.hint,
+    })
+    return null
+  }
 
   if (existingUser) {
     // Update existing user

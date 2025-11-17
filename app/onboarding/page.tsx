@@ -67,8 +67,22 @@ export default function OnboardingPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to save settings');
+        console.error('Onboarding save failed:', {
+          status: response.status,
+          error: data.error,
+          details: data.details,
+          userId: data.userId,
+        });
+
+        const errorMsg = data.error || 'Failed to save settings';
+        const detailsMsg = data.details ? ` (${data.details})` : '';
+        toast.error(`Gagal menyimpan: ${errorMsg}${detailsMsg}`, {
+          duration: 5000,
+        });
+        throw new Error(errorMsg);
       }
+
+      console.log('Onboarding saved successfully:', data);
 
       // Also save to localStorage for backward compatibility
       localStorage.setItem('halodompet_initial_balance', initialBalance);
@@ -80,9 +94,12 @@ export default function OnboardingPage() {
       // Redirect to main app
       toast.success('Selamat datang di HaloDompet! Trial 30 hari aktif. 🎉');
       setTimeout(() => router.push('/'), 500);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error completing onboarding:', error);
-      toast.error('Gagal menyimpan pengaturan. Silakan coba lagi.');
+      // Don't show generic error if we already showed a specific one
+      if (!error.message.includes('Failed')) {
+        toast.error('Gagal menyimpan pengaturan. Silakan coba lagi.');
+      }
     } finally {
       setIsLoading(false);
     }
