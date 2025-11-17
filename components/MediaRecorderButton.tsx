@@ -22,8 +22,18 @@ export function MediaRecorderButton({
   const recordingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const mimeTypeRef = useRef<string>('audio/webm')
 
+  // Check if MediaRecorder is supported
+  const isMediaRecorderSupported = () => {
+    return typeof MediaRecorder !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.getUserMedia
+  }
+
   // Detect best supported audio format for browser
   const getSupportedMimeType = (): string => {
+    if (!isMediaRecorderSupported()) {
+      console.error('MediaRecorder not supported')
+      return ''
+    }
+
     const types = [
       'audio/webm;codecs=opus',
       'audio/webm',
@@ -35,25 +45,41 @@ export function MediaRecorderButton({
     for (const type of types) {
       if (MediaRecorder.isTypeSupported(type)) {
         console.log('Using MIME type:', type)
+        alert(`✅ Format detected: ${type}`) // Debug alert for iPhone
         return type
       }
     }
 
     // Fallback to default
     console.warn('No supported MIME type found, using default')
+    alert('⚠️ No MIME type supported, will use default') // Debug alert
     return ''
   }
 
   const startRecording = async () => {
     try {
-      // Request microphone permission
+      console.log('🎤 Starting recording...')
+      alert('🎤 Starting recording...') // Debug alert
+
+      // Check MediaRecorder support first
+      if (!isMediaRecorderSupported()) {
+        const errorMsg = 'Browser Anda tidak mendukung perekaman audio. Update iOS ke versi 14.5 atau lebih baru.'
+        alert('❌ ' + errorMsg)
+        toast.error(errorMsg)
+        onError?.(errorMsg)
+        return
+      }
+
+      // Request microphone permission with simplified constraints for iOS
+      console.log('📱 Requesting microphone permission...')
+      alert('📱 Requesting mic permission...')
+
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          sampleRate: 44100,
-        }
+        audio: true  // Simplified for iOS compatibility
       })
+
+      console.log('✅ Microphone permission granted')
+      alert('✅ Permission granted!')
 
       // Get supported MIME type
       const mimeType = getSupportedMimeType()
@@ -61,13 +87,17 @@ export function MediaRecorderButton({
 
       // Create MediaRecorder instance with supported format
       const options = mimeType ? { mimeType } : {}
+      console.log('Creating MediaRecorder with options:', options)
+
       const mediaRecorder = new MediaRecorder(stream, options)
+      console.log('MediaRecorder created, state:', mediaRecorder.state)
 
       mediaRecorderRef.current = mediaRecorder
       audioChunksRef.current = []
 
       // Collect audio data
       mediaRecorder.ondataavailable = (event) => {
+        console.log('📦 Data available:', event.data.size, 'bytes')
         if (event.data.size > 0) {
           audioChunksRef.current.push(event.data)
         }
@@ -75,10 +105,15 @@ export function MediaRecorderButton({
 
       // Handle recording stop
       mediaRecorder.onstop = async () => {
+        console.log('⏹️ Recording stopped')
+        alert('⏹️ Recording stopped, processing...')
+
         // Use the detected MIME type for blob
         const audioBlob = new Blob(audioChunksRef.current, {
           type: mimeTypeRef.current || 'audio/webm'
         })
+
+        console.log('📦 Audio blob created:', audioBlob.size, 'bytes')
 
         // Stop all tracks to release microphone
         stream.getTracks().forEach(track => track.stop())
@@ -90,6 +125,7 @@ export function MediaRecorderButton({
       // Handle errors
       mediaRecorder.onerror = (event: any) => {
         console.error('MediaRecorder error:', event.error)
+        alert('❌ MediaRecorder error: ' + event.error)
         const errorMsg = 'Terjadi kesalahan saat merekam'
         toast.error(errorMsg)
         onError?.(errorMsg)
@@ -101,7 +137,11 @@ export function MediaRecorderButton({
       }
 
       // Start recording
+      console.log('▶️ Starting MediaRecorder...')
       mediaRecorder.start()
+      console.log('✅ MediaRecorder started, state:', mediaRecorder.state)
+      alert('✅ Recording started! Speak now...')
+
       setIsRecording(true)
       onStatusChange?.("Merekam... (Klik lagi untuk berhenti)")
 
@@ -117,12 +157,19 @@ export function MediaRecorderButton({
       console.error('Error starting recording:', error)
 
       let errorMsg = 'Gagal memulai rekaman'
+      let errorDetail = error.message || error.name || 'Unknown error'
+
       if (error.name === 'NotAllowedError') {
         errorMsg = 'Izinkan akses mikrofon di browser!'
+        alert('❌ Permission denied: Izinkan akses mikrofon!')
       } else if (error.name === 'NotFoundError') {
         errorMsg = 'Mikrofon tidak ditemukan'
+        alert('❌ No microphone found')
       } else if (error.name === 'NotReadableError') {
         errorMsg = 'Mikrofon sedang digunakan aplikasi lain'
+        alert('❌ Mic already in use')
+      } else {
+        alert('❌ Error: ' + errorDetail)
       }
 
       toast.error(errorMsg)
