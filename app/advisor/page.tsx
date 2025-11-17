@@ -117,11 +117,20 @@ export default function AdvisorPage() {
         }
         setMessages(prev => [...prev, aiMessage])
       } else {
+        // Show detailed error message from API
+        const errorMessage = data.details || data.error || 'Gagal mengirim pesan'
+        console.error('API Error:', data)
+        toast.error(errorMessage, {
+          duration: 6000, // Show longer for detailed messages
+        })
         throw new Error(data.error || 'Failed to get response')
       }
     } catch (error) {
       console.error('Error sending message:', error)
-      toast.error('Gagal mengirim pesan. Silakan coba lagi.')
+      // Only show generic error if we haven't shown a specific one
+      if (error instanceof Error && !error.message.includes('Failed to get response')) {
+        toast.error('Gagal mengirim pesan. Silakan coba lagi.')
+      }
     } finally {
       setIsLoading(false)
     }
