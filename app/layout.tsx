@@ -39,6 +39,29 @@ export default function RootLayout({
             `,
           }}
         />
+        {/* Eruda mobile debugger - Only load in development or when debug=true in URL */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const hasDebugParam = window.location.search.includes('debug=true');
+
+                if (isDev || hasDebugParam) {
+                  var script = document.createElement('script');
+                  script.src = 'https://cdn.jsdelivr.net/npm/eruda';
+                  script.onload = function() {
+                    if (window.eruda) {
+                      window.eruda.init();
+                      console.log('Eruda mobile debugger loaded');
+                    }
+                  };
+                  document.head.appendChild(script);
+                }
+              })();
+            `,
+          }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}

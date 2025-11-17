@@ -65,7 +65,7 @@ export default function OnboardingPage() {
       }
 
       // Redirect to main app
-      toast.success('Selamat datang di HaloDompet!');
+      toast.success('Selamat datang di HaloDompet! Trial 30 hari aktif. 🎉');
       setTimeout(() => router.push('/'), 500);
     } catch (error) {
       console.error('Error completing onboarding:', error);

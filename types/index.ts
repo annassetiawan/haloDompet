@@ -6,6 +6,10 @@ export interface User {
   current_balance: number
   mode: 'simple' | 'webhook'
   webhook_url?: string
+  account_status: 'trial' | 'active' | 'expired' | 'blocked'
+  trial_ends_at: string | null
+  trial_started_at: string | null
+  invited_by: string | null
 }
 
 export interface Transaction {
