@@ -8,10 +8,10 @@ export async function POST(request: NextRequest) {
   try {
     const { text, webhookUrl } = await request.json();
 
-    // Validasi input
-    if (!text || !webhookUrl) {
+    // Validasi input - hanya text yang wajib, webhookUrl optional
+    if (!text) {
       return NextResponse.json(
-        { error: 'Text dan webhookUrl harus diisi' },
+        { error: 'Text harus diisi' },
         { status: 400 }
       );
     }
@@ -90,36 +90,41 @@ PENTING: Hanya berikan JSON, tanpa penjelasan atau teks tambahan.
 
     console.log('Extracted JSON:', jsonData);
 
-    // Kirim ke n8n webhook
-    const webhookResponse = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(jsonData),
-    });
+    // Kirim ke n8n webhook (hanya jika webhookUrl ada - untuk mode webhook)
+    let webhookData = null;
+    if (webhookUrl) {
+      try {
+        const webhookResponse = await fetch(webhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(jsonData),
+        });
 
-    if (!webhookResponse.ok) {
-      const errorText = await webhookResponse.text();
-      console.error('Webhook error:', errorText);
-      return NextResponse.json(
-        {
-          error: 'Gagal mengirim ke n8n webhook',
-          webhookStatus: webhookResponse.status,
-          webhookError: errorText
-        },
-        { status: 500 }
-      );
+        if (!webhookResponse.ok) {
+          const errorText = await webhookResponse.text();
+          console.error('Webhook error:', errorText);
+          // Jangan return error, karena data sudah berhasil di-extract
+          // User tetap bisa simpan ke database
+          console.warn('Webhook failed but continuing...');
+        } else {
+          webhookData = await webhookResponse.json().catch(() => ({}));
+        }
+      } catch (webhookError) {
+        console.error('Webhook request failed:', webhookError);
+        // Continue anyway - webhook optional
+      }
     }
-
-    const webhookData = await webhookResponse.json().catch(() => ({}));
 
     // Return success response
     return NextResponse.json({
       success: true,
       data: jsonData,
       webhookResponse: webhookData,
-      message: 'Data berhasil diproses dan dikirim ke n8n!',
+      message: webhookUrl
+        ? 'Data berhasil diproses dan dikirim ke webhook!'
+        : 'Data berhasil diproses!',
     });
 
   } catch (error: any) {

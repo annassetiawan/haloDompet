@@ -113,15 +113,21 @@ export default function HomePage() {
 
       try {
         // Step 1: Extract JSON from voice using Gemini
+        const processPayload: { text: string; webhookUrl?: string } = {
+          text: transcript,
+        };
+
+        // Only include webhookUrl for webhook mode
+        if (userProfile?.mode === 'webhook' && webhookUrl) {
+          processPayload.webhookUrl = webhookUrl;
+        }
+
         const processResponse = await fetch('/api/process', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            text: transcript,
-            webhookUrl: webhookUrl, // For webhook mode
-          }),
+          body: JSON.stringify(processPayload),
         });
 
         const processData = await processResponse.json();
