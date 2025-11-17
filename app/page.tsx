@@ -8,6 +8,7 @@ import { SaldoDisplay } from '@/components/SaldoDisplay';
 import { TransactionCard } from '@/components/TransactionCard';
 import { DarkModeToggle } from '@/components/DarkModeToggle';
 import { TransactionListSkeleton } from '@/components/TransactionSkeleton';
+import { RecordButton } from '@/components/RecordButton';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -21,7 +22,6 @@ export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
-  const [isListening, setIsListening] = useState(false);
   const [status, setStatus] = useState("Siap merekam");
   const [webhookUrl, setWebhookUrl] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -30,7 +30,6 @@ export default function HomePage() {
 
   // Review dialog state
   const [isReviewOpen, setIsReviewOpen] = useState(false);
-  const [pendingTranscript, setPendingTranscript] = useState("");
   const [editedTranscript, setEditedTranscript] = useState("");
 
   const router = useRouter();
@@ -93,6 +92,18 @@ export default function HomePage() {
     router.push('/login');
   };
 
+  // Handle transcript from recorder
+  const handleTranscript = (transcript: string) => {
+    // Open review dialog with transcript
+    setEditedTranscript(transcript);
+    setIsReviewOpen(true);
+  };
+
+  // Handle status change from recorder
+  const handleStatusChange = (newStatus: string) => {
+    setStatus(newStatus);
+  };
+
   // Handle confirm from review dialog
   const handleConfirmTranscript = async () => {
     setIsReviewOpen(false);
@@ -102,7 +113,6 @@ export default function HomePage() {
   // Handle cancel from review dialog
   const handleCancelTranscript = () => {
     setIsReviewOpen(false);
-    setPendingTranscript("");
     setEditedTranscript("");
     setStatus("Siap merekam");
   };
@@ -175,67 +185,6 @@ export default function HomePage() {
     }
   };
 
-  // Web Speech API Handler
-  const handleListen = async () => {
-    // Cek apakah browser support Web Speech API
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      toast.error("Browser tidak mendukung Web Speech API. Gunakan Chrome.");
-      return;
-    }
-
-    // Cek apakah webhook URL sudah diset (hanya untuk mode webhook)
-    if (userProfile?.mode === 'webhook' && !webhookUrl) {
-      toast.warning("Atur webhook URL di halaman Settings!");
-      setTimeout(() => router.push('/settings'), 1000);
-      return;
-    }
-
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-
-    recognition.lang = 'id-ID'; // Bahasa Indonesia
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    recognition.onstart = () => {
-      setIsListening(true);
-      setStatus("Mendengarkan... (Ucapkan pengeluaran Anda)");
-    };
-
-    recognition.onresult = async (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setIsListening(false);
-
-      // Show review dialog for user to confirm/edit transcript
-      setPendingTranscript(transcript);
-      setEditedTranscript(transcript);
-      setIsReviewOpen(true);
-      setStatus(`Terdeteksi: "${transcript}"`);
-    };
-
-    recognition.onerror = (event: any) => {
-      setIsListening(false);
-      setIsProcessing(false);
-
-      if (event.error === 'no-speech') {
-        toast.error("Tidak mendengar suara. Coba lagi!");
-      } else if (event.error === 'not-allowed') {
-        toast.error("Izinkan akses mikrofon di browser!");
-      } else {
-        toast.error(`Error: ${event.error}`);
-      }
-
-      setStatus("Siap merekam");
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    // Mulai mendengarkan
-    recognition.start();
-  };
-
   return (
     <div className="min-h-screen bg-background">
       {/* Top Navigation - Fixed */}
@@ -304,35 +253,10 @@ export default function HomePage() {
 
           {/* Voice Recording Section */}
           <div className="flex flex-col items-center gap-6 py-8">
-            <div className="neomorphic-container">
-              <input
-                id="record-checkbox"
-                type="checkbox"
-                checked={isListening}
-                onChange={() => {}}
-                className="neomorphic-input"
-              />
-              <label
-                className={`neomorphic-button ${isListening ? 'active' : ''} ${isProcessing ? 'processing' : ''}`}
-                htmlFor="record-checkbox"
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (!isListening && !isProcessing) {
-                    handleListen();
-                  }
-                }}
-              >
-                <span className="neomorphic-icon">
-                  {isListening ? (
-                    <Mic className="h-12 w-12 md:h-16 md:w-16" />
-                  ) : isProcessing ? (
-                    <Loader2 className="h-12 w-12 md:h-16 md:w-16 animate-spin" />
-                  ) : (
-                    <MicOff className="h-12 w-12 md:h-16 md:w-16" />
-                  )}
-                </span>
-              </label>
-            </div>
+            <RecordButton
+              onTranscript={handleTranscript}
+              onStatusChange={handleStatusChange}
+            />
 
             {/* Status Card */}
             <div className="w-full max-w-md space-y-3">
