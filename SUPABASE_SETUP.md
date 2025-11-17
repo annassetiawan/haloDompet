@@ -88,17 +88,22 @@ Name: HaloDompet Web
 
 Authorized JavaScript origins:
   - https://xxxxx.supabase.co
+  - https://your-app.vercel.app
 
 Authorized redirect URIs:
   - https://xxxxx.supabase.co/auth/v1/callback
+  - https://your-app.vercel.app/auth/callback
 ```
 
-**PENTING:** Ganti `xxxxx` dengan Project URL dari Supabase!
+**PENTING:**
+- Ganti `xxxxx` dengan Project URL dari Supabase!
+- Ganti `your-app.vercel.app` dengan domain Vercel Anda!
+- Jika domain custom, tambahkan juga (e.g., `https://halodompet.com/auth/callback`)
 
 - Klik **"Create"**
 - **COPY** Client ID dan Client Secret (akan muncul popup)
 
-### 6. Configure di Supabase
+### 6. Configure di Supabase - Google Provider
 Kembali ke Supabase Dashboard:
 
 1. Go to: **Authentication** > **Providers**
@@ -110,6 +115,30 @@ Kembali ke Supabase Dashboard:
    Client Secret: [dari Google Console]
    ```
 5. Klik **"Save"**
+
+### 7. Configure Site URL & Redirect URLs
+**PENTING:** Ini langkah yang sering terlewat dan menyebabkan redirect ke localhost!
+
+1. Go to: **Authentication** > **URL Configuration**
+2. Set **Site URL**:
+   ```
+   https://your-app.vercel.app
+   ```
+   *Ganti dengan domain Vercel Anda!*
+
+3. Set **Redirect URLs** (tambahkan semua):
+   ```
+   https://your-app.vercel.app/**
+   http://localhost:3000/**
+   ```
+   *Klik "Add URL" untuk setiap entry*
+
+4. Klik **"Save"**
+
+**Penjelasan:**
+- **Site URL** = domain utama production Anda
+- **Redirect URLs** = semua domain yang boleh redirect setelah login
+- Wildcard `/**` mengizinkan semua path di domain tersebut
 
 ---
 
@@ -255,10 +284,38 @@ Di Supabase:
 
 ## 🐛 Troubleshooting
 
+### 🚨 Login redirect ke localhost:3000 (COMMON!)
+**Penyebab:** Redirect URLs belum dikonfigurasi dengan benar
+
+**Fix (Step-by-step):**
+
+1. **Google Cloud Console:**
+   - Go to: APIs & Services > Credentials
+   - Klik OAuth Client ID yang sudah dibuat
+   - Di **Authorized redirect URIs**, pastikan ada:
+     ```
+     https://xxxxx.supabase.co/auth/v1/callback
+     https://your-app.vercel.app/auth/callback
+     ```
+   - Klik **"Save"**
+
+2. **Supabase Dashboard:**
+   - Go to: Authentication > URL Configuration
+   - **Site URL:** `https://your-app.vercel.app`
+   - **Redirect URLs:**
+     ```
+     https://your-app.vercel.app/**
+     http://localhost:3000/**
+     ```
+   - Klik **"Save"**
+
+3. **Test lagi** - refresh page dan coba login
+
 ### Error: "Unauthorized" saat login
 **Fix:**
 1. Check Google OAuth redirect URI di Google Console
-2. Harus match: `https://xxxxx.supabase.co/auth/v1/callback`
+2. Harus ada: `https://xxxxx.supabase.co/auth/v1/callback`
+3. Pastikan Client ID dan Secret sudah benar di Supabase
 
 ### Error: "relation users does not exist"
 **Fix:**
@@ -279,12 +336,6 @@ Di Supabase:
    WHERE tgname = 'auto_update_balance';
    ```
 2. Re-run schema jika trigger tidak ada
-
-### Login redirect ke error page
-**Fix:**
-1. Check Supabase > Authentication > URL Configuration
-2. Site URL harus: `https://halodompet.vercel.app`
-3. Redirect URLs tambahkan: `https://halodompet.vercel.app/**`
 
 ---
 
