@@ -85,7 +85,7 @@ export function MediaRecorderButton({
 
       // Check MediaRecorder support first
       if (!isMediaRecorderSupported()) {
-        const errorMsg = 'Browser Anda tidak mendukung perekaman audio. Update iOS ke versi 14.5 atau lebih baru.'
+        const errorMsg = 'Browser Anda tidak mendukung perekaman audio. Update iOS ke versi 14.5 atau lebih baru, atau gunakan Chrome.'
         alert('❌ ' + errorMsg)
         toast.error(errorMsg)
         onError?.(errorMsg)
@@ -103,65 +103,33 @@ export function MediaRecorderButton({
       console.log('✅ Microphone permission granted')
       alert('✅ Permission granted!')
 
-      // Get supported MIME type - INLINE to avoid function call issues
-      console.log('🔍 Step 1: About to detect MIME type...')
-      alert('🔍 Step 1: About to detect MIME type...')
+      // SIMPLIFIED: Skip format detection for Safari iOS, just use default
+      console.log('🔍 Creating MediaRecorder with default settings for iOS...')
+      alert('🔍 Creating recorder (default settings)...')
 
-      let mimeType = ''
+      const mimeType = '' // Let browser choose best format
+      mimeTypeRef.current = 'audio/mp4' // Assume mp4 for iOS
 
-      // Check if isTypeSupported exists
-      if (typeof MediaRecorder.isTypeSupported !== 'function') {
-        console.warn('MediaRecorder.isTypeSupported not available')
-        alert('⚠️ isTypeSupported not available, using mp4')
-        mimeType = 'audio/mp4'
-      } else {
-        console.log('🔍 Step 2: Testing formats...')
-        alert('🔍 Step 2: Testing formats...')
-
-        const types = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/wav']
-
-        for (const type of types) {
-          console.log(`Testing: ${type}`)
-          try {
-            const isSupported = MediaRecorder.isTypeSupported(type)
-            console.log(`${type}: ${isSupported ? 'YES' : 'NO'}`)
-
-            if (isSupported) {
-              console.log('Found supported format:', type)
-              alert(`✅ Format found: ${type}`)
-              mimeType = type
-              break
-            }
-          } catch (error) {
-            console.error(`Error testing ${type}:`, error)
-          }
-        }
-
-        if (!mimeType) {
-          console.warn('No format found, using mp4 fallback')
-          alert('⚠️ No format found, using mp4 fallback')
-          mimeType = 'audio/mp4'
-        }
-      }
-
-      console.log('🔍 Step 3: MIME type selected:', mimeType)
-      alert(`📝 MIME type: ${mimeType}`)
-
-      mimeTypeRef.current = mimeType
-
-      // Create MediaRecorder instance with supported format
-      const options = mimeType ? { mimeType } : {}
-      console.log('Creating MediaRecorder with options:', options)
-      alert(`🎬 Creating recorder with: ${JSON.stringify(options)}`)
+      // Create MediaRecorder WITHOUT mimeType option (Safari iOS workaround)
+      console.log('Creating MediaRecorder without format specification...')
 
       let mediaRecorder: MediaRecorder
       try {
-        mediaRecorder = new MediaRecorder(stream, options)
-        console.log('MediaRecorder created, state:', mediaRecorder.state)
-        alert(`✅ MediaRecorder created! State: ${mediaRecorder.state}`)
+        // Try without options first (most compatible)
+        mediaRecorder = new MediaRecorder(stream)
+        console.log('MediaRecorder created with default, state:', mediaRecorder.state)
+        alert(`✅ Recorder created! State: ${mediaRecorder.state}`)
+
+        // Get actual MIME type from recorder
+        if (mediaRecorder.mimeType) {
+          mimeTypeRef.current = mediaRecorder.mimeType
+          console.log('Recorder MIME type:', mediaRecorder.mimeType)
+          alert(`📝 Using: ${mediaRecorder.mimeType}`)
+        }
       } catch (constructorError: any) {
         console.error('Error creating MediaRecorder:', constructorError)
-        alert(`❌ MediaRecorder constructor failed: ${constructorError.message}`)
+        alert(`❌ Cannot create recorder: ${constructorError.message}`)
+        stream.getTracks().forEach(track => track.stop())
         throw constructorError
       }
 
@@ -171,8 +139,13 @@ export function MediaRecorderButton({
       // Collect audio data
       mediaRecorder.ondataavailable = (event) => {
         console.log('📦 Data available:', event.data.size, 'bytes')
+        alert(`📦 Got ${event.data.size} bytes`) // Debug for iOS
         if (event.data.size > 0) {
           audioChunksRef.current.push(event.data)
+          console.log('Total chunks:', audioChunksRef.current.length)
+        } else {
+          console.warn('Empty data chunk received!')
+          alert('⚠️ Empty chunk!')
         }
       }
 
@@ -209,9 +182,9 @@ export function MediaRecorderButton({
         stream.getTracks().forEach(track => track.stop())
       }
 
-      // Start recording
-      console.log('▶️ Starting MediaRecorder...')
-      mediaRecorder.start()
+      // Start recording with timeslice (Safari iOS requires this)
+      console.log('▶️ Starting MediaRecorder with timeslice...')
+      mediaRecorder.start(1000) // Emit data every 1 second (Safari iOS compatibility)
       console.log('✅ MediaRecorder started, state:', mediaRecorder.state)
       alert('✅ Recording started! Speak now...')
 
