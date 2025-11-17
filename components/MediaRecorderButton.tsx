@@ -20,16 +20,48 @@ export function MediaRecorderButton({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
   const recordingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const mimeTypeRef = useRef<string>('audio/webm')
+
+  // Detect best supported audio format for browser
+  const getSupportedMimeType = (): string => {
+    const types = [
+      'audio/webm;codecs=opus',
+      'audio/webm',
+      'audio/mp4',
+      'audio/ogg;codecs=opus',
+      'audio/wav',
+    ]
+
+    for (const type of types) {
+      if (MediaRecorder.isTypeSupported(type)) {
+        console.log('Using MIME type:', type)
+        return type
+      }
+    }
+
+    // Fallback to default
+    console.warn('No supported MIME type found, using default')
+    return ''
+  }
 
   const startRecording = async () => {
     try {
       // Request microphone permission
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-
-      // Create MediaRecorder instance
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus'
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 44100,
+        }
       })
+
+      // Get supported MIME type
+      const mimeType = getSupportedMimeType()
+      mimeTypeRef.current = mimeType
+
+      // Create MediaRecorder instance with supported format
+      const options = mimeType ? { mimeType } : {}
+      const mediaRecorder = new MediaRecorder(stream, options)
 
       mediaRecorderRef.current = mediaRecorder
       audioChunksRef.current = []
@@ -43,7 +75,10 @@ export function MediaRecorderButton({
 
       // Handle recording stop
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+        // Use the detected MIME type for blob
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: mimeTypeRef.current || 'audio/webm'
+        })
 
         // Stop all tracks to release microphone
         stream.getTracks().forEach(track => track.stop())
@@ -111,17 +146,47 @@ export function MediaRecorderButton({
 
   const uploadAndTranscribe = async (audioBlob: Blob) => {
     try {
+      // Get file extension based on MIME type
+      const getFileExtension = (mimeType: string): string => {
+        if (mimeType.includes('webm')) return 'webm'
+        if (mimeType.includes('mp4')) return 'mp4'
+        if (mimeType.includes('ogg')) return 'ogg'
+        if (mimeType.includes('wav')) return 'wav'
+        return 'webm' // fallback
+      }
+
+      const extension = getFileExtension(mimeTypeRef.current)
+
+      // Debug logging
+      console.log('Audio blob info:', {
+        size: audioBlob.size,
+        type: audioBlob.type,
+        mimeType: mimeTypeRef.current,
+        extension: extension
+      })
+
+      // Validate blob
+      if (audioBlob.size === 0) {
+        throw new Error('Rekaman kosong. Silakan coba lagi.')
+      }
+
+      if (audioBlob.size > 10 * 1024 * 1024) {
+        throw new Error('Rekaman terlalu besar (max 10MB)')
+      }
+
       // Prepare form data
       const formData = new FormData()
-      formData.append('audio', audioBlob, 'recording.webm')
+      formData.append('audio', audioBlob, `recording.${extension}`)
 
       // Upload to STT API
+      console.log('Uploading to /api/stt...')
       const response = await fetch('/api/stt', {
         method: 'POST',
         body: formData,
       })
 
       const data = await response.json()
+      console.log('STT API response:', data)
 
       if (response.ok && data.success) {
         const transcript = data.text
@@ -129,7 +194,7 @@ export function MediaRecorderButton({
         onTranscript(transcript)
         onStatusChange?.("Siap merekam")
       } else {
-        throw new Error(data.error || 'Gagal memproses audio')
+        throw new Error(data.details || data.error || 'Gagal memproses audio')
       }
     } catch (error) {
       console.error('Error uploading audio:', error)
