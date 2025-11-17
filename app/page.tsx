@@ -330,34 +330,38 @@ export default function HomePage() {
           </div>
 
           {/* Recent Transactions */}
-          {recentTransactions.length > 0 && (
-            <div className="space-y-4">
+          {(isLoadingTransactions || recentTransactions.length > 0) && (
+            <div className="space-y-4 animate-slide-up">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">
+                <h2 className="text-lg font-normal text-foreground">
                   Transaksi Terakhir
                 </h2>
                 <Link href="/history">
-                  <Button variant="ghost" size="sm" className="gap-1 h-8">
+                  <Button variant="ghost" size="sm" className="gap-1">
                     Lihat Semua
-                    <ArrowRight className="h-3.5 w-3.5" />
+                    <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
               </div>
 
-              <div className="space-y-2">
-                {recentTransactions.map((transaction) => (
-                  <TransactionCard
-                    key={transaction.id}
-                    transaction={transaction}
-                    onClick={() => router.push('/history')}
-                  />
-                ))}
-              </div>
+              {isLoadingTransactions ? (
+                <TransactionListSkeleton count={3} />
+              ) : (
+                <div className="space-y-2">
+                  {recentTransactions.map((transaction) => (
+                    <TransactionCard
+                      key={transaction.id}
+                      transaction={transaction}
+                      onClick={() => router.push('/history')}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {/* Empty State */}
-          {recentTransactions.length === 0 && !isLoadingProfile && (
+          {recentTransactions.length === 0 && !isLoadingTransactions && !isLoadingProfile && (
             <div className="text-center py-12 space-y-3">
               <div className="w-16 h-16 mx-auto rounded-full bg-muted/50 flex items-center justify-center">
                 <History className="h-8 w-8 text-muted-foreground" />
@@ -373,51 +377,7 @@ export default function HomePage() {
             </div>
           )}
         </div>
-
-        {/* Instruction Text */}
-        <div className="text-center space-y-1.5 md:space-y-2 px-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-muted/30 dark:bg-muted/50 backdrop-blur-sm border border-border/30 dark:border-border/50">
-            <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 animate-ping" />
-            <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 absolute left-[14px] md:left-[18px]" />
-            <p className="text-xs md:text-sm font-normal text-muted-foreground dark:text-muted-foreground/90">Tekan tombol dan ucapkan pengeluaran Anda</p>
-          </div>
-          <p className="text-[10px] md:text-xs font-normal text-muted-foreground/70 dark:text-muted-foreground/60">
-            Contoh: &quot;Beli kopi 25000&quot; atau &quot;Makan siang 50000&quot;
-          </p>
-        </div>
-        </div>
-
-        {/* Recent Transactions */}
-        {(isLoadingTransactions || recentTransactions.length > 0) && (
-          <div className="space-y-4 animate-slide-up">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-normal text-foreground">
-                Transaksi Terakhir
-              </h2>
-              <Link href="/history">
-                <Button variant="ghost" size="sm" className="gap-1">
-                  Lihat Semua
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-
-            {isLoadingTransactions ? (
-              <TransactionListSkeleton count={3} />
-            ) : (
-              <div className="space-y-2">
-                {recentTransactions.map((transaction) => (
-                  <TransactionCard
-                    key={transaction.id}
-                    transaction={transaction}
-                    onClick={() => router.push('/history')}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
