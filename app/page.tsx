@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { SaldoDisplay } from '@/components/SaldoDisplay';
 import { TransactionCard } from '@/components/TransactionCard';
+import { TrialWarningBanner } from '@/components/trial-warning-banner';
 import { DarkModeToggle } from '@/components/DarkModeToggle';
 import { TransactionListSkeleton } from '@/components/TransactionSkeleton';
 import { RecordButton } from '@/components/RecordButton';
@@ -16,6 +17,7 @@ import { Mic, MicOff, Settings, Loader2, LogOut, History, ArrowRight, BarChart3,
 import { toast } from 'sonner';
 import type { User } from '@supabase/supabase-js';
 import type { User as UserProfile, Transaction } from '@/types';
+import { isTrialExpired } from '@/lib/trial';
 
 export default function HomePage() {
   // State Management
@@ -58,6 +60,12 @@ export default function HomePage() {
       const data = await response.json();
 
       if (response.ok) {
+        
+        // Check if trial has expired
+        if (isTrialExpired(data.user)) {
+          router.push("/trial-expired");
+          return;
+        }
         setUserProfile(data.user);
         // Load webhook URL jika mode webhook
         if (data.user.mode === 'webhook' && data.user.webhook_url) {
@@ -244,6 +252,10 @@ export default function HomePage() {
             </p>
           </div>
 
+          {/* Trial Warning Banner */}
+          <TrialWarningBanner profile={userProfile} />
+
+          {/* Balance Card */}
           {/* Balance Card */}
           <SaldoDisplay
             currentBalance={userProfile?.current_balance || 0}
