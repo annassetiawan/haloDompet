@@ -21,6 +21,10 @@ export function SaldoDisplay({ currentBalance, initialBalance, isLoading = false
   const totalSpent = initialBalance ? initialBalance - currentBalance : 0
   const spentPercentage = initialBalance ? ((totalSpent / initialBalance) * 100).toFixed(1) : 0
 
+  // Generate masked text based on the length of formatted number
+  const maskedBalance = 'Rp ' + '•'.repeat(formattedBalance.replace(/[^0-9]/g, '').length)
+  const maskedSpent = 'Rp ' + '•'.repeat(totalSpent.toString().length)
+
   return (
     <div className="bg-gradient-to-br from-card/80 to-card/50 dark:from-card/90 dark:to-card/70 backdrop-blur-sm border border-border/50 rounded-2xl p-6 shadow-lg">
       <div className="flex items-start justify-between mb-4">
@@ -31,10 +35,8 @@ export function SaldoDisplay({ currentBalance, initialBalance, isLoading = false
               <div className="h-10 w-48 bg-muted/20 rounded animate-pulse" />
             ) : (
               <>
-                <h2 className={`text-3xl md:text-4xl font-normal ${
-                  isVisible ? 'text-foreground' : 'text-transparent select-none'
-                }`}>
-                  {isVisible ? formattedBalance : 'Rp ••••••••'}
+                <h2 className="text-3xl md:text-4xl font-normal text-foreground">
+                  {isVisible ? formattedBalance : maskedBalance}
                 </h2>
                 <button
                   onClick={() => setIsVisible(!isVisible)}
@@ -62,16 +64,14 @@ export function SaldoDisplay({ currentBalance, initialBalance, isLoading = false
               <span>Total Pengeluaran</span>
             </div>
             <div className="flex items-center gap-3">
-              <span className={`font-normal ${
-                isVisible ? 'text-foreground' : 'text-transparent select-none'
-              }`}>
+              <span className="font-normal text-foreground">
                 {isVisible
                   ? new Intl.NumberFormat('id-ID', {
                       style: 'currency',
                       currency: 'IDR',
                       minimumFractionDigits: 0,
                     }).format(totalSpent)
-                  : 'Rp ••••••'
+                  : maskedSpent
                 }
               </span>
               {isVisible && (
