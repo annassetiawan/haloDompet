@@ -35,7 +35,22 @@ Fix ini akan:
 
 **Verify:** Jalankan `SELECT * FROM public.admin_users;` - harus berhasil tanpa error.
 
-### 3. Add Admin User
+### 3. Fix Missing Trigger (NEW USER BUG FIX!)
+
+Jika user baru tidak muncul di admin panel, berarti trigger tidak jalan. Jalankan fix ini:
+
+**Buka Supabase Dashboard → SQL Editor → New Query**
+
+Copy dan paste isi file `supabase/fix-missing-trigger.sql`, lalu klik **Run**.
+
+Fix ini akan:
+- ✅ Recreate trigger `on_auth_user_created`
+- ✅ Update function `handle_new_user()` dengan semua field yang diperlukan
+- ✅ Backfill user yang missing (ada di auth tapi tidak di public.users)
+- ✅ Show verification queries
+
+**Verify:** Script akan otomatis show berapa user di auth vs public. Harus sama!
+
 ### 4. Add Admin User
 
 Setelah migration selesai, tambahkan diri kamu sebagai admin:
@@ -194,9 +209,22 @@ mailto:support@halodompet.com
 
 ## 🐛 Troubleshooting
 
+### User baru tidak muncul di admin panel ⚠️ COMMON ISSUE
+**Symptom:** User bisa login tapi tidak muncul di admin panel list.
+
+**Root Cause:** Trigger `on_auth_user_created` tidak ada atau tidak jalan.
+
+**Fix:**
+1. Jalankan `supabase/fix-missing-trigger.sql` di SQL Editor
+2. Script akan otomatis backfill user yang missing
+3. Refresh admin panel
+
+**Debug:** Access `/api/debug/users` untuk lihat mismatch antara auth.users dan public.users
+
 ### User tidak dapat trial otomatis
 - Cek: Apakah migration sudah dijalankan?
 - Cek: Apakah function `handle_new_user()` sudah updated?
+- Cek: Apakah trigger `on_auth_user_created` exists? (lihat fix di atas)
 - Test: Insert manual user baru di Supabase
 
 ### Warning banner tidak muncul
