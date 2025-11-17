@@ -1,9 +1,10 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { isSpeechRecognitionSupported } from '@/lib/utils'
+import { isSpeechRecognitionSupported, isIOSDevice } from '@/lib/utils'
 import { WebSpeechRecorder } from './WebSpeechRecorder'
 import { MediaRecorderButton } from './MediaRecorderButton'
+import { iOSMediaRecorder } from './iOSMediaRecorder'
 
 interface RecordButtonProps {
   onTranscript: (text: string) => void
@@ -17,11 +18,23 @@ export function RecordButton({
   onStatusChange
 }: RecordButtonProps) {
   const [isClient, setIsClient] = useState(false)
-  const [useSpeechAPI, setUseSpeechAPI] = useState(false)
+  const [recorderType, setRecorderType] = useState<'webspeech' | 'ios' | 'mediarecorder'>('mediarecorder')
 
   useEffect(() => {
     setIsClient(true)
-    setUseSpeechAPI(isSpeechRecognitionSupported())
+
+    // Determine best recorder for this device
+    if (isSpeechRecognitionSupported()) {
+      // Chrome, Edge (Desktop & Android) - Fast, real-time Web Speech API
+      setRecorderType('webspeech')
+    } else if (isIOSDevice()) {
+      // iOS (iPhone/iPad) - Use RecordRTC for better compatibility
+      setRecorderType('ios')
+      console.log('🍎 iOS device detected, using RecordRTC recorder')
+    } else {
+      // Firefox, Safari Desktop, others - Standard MediaRecorder
+      setRecorderType('mediarecorder')
+    }
   }, [])
 
   // Don't render anything on server
@@ -37,24 +50,37 @@ export function RecordButton({
     )
   }
 
-  // Render appropriate recorder based on browser support
-  if (useSpeechAPI) {
-    // Chrome, Edge (Desktop & Android) - Fast, real-time
-    return (
-      <WebSpeechRecorder
-        onTranscript={onTranscript}
-        onError={onError}
-        onStatusChange={onStatusChange}
-      />
-    )
-  } else {
-    // Safari iOS, Firefox, others - Upload + STT
-    return (
-      <MediaRecorderButton
-        onTranscript={onTranscript}
-        onError={onError}
-        onStatusChange={onStatusChange}
-      />
-    )
+  // Render appropriate recorder based on device/browser
+  switch (recorderType) {
+    case 'webspeech':
+      // Chrome, Edge (Desktop & Android) - Fast, real-time
+      return (
+        <WebSpeechRecorder
+          onTranscript={onTranscript}
+          onError={onError}
+          onStatusChange={onStatusChange}
+        />
+      )
+
+    case 'ios':
+      // iOS (iPhone/iPad) - RecordRTC for better Safari compatibility
+      return (
+        <iOSMediaRecorder
+          onTranscript={onTranscript}
+          onError={onError}
+          onStatusChange={onStatusChange}
+        />
+      )
+
+    case 'mediarecorder':
+    default:
+      // Firefox, Safari Desktop, others - Standard MediaRecorder
+      return (
+        <MediaRecorderButton
+          onTranscript={onTranscript}
+          onError={onError}
+          onStatusChange={onStatusChange}
+        />
+      )
   }
 }
