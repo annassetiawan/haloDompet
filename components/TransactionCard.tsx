@@ -38,7 +38,7 @@ export function TransactionCard({ transaction, onClick, onDelete, showDelete = f
     <div className="relative group/card">
       <button
         onClick={onClick}
-        className="w-full text-left p-4 rounded-xl bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all hover:shadow-md group"
+        className={`w-full text-left p-4 rounded-xl bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all hover:shadow-md group ${showDelete ? 'pr-12' : ''}`}
       >
         <div className="flex items-start justify-between gap-3">
           {/* Left side - Icon & Details */}
@@ -77,7 +77,7 @@ export function TransactionCard({ transaction, onClick, onDelete, showDelete = f
           </div>
 
           {/* Right side - Amount */}
-          <div className="flex-shrink-0 text-right">
+          <div className={`flex-shrink-0 text-right ${showDelete ? 'mr-2' : ''}`}>
             <div className="font-normal text-lg text-foreground">
               {formattedAmount}
             </div>
@@ -90,7 +90,7 @@ export function TransactionCard({ transaction, onClick, onDelete, showDelete = f
 
       {/* Delete Button */}
       {showDelete && onDelete && (
-        <div className="absolute top-2 right-2 opacity-0 group-hover/card:opacity-100 transition-opacity">
+        <div className="absolute top-1/2 -translate-y-1/2 right-2 opacity-0 group-hover/card:opacity-100 transition-opacity">
           <Button
             variant="ghost"
             size="icon"
@@ -98,7 +98,7 @@ export function TransactionCard({ transaction, onClick, onDelete, showDelete = f
               e.stopPropagation()
               onDelete()
             }}
-            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 bg-background/80 dark:bg-background/60 backdrop-blur-sm shadow-sm"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
