@@ -218,14 +218,17 @@ export async function updateTransaction(
 }
 
 export async function deleteTransaction(
+  userId: string,
   transactionId: string
 ): Promise<boolean> {
   const supabase = await createClient()
 
+  // Delete with user verification for security
   const { error } = await supabase
     .from('transactions')
     .delete()
     .eq('id', transactionId)
+    .eq('user_id', userId)
 
   if (error) {
     console.error('Error deleting transaction:', error)

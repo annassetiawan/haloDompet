@@ -7,7 +7,18 @@ import { TransactionCard } from '@/components/TransactionCard'
 import { TransactionListSkeleton } from '@/components/TransactionSkeleton'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ArrowLeft, Search, Filter } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { ArrowLeft, Search, Filter, Mic } from 'lucide-react'
+import { toast } from 'sonner'
 import type { Transaction } from '@/types'
 import type { User } from '@supabase/supabase-js'
 
@@ -17,6 +28,8 @@ export default function HistoryPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('')
+  const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -49,6 +62,33 @@ export default function HistoryPage() {
       console.error('Error:', error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleDeleteTransaction = async () => {
+    if (!transactionToDelete) return
+
+    try {
+      setIsDeleting(true)
+      const response = await fetch(`/api/transaction?id=${transactionToDelete.id}`, {
+        method: 'DELETE',
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success('Transaksi berhasil dihapus!')
+        // Remove transaction from local state
+        setTransactions(prev => prev.filter(t => t.id !== transactionToDelete.id))
+        setTransactionToDelete(null)
+      } else {
+        throw new Error(data.error || 'Gagal menghapus transaksi')
+      }
+    } catch (error) {
+      console.error('Error deleting transaction:', error)
+      toast.error('Gagal menghapus transaksi. Silakan coba lagi.')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -154,19 +194,27 @@ export default function HistoryPage() {
           {isLoading ? (
             <TransactionListSkeleton count={8} />
           ) : filteredTransactions.length === 0 ? (
-            <div className="text-center py-12 bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl">
-              <div className="text-5xl mb-4">📭</div>
-              <h3 className="text-lg font-normal text-foreground mb-2">
+            <div className="text-center py-16 bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl">
+              <div className="text-6xl mb-4">
+                {searchQuery || selectedCategory ? '🔍' : '📭'}
+              </div>
+              <h3 className="text-xl font-normal text-foreground mb-2">
                 {searchQuery || selectedCategory
                   ? 'Tidak ada transaksi yang cocok'
                   : 'Belum ada transaksi'
                 }
               </h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
                 {searchQuery || selectedCategory
-                  ? 'Coba ubah filter pencarian Anda'
-                  : 'Mulai rekam pengeluaran Anda dengan suara'}
+                  ? 'Coba ubah filter atau kata kunci pencarian Anda untuk menemukan transaksi yang sesuai.'
+                  : 'Anda belum memiliki riwayat transaksi. Mulai rekam pengeluaran dengan suara untuk melacak keuangan Anda.'}
               </p>
+              {!searchQuery && !selectedCategory && (
+                <Button onClick={() => router.push('/')} className="gap-2">
+                  <Mic className="h-4 w-4" />
+                  Mulai Rekam
+                </Button>
+              )}
             </div>
           ) : (
             Object.entries(groupedTransactions).map(([date, dateTransactions]) => (
@@ -188,6 +236,8 @@ export default function HistoryPage() {
                         // TODO: Open transaction detail modal
                         console.log('Transaction clicked:', transaction)
                       }}
+                      showDelete={true}
+                      onDelete={() => setTransactionToDelete(transaction)}
                     />
                   ))}
                 </div>
@@ -196,6 +246,36 @@ export default function HistoryPage() {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!transactionToDelete} onOpenChange={(open) => !open && setTransactionToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus Transaksi?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin ingin menghapus transaksi &quot;{transactionToDelete?.item}&quot; sebesar{' '}
+              {new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+              }).format(parseFloat(transactionToDelete?.amount?.toString() || '0'))}?
+              <br />
+              <br />
+              Tindakan ini tidak dapat dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteTransaction}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? 'Menghapus...' : 'Hapus'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   )
 }
