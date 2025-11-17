@@ -1,0 +1,160 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { getUserProfile, createOrUpdateUserProfile } from '@/lib/db'
+
+export async function GET(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    const profile = await getUserProfile(user.id)
+
+    if (!profile) {
+      return NextResponse.json(
+        { error: 'User profile not found' },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      user: profile,
+    })
+  } catch (error) {
+    console.error('User GET API error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    const body = await request.json()
+    const { initial_balance, mode, webhook_url } = body
+
+    // Validation
+    if (initial_balance !== undefined && (typeof initial_balance !== 'number' || initial_balance < 0)) {
+      return NextResponse.json(
+        { error: 'Initial balance must be a non-negative number' },
+        { status: 400 }
+      )
+    }
+
+    if (mode && !['simple', 'webhook'].includes(mode)) {
+      return NextResponse.json(
+        { error: 'Mode must be either "simple" or "webhook"' },
+        { status: 400 }
+      )
+    }
+
+    // Create or update user profile
+    const profile = await createOrUpdateUserProfile(user.id, user.email!, {
+      initial_balance,
+      current_balance: initial_balance, // Set current balance to initial balance on first setup
+      mode,
+      webhook_url,
+    })
+
+    if (!profile) {
+      return NextResponse.json(
+        { error: 'Failed to update user profile' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      user: profile,
+    })
+  } catch (error) {
+    console.error('User POST API error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    const body = await request.json()
+    const { initial_balance, current_balance, mode, webhook_url } = body
+
+    // Validation
+    if (initial_balance !== undefined && (typeof initial_balance !== 'number' || initial_balance < 0)) {
+      return NextResponse.json(
+        { error: 'Initial balance must be a non-negative number' },
+        { status: 400 }
+      )
+    }
+
+    if (current_balance !== undefined && typeof current_balance !== 'number') {
+      return NextResponse.json(
+        { error: 'Current balance must be a number' },
+        { status: 400 }
+      )
+    }
+
+    if (mode && !['simple', 'webhook'].includes(mode)) {
+      return NextResponse.json(
+        { error: 'Mode must be either "simple" or "webhook"' },
+        { status: 400 }
+      )
+    }
+
+    // Update user profile
+    const profile = await createOrUpdateUserProfile(user.id, user.email!, {
+      initial_balance,
+      current_balance,
+      mode,
+      webhook_url,
+    })
+
+    if (!profile) {
+      return NextResponse.json(
+        { error: 'Failed to update user profile' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      user: profile,
+    })
+  } catch (error) {
+    console.error('User PUT API error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}

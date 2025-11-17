@@ -1,6 +1,11 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
+import { SaldoDisplay } from '@/components/SaldoDisplay';
+import { TransactionCard } from '@/components/TransactionCard';
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,24 +17,79 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Mic, MicOff, Settings, Loader2 } from 'lucide-react';
+import { Mic, MicOff, Settings, Loader2, LogOut, History, ArrowRight, BarChart3 } from 'lucide-react';
+import type { User } from '@supabase/supabase-js';
+import type { User as UserProfile, Transaction } from '@/types';
 
 export default function HomePage() {
   // State Management
+  const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
   const [isListening, setIsListening] = useState(false);
   const [status, setStatus] = useState("Siap merekam");
   const [webhookUrl, setWebhookUrl] = useState("");
   const [tempWebhookUrl, setTempWebhookUrl] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const router = useRouter();
+  const supabase = createClient();
 
-  // Load webhook URL from localStorage on mount
+  // Check authentication on mount
   useEffect(() => {
-    const savedUrl = localStorage.getItem('halodompet_webhook_url');
-    if (savedUrl) {
-      setWebhookUrl(savedUrl);
-    }
+    checkUser();
   }, []);
+
+  const checkUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      router.push('/login');
+    } else {
+      setUser(user);
+      loadUserProfile();
+      loadRecentTransactions();
+      // Load webhook URL from localStorage
+      const savedUrl = localStorage.getItem('halodompet_webhook_url');
+      if (savedUrl) {
+        setWebhookUrl(savedUrl);
+      }
+    }
+  };
+
+  const loadUserProfile = async () => {
+    try {
+      setIsLoadingProfile(true);
+      const response = await fetch('/api/user');
+      const data = await response.json();
+
+      if (response.ok) {
+        setUserProfile(data.user);
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    } finally {
+      setIsLoadingProfile(false);
+    }
+  };
+
+  const loadRecentTransactions = async () => {
+    try {
+      const response = await fetch('/api/transaction?limit=5');
+      const data = await response.json();
+
+      if (response.ok) {
+        setRecentTransactions(data.transactions);
+      }
+    } catch (error) {
+      console.error('Error loading transactions:', error);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
 
   // Save webhook URL to localStorage
   const saveWebhookUrl = () => {
@@ -74,30 +134,54 @@ export default function HomePage() {
       setIsProcessing(true);
 
       try {
-        // Kirim ke backend untuk diproses
-        const response = await fetch('/api/process', {
+        // Step 1: Extract JSON from voice using Gemini
+        const processResponse = await fetch('/api/process', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             text: transcript,
-            webhookUrl: webhookUrl,
+            webhookUrl: webhookUrl, // For webhook mode
           }),
         });
 
-        const data = await response.json();
+        const processData = await processResponse.json();
 
-        if (response.ok) {
-          setStatus(`Berhasil! Data terkirim ke n8n 🎉`);
-          setTimeout(() => setStatus("Siap merekam"), 3000);
-        } else {
-          setStatus(`Error: ${data.error || 'Gagal memproses'}`);
-          setTimeout(() => setStatus("Siap merekam"), 3000);
+        if (!processResponse.ok) {
+          throw new Error(processData.error || 'Gagal memproses suara');
         }
+
+        // Step 2: Save to database
+        const transactionResponse = await fetch('/api/transaction', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            item: processData.data.item,
+            amount: processData.data.amount,
+            category: processData.data.category,
+            date: processData.data.date,
+            voice_text: transcript,
+          }),
+        });
+
+        const transactionData = await transactionResponse.json();
+
+        if (!transactionResponse.ok) {
+          throw new Error(transactionData.error || 'Gagal menyimpan transaksi');
+        }
+
+        // Reload profile and transactions after successful save
+        loadUserProfile();
+        loadRecentTransactions();
+
+        setStatus(`Berhasil! ${processData.data.item} - Rp ${processData.data.amount.toLocaleString('id-ID')} 🎉`);
+        setTimeout(() => setStatus("Siap merekam"), 3000);
       } catch (error) {
         console.error('Error:', error);
-        setStatus("Error mengirim data. Cek koneksi internet.");
+        setStatus(`Error: ${error instanceof Error ? error.message : 'Gagal memproses'}`);
         setTimeout(() => setStatus("Siap merekam"), 3000);
       } finally {
         setIsProcessing(false);
@@ -141,11 +225,47 @@ export default function HomePage() {
           <h1 className="text-2xl md:text-3xl font-normal text-foreground">
             HaloDompet
           </h1>
-          <p className="text-xs md:text-sm font-normal text-muted-foreground mt-0.5">Voice-powered expense tracker</p>
+          <p className="text-xs md:text-sm font-normal text-muted-foreground mt-0.5">
+            {user?.email || 'Voice-powered expense tracker'}
+          </p>
         </div>
 
-        {/* Dialog Pengaturan */}
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <div className="flex gap-2">
+          {/* History Button */}
+          <Link href="/history">
+            <Button
+              variant="outline"
+              size="icon"
+              title="Riwayat Transaksi"
+            >
+              <History className="h-4 w-4" />
+            </Button>
+          </Link>
+
+          {/* Reports Button */}
+          <Link href="/reports">
+            <Button
+              variant="outline"
+              size="icon"
+              title="Laporan & Analisis"
+            >
+              <BarChart3 className="h-4 w-4" />
+            </Button>
+          </Link>
+
+          {/* Settings Button */}
+          <Link href="/settings">
+            <Button
+              variant="outline"
+              size="icon"
+              title="Pengaturan"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          </Link>
+
+          {/* Dialog Pengaturan (old - keeping for webhook) */}
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button
               variant="outline"
@@ -179,10 +299,32 @@ export default function HomePage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+          {/* Logout Button */}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleLogout}
+            title="Logout"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
-      {/* Main Content - Tombol Rekam 3D - Scale in animation */}
-      <div className="relative z-10 flex-grow flex flex-col items-center justify-center gap-6 md:gap-8 animate-scale-in max-w-2xl mx-auto w-full py-8 md:py-0">
+      {/* Main Content Container */}
+      <div className="relative z-10 flex-grow max-w-2xl mx-auto w-full space-y-6 py-6 md:py-12">
+        {/* Balance Display */}
+        <div className="animate-slide-down">
+          <SaldoDisplay
+            currentBalance={userProfile?.current_balance || 0}
+            initialBalance={userProfile?.initial_balance}
+            isLoading={isLoadingProfile}
+          />
+        </div>
+
+        {/* Voice Recording Button */}
+        <div className="flex flex-col items-center gap-6 md:gap-8 animate-scale-in">
         <div className="neomorphic-container">
           <input
             id="record-checkbox"
@@ -228,18 +370,46 @@ export default function HomePage() {
             </div>
           )}
         </div>
-      </div>
 
-      {/* Footer - Fade in from bottom */}
-      <div className="relative z-10 text-center space-y-1.5 md:space-y-2 animate-slide-up px-2 pb-4 md:pb-0 max-w-2xl mx-auto w-full">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-muted/30 dark:bg-muted/50 backdrop-blur-sm border border-border/30 dark:border-border/50">
-          <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 animate-ping" />
-          <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 absolute left-[14px] md:left-[18px]" />
-          <p className="text-xs md:text-sm font-normal text-muted-foreground dark:text-muted-foreground/90">Tekan tombol dan ucapkan pengeluaran Anda</p>
+        {/* Instruction Text */}
+        <div className="text-center space-y-1.5 md:space-y-2 px-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-muted/30 dark:bg-muted/50 backdrop-blur-sm border border-border/30 dark:border-border/50">
+            <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 animate-ping" />
+            <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 absolute left-[14px] md:left-[18px]" />
+            <p className="text-xs md:text-sm font-normal text-muted-foreground dark:text-muted-foreground/90">Tekan tombol dan ucapkan pengeluaran Anda</p>
+          </div>
+          <p className="text-[10px] md:text-xs font-normal text-muted-foreground/70 dark:text-muted-foreground/60">
+            Contoh: &quot;Beli kopi 25000&quot; atau &quot;Makan siang 50000&quot;
+          </p>
         </div>
-        <p className="text-[10px] md:text-xs font-normal text-muted-foreground/70 dark:text-muted-foreground/60">
-          Contoh: &quot;Beli kopi 25000&quot; atau &quot;Makan siang 50000&quot;
-        </p>
+        </div>
+
+        {/* Recent Transactions */}
+        {recentTransactions.length > 0 && (
+          <div className="space-y-4 animate-slide-up">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-normal text-foreground">
+                Transaksi Terakhir
+              </h2>
+              <Link href="/history">
+                <Button variant="ghost" size="sm" className="gap-1">
+                  Lihat Semua
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+
+            <div className="space-y-2">
+              {recentTransactions.map((transaction) => (
+                <TransactionCard
+                  key={transaction.id}
+                  transaction={transaction}
+                  onClick={() => router.push('/history')}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );
