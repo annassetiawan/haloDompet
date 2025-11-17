@@ -11,6 +11,7 @@ import { format, startOfMonth, endOfMonth } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@/components/ui/chart'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell, Legend, Line, LineChart } from 'recharts'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function ReportsPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -382,11 +383,19 @@ export default function ReportsPage() {
             </Button>
           </div>
         ) : (
-          <>
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-scale-in">
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 mb-4">
+              <TabsTrigger value="overview">Ringkasan</TabsTrigger>
+              <TabsTrigger value="charts">Grafik</TabsTrigger>
+              <TabsTrigger value="details">Detail</TabsTrigger>
+            </TabsList>
+
+            {/* Tab 1: Overview - Summary Cards + Key Insights */}
+            <TabsContent value="overview" className="space-y-4">
+              {/* Summary Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
               {/* Total Spent */}
-              <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-6">
+              <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 md:p-6">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="p-2 rounded-lg bg-red-500/10 dark:bg-red-500/20">
                     <TrendingDown className="h-5 w-5 text-red-500" />
@@ -429,7 +438,7 @@ export default function ReportsPage() {
               </div>
 
               {/* Transaction Count */}
-              <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-6">
+              <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 md:p-6">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="p-2 rounded-lg bg-blue-500/10 dark:bg-blue-500/20">
                     <Calendar className="h-5 w-5 text-blue-500" />
@@ -472,7 +481,7 @@ export default function ReportsPage() {
               </div>
 
               {/* Average per Transaction */}
-              <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-6">
+              <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 md:p-6">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="p-2 rounded-lg bg-green-500/10 dark:bg-green-500/20">
                     <Tag className="h-5 w-5 text-green-500" />
@@ -519,18 +528,61 @@ export default function ReportsPage() {
               </div>
             </div>
 
+              {/* Key Insights - Top 3 */}
+              {insights.length > 0 && (
+                <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 md:p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 rounded-lg bg-purple-500/10 dark:bg-purple-500/20">
+                      <Sparkles className="h-5 w-5 text-purple-500" />
+                    </div>
+                    <h2 className="text-base md:text-lg font-normal text-foreground">
+                      Insights Utama
+                    </h2>
+                  </div>
+
+                  <div className="space-y-2 md:space-y-3">
+                    {insights.slice(0, 3).map((insight, index) => (
+                      <div
+                        key={index}
+                        className={`flex items-start gap-3 p-3 rounded-xl border ${
+                          insight.type === 'warning'
+                            ? 'bg-amber-500/5 border-amber-500/20 dark:bg-amber-500/10'
+                            : insight.type === 'success'
+                            ? 'bg-green-500/5 border-green-500/20 dark:bg-green-500/10'
+                            : 'bg-blue-500/5 border-blue-500/20 dark:bg-blue-500/10'
+                        }`}
+                      >
+                        {insight.type === 'warning' ? (
+                          <AlertCircle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                        ) : insight.type === 'success' ? (
+                          <TrendingDown className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        ) : (
+                          <Sparkles className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
+                        )}
+                        <p className="text-xs md:text-sm text-foreground leading-relaxed">
+                          {insight.text}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Tab 2: Charts - All Visualizations */}
+            <TabsContent value="charts" className="space-y-3 md:space-y-4">
             {/* Bar Chart - Top Categories */}
-            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-6 animate-slide-up">
-              <div className="flex items-center gap-3 mb-6">
+            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 md:p-6">
+              <div className="flex items-center gap-3 mb-4 md:mb-6">
                 <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
                   <BarChart3 className="h-5 w-5 text-primary" />
                 </div>
-                <h2 className="text-lg font-normal text-foreground">
+                <h2 className="text-base md:text-lg font-normal text-foreground">
                   Top 5 Kategori Pengeluaran
                 </h2>
               </div>
 
-              <ChartContainer config={chartConfig} className="h-[300px] w-full">
+              <ChartContainer config={chartConfig} className="h-[250px] md:h-[300px] w-full">
                 <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis
@@ -570,17 +622,17 @@ export default function ReportsPage() {
             </div>
 
             {/* Pie Chart - Category Distribution */}
-            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-6 animate-slide-up">
-              <div className="flex items-center gap-3 mb-6">
+            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 md:p-6">
+              <div className="flex items-center gap-3 mb-4 md:mb-6">
                 <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
                   <Tag className="h-5 w-5 text-primary" />
                 </div>
-                <h2 className="text-lg font-normal text-foreground">
+                <h2 className="text-base md:text-lg font-normal text-foreground">
                   Distribusi Kategori
                 </h2>
               </div>
 
-              <ChartContainer config={chartConfig} className="h-[300px] w-full">
+              <ChartContainer config={chartConfig} className="h-[250px] md:h-[300px] w-full">
                 <PieChart>
                   <ChartTooltip
                     content={
@@ -624,17 +676,17 @@ export default function ReportsPage() {
             </div>
 
             {/* Line Chart - Daily Spending Trend */}
-            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-6 animate-slide-up">
-              <div className="flex items-center gap-3 mb-6">
+            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 md:p-6">
+              <div className="flex items-center gap-3 mb-4 md:mb-6">
                 <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
                   <TrendingUp className="h-5 w-5 text-primary" />
                 </div>
-                <h2 className="text-lg font-normal text-foreground">
+                <h2 className="text-base md:text-lg font-normal text-foreground">
                   Tren Pengeluaran Harian
                 </h2>
               </div>
 
-              <ChartContainer config={chartConfig} className="h-[300px] w-full">
+              <ChartContainer config={chartConfig} className="h-[250px] md:h-[300px] w-full">
                 <LineChart data={lineChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis
@@ -679,54 +731,17 @@ export default function ReportsPage() {
                 </LineChart>
               </ChartContainer>
             </div>
+            </TabsContent>
 
-            {/* Smart Insights */}
-            {insights.length > 0 && (
-              <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-6 animate-slide-up">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 rounded-lg bg-purple-500/10 dark:bg-purple-500/20">
-                    <Sparkles className="h-5 w-5 text-purple-500" />
-                  </div>
-                  <h2 className="text-lg font-normal text-foreground">
-                    Insights Cerdas
-                  </h2>
-                </div>
-
-                <div className="space-y-3">
-                  {insights.map((insight, index) => (
-                    <div
-                      key={index}
-                      className={`flex items-start gap-3 p-4 rounded-xl border ${
-                        insight.type === 'warning'
-                          ? 'bg-amber-500/5 border-amber-500/20 dark:bg-amber-500/10'
-                          : insight.type === 'success'
-                          ? 'bg-green-500/5 border-green-500/20 dark:bg-green-500/10'
-                          : 'bg-blue-500/5 border-blue-500/20 dark:bg-blue-500/10'
-                      }`}
-                    >
-                      {insight.type === 'warning' ? (
-                        <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
-                      ) : insight.type === 'success' ? (
-                        <TrendingDown className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                      ) : (
-                        <Sparkles className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                      )}
-                      <p className="text-sm text-foreground leading-relaxed">
-                        {insight.text}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
+            {/* Tab 3: Details - Category Breakdown */}
+            <TabsContent value="details" className="space-y-3 md:space-y-4">
             {/* Category Breakdown */}
-            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-6 animate-slide-up">
-              <h2 className="text-lg font-normal text-foreground mb-6">
+            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 md:p-6">
+              <h2 className="text-base md:text-lg font-normal text-foreground mb-4 md:mb-6">
                 Pengeluaran per Kategori
               </h2>
 
-              <div className="space-y-4">
+              <div className="space-y-3 md:space-y-4">
                 {sortedCategories.map(({ category, total, count, percentage }) => (
                   <div key={category} className="space-y-2">
                     <div className="flex items-center justify-between">
@@ -766,7 +781,8 @@ export default function ReportsPage() {
                 ))}
               </div>
             </div>
-          </>
+            </TabsContent>
+          </Tabs>
         )}
       </div>
     </main>
