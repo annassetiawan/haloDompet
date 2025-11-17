@@ -29,17 +29,35 @@ export async function POST(request: NextRequest) {
     const audioFile = formData.get('audio') as File
 
     if (!audioFile) {
+      console.error('No audio file in request')
       return NextResponse.json(
         { error: 'Audio file is required' },
         { status: 400 }
       )
     }
 
+    // Log file info
+    console.log('Received audio file:', {
+      name: audioFile.name,
+      size: audioFile.size,
+      type: audioFile.type,
+    })
+
     // Validate file size (max 10MB)
     const maxSize = 10 * 1024 * 1024 // 10MB
     if (audioFile.size > maxSize) {
+      console.error('File too large:', audioFile.size)
       return NextResponse.json(
         { error: 'File terlalu besar. Maksimal 10MB' },
+        { status: 400 }
+      )
+    }
+
+    // Validate file is not empty
+    if (audioFile.size === 0) {
+      console.error('File is empty')
+      return NextResponse.json(
+        { error: 'File audio kosong' },
         { status: 400 }
       )
     }
@@ -51,6 +69,7 @@ export async function POST(request: NextRequest) {
 
     // Get file MIME type
     const mimeType = audioFile.type || 'audio/webm'
+    console.log('Processing audio with MIME type:', mimeType)
 
     // Initialize Gemini AI
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
@@ -70,11 +89,20 @@ Audio berisi ucapan tentang pengeluaran atau pembelian.
 HANYA berikan teks transkripsi, tanpa penjelasan apapun.
 Contoh format yang diharapkan: "beli kopi dua puluh ribu" atau "makan siang lima puluh ribu"`
 
+    console.log('Sending to Gemini API for transcription...')
     const result = await model.generateContent([prompt, audioPart])
+    console.log('Gemini API response received')
+
     const response = result.response
     const text = response.text().trim()
 
+    console.log('Transcription result:', {
+      length: text.length,
+      preview: text.substring(0, 100)
+    })
+
     if (!text) {
+      console.warn('Empty transcription returned')
       return NextResponse.json(
         { error: 'Suara tidak terdeteksi atau tidak jelas' },
         { status: 400 }
