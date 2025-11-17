@@ -9,8 +9,11 @@ import { toast } from 'sonner'
 import { getStatusColor, getStatusLabel, formatTrialEndDate, getDaysLeft } from '@/lib/trial'
 import type { User } from '@/types'
 
+// Minimal user data for admin panel (no sensitive balance info)
+type AdminUserView = Pick<User, 'id' | 'email' | 'account_status' | 'trial_ends_at' | 'trial_started_at' | 'created_at'>
+
 export default function AdminPanel() {
-  const [users, setUsers] = useState<User[]>([])
+  const [users, setUsers] = useState<AdminUserView[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
   const [debugInfo, setDebugInfo] = useState<string>('')
@@ -62,7 +65,7 @@ export default function AdminPanel() {
       setIsLoading(true)
       const { data, error } = await supabase
         .from('users')
-        .select('*')
+        .select('id, email, account_status, trial_ends_at, trial_started_at, created_at')
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -214,7 +217,6 @@ export default function AdminPanel() {
                     <th className="text-left p-4 text-sm font-medium text-muted-foreground">Email</th>
                     <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status</th>
                     <th className="text-left p-4 text-sm font-medium text-muted-foreground">Trial Ends</th>
-                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">Balance</th>
                     <th className="text-right p-4 text-sm font-medium text-muted-foreground">Actions</th>
                   </tr>
                 </thead>
@@ -251,15 +253,6 @@ export default function AdminPanel() {
                           ) : (
                             <p className="text-sm text-muted-foreground">-</p>
                           )}
-                        </td>
-                        <td className="p-4">
-                          <p className="text-sm text-foreground">
-                            {new Intl.NumberFormat('id-ID', {
-                              style: 'currency',
-                              currency: 'IDR',
-                              minimumFractionDigits: 0,
-                            }).format(user.current_balance)}
-                          </p>
                         </td>
                         <td className="p-4">
                           <div className="flex items-center justify-end gap-2">
@@ -326,27 +319,15 @@ export default function AdminPanel() {
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div>
-                        <p className="text-muted-foreground">Trial Ends</p>
-                        <p className="text-foreground font-medium">
-                          {user.account_status === 'trial' && user.trial_ends_at
-                            ? `${daysLeft} hari lagi`
-                            : user.account_status === 'active'
-                            ? 'Unlimited'
-                            : '-'}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Balance</p>
-                        <p className="text-foreground font-medium">
-                          {new Intl.NumberFormat('id-ID', {
-                            style: 'currency',
-                            currency: 'IDR',
-                            minimumFractionDigits: 0,
-                          }).format(user.current_balance)}
-                        </p>
-                      </div>
+                    <div className="text-xs">
+                      <p className="text-muted-foreground">Trial Ends</p>
+                      <p className="text-foreground font-medium">
+                        {user.account_status === 'trial' && user.trial_ends_at
+                          ? `${daysLeft} hari lagi`
+                          : user.account_status === 'active'
+                          ? 'Unlimited'
+                          : '-'}
+                      </p>
                     </div>
 
                     <div className="flex gap-2">
