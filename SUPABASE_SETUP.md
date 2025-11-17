@@ -111,7 +111,22 @@ Developer contact information:
 - Untuk production (semua orang bisa login), nanti perlu "Publish App"
 
 ### 5. Create OAuth 2.0 Credentials
-- Di sidebar: **APIs & Services** > **Credentials**
+**⚠️ CRITICAL: Redirect URI harus PERSIS dari Supabase!**
+
+**BEFORE creating credentials, get the callback URL from Supabase:**
+
+1. **Buka Supabase Dashboard dulu**
+2. Go to: **Authentication** > **Providers**
+3. Scroll ke **Google** (belum perlu enable)
+4. **COPY** the **"Callback URL (for OAuth)"**:
+   ```
+   Format: https://xxxxxxxxxxxxx.supabase.co/auth/v1/callback
+   ```
+   **SIMPAN URL INI!** ← Akan dipakai di step berikutnya
+
+**NOW create Google OAuth credentials:**
+
+- Di Google Console sidebar: **APIs & Services** > **Credentials**
 - Klik **"+ Create Credentials"** > **OAuth client ID**
 
 Fill in:
@@ -120,18 +135,17 @@ Application type: Web application
 Name: HaloDompet Web
 
 Authorized JavaScript origins:
-  - https://xxxxx.supabase.co
-  - https://your-app.vercel.app
+  - https://xxxxxxxxxxxxx.supabase.co
 
 Authorized redirect URIs:
-  - https://xxxxx.supabase.co/auth/v1/callback
-  - https://your-app.vercel.app/auth/callback
+  - https://xxxxxxxxxxxxx.supabase.co/auth/v1/callback
 ```
 
-**PENTING:**
-- Ganti `xxxxx` dengan Project URL dari Supabase!
-- Ganti `your-app.vercel.app` dengan domain Vercel Anda!
-- Jika domain custom, tambahkan juga (e.g., `https://halodompet.com/auth/callback`)
+**⚠️ SANGAT PENTING:**
+- Paste PERSIS callback URL yang di-copy dari Supabase
+- JANGAN tambahkan Vercel domain di sini (tidak perlu!)
+- JANGAN typo di `/auth/v1/callback` (harus lowercase, dengan /v1/)
+- Ganti `xxxxxxxxxxxxx` dengan Supabase project ID Anda
 
 - Klik **"Create"**
 - **COPY** Client ID dan Client Secret (akan muncul popup)
@@ -317,7 +331,46 @@ Di Supabase:
 
 ## 🐛 Troubleshooting
 
-### 🚨 "Access blocked: This app's request is invalid" (VERY COMMON!)
+### 🚨 "Error 400: redirect_uri_mismatch" (MOST COMMON!)
+**Pesan error:**
+```
+Access blocked: This app's request is invalid
+Error 400: redirect_uri_mismatch
+```
+
+**Penyebab:** Redirect URI di Google Console tidak match dengan callback URL Supabase
+
+**Fix (Step-by-step):**
+
+1. **Dapatkan Callback URL dari Supabase:**
+   - Go to: Supabase Dashboard > **Authentication** > **Providers**
+   - Scroll ke **Google**
+   - Copy **"Callback URL (for OAuth)"**
+   - Format: `https://xxxxxxxxxxxxx.supabase.co/auth/v1/callback`
+
+2. **Update Google Cloud Console:**
+   - Go to: **APIs & Services** > **Credentials**
+   - Klik **OAuth Client ID** yang sudah dibuat
+   - Di **Authorized redirect URIs**, pastikan ada PERSIS:
+     ```
+     https://xxxxxxxxxxxxx.supabase.co/auth/v1/callback
+     ```
+   - **HAPUS** redirect URI lain jika ada (e.g., Vercel domain)
+   - Klik **"Save"**
+
+3. **Common Mistakes:**
+   - ❌ Typo: `auth/V1/callback` (huruf besar V)
+   - ❌ Typo: `auth/callback` (tanpa /v1/)
+   - ❌ Salah domain: pakai Vercel domain bukan Supabase
+   - ❌ HTTP instead of HTTPS
+   - ✅ Correct: `https://xxxxx.supabase.co/auth/v1/callback`
+
+4. **Wait & Test:**
+   - Tunggu 1-2 menit
+   - Clear cache atau buka Incognito
+   - Coba login lagi
+
+### 🚨 "Access blocked: This app's request is invalid" (without redirect_uri error)
 **Penyebab:** OAuth Consent Screen tidak dikonfigurasi lengkap atau Test User belum ditambahkan
 
 **Fix (Step-by-step):**
