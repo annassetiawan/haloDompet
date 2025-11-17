@@ -38,9 +38,16 @@ export async function GET(request: NextRequest) {
       .select('*')
       .order('created_at', { ascending: false })
 
-    // 3. Check table schema
-    const { data: schemaCheck, error: schemaError } = await supabase.rpc('check_users_schema', {})
-      .catch(() => ({ data: null, error: 'RPC not available' }))
+    // 3. Check table schema (optional RPC - may not exist)
+    let schemaCheck = null
+    let schemaError: any = null
+    try {
+      const result = await supabase.rpc('check_users_schema', {})
+      schemaCheck = result.data
+      schemaError = result.error
+    } catch (e) {
+      schemaError = 'RPC not available'
+    }
 
     // 4. Count mismatches
     const authUserIds = authUsers?.users.map(u => u.id) || []
