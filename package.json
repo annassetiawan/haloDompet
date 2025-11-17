@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:ngrok": "echo '🚀 Starting dev server and ngrok...' && echo 'Open http://localhost:4040 for ngrok dashboard' && npm run dev & npx ngrok http 3000",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
