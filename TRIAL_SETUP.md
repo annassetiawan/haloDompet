@@ -51,7 +51,22 @@ Fix ini akan:
 
 **Verify:** Script akan otomatis show berapa user di auth vs public. Harus sama!
 
-### 4. Add Admin User
+### 4. Fix Admin RLS for Users Table (CRITICAL!)
+
+Admin tidak bisa lihat user lain karena RLS policy. Jalankan fix ini:
+
+**Buka Supabase Dashboard → SQL Editor → New Query**
+
+Copy dan paste isi file `supabase/fix-admin-rls-users-table.sql`, lalu klik **Run**.
+
+Fix ini akan:
+- ✅ Tambah policy "Admins can view all users"
+- ✅ Allow admin melihat semua user di admin panel
+- ✅ Show verification queries
+
+**Verify:** Refresh admin panel, semua user seharusnya muncul sekarang!
+
+### 5. Add Admin User
 
 Setelah migration selesai, tambahkan diri kamu sebagai admin:
 
@@ -212,14 +227,20 @@ mailto:support@halodompet.com
 ### User baru tidak muncul di admin panel ⚠️ COMMON ISSUE
 **Symptom:** User bisa login tapi tidak muncul di admin panel list.
 
-**Root Cause:** Trigger `on_auth_user_created` tidak ada atau tidak jalan.
+**Root Causes:**
+1. **RLS Policy blocking admin** (MOST COMMON)
+   - Policy "Users can view own data" hanya allow user lihat data mereka sendiri
+   - Admin tidak bisa query user lain
+   - **Fix:** Jalankan `supabase/fix-admin-rls-users-table.sql`
 
-**Fix:**
-1. Jalankan `supabase/fix-missing-trigger.sql` di SQL Editor
-2. Script akan otomatis backfill user yang missing
-3. Refresh admin panel
+2. **Trigger tidak jalan**
+   - User tidak dibuat di public.users saat signup
+   - **Fix:** Jalankan `supabase/fix-missing-trigger.sql`
 
-**Debug:** Access `/api/debug/users` untuk lihat mismatch antara auth.users dan public.users
+**Debug Steps:**
+1. Access `/api/debug/users` - cek apakah user ada di database
+2. Kalau user ADA di public.users tapi tidak muncul → RLS issue (fix #1)
+3. Kalau user TIDAK ADA di public.users → Trigger issue (fix #2)
 
 ### User tidak dapat trial otomatis
 - Cek: Apakah migration sudah dijalankan?
