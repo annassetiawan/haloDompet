@@ -25,6 +25,19 @@ export default function OnboardingPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       router.push('/login');
+      return;
+    }
+
+    // Check if user already completed onboarding
+    const { data: profile } = await supabase
+      .from('users')
+      .select('initial_balance')
+      .eq('id', user.id)
+      .single();
+
+    // If user already has initial_balance set, they've completed onboarding
+    if (profile && profile.initial_balance !== null && profile.initial_balance !== undefined) {
+      router.push('/'); // Redirect to dashboard
     }
   };
 
@@ -76,8 +89,8 @@ export default function OnboardingPage() {
   };
 
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
-      <div className="relative z-10 w-full max-w-md space-y-6 animate-scale-in">
+    <main className="relative min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
+      <div className="relative z-10 w-full max-w-lg space-y-6 animate-scale-in">
         {/* Progress Indicator */}
         <div className="flex justify-center gap-2">
           <div className={`h-2 w-16 rounded-full transition-colors ${step >= 1 ? 'bg-primary' : 'bg-muted'}`} />
@@ -144,12 +157,12 @@ export default function OnboardingPage() {
                 onClick={() => setMode('simple')}
                 className="w-full h-auto p-4 justify-start"
               >
-                <div className="flex items-start gap-3 text-left">
-                  <div className="text-2xl">📱</div>
-                  <div className="flex-1">
+                <div className="flex items-start gap-3 text-left w-full">
+                  <div className="text-2xl shrink-0">📱</div>
+                  <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-base">Mode Sederhana</h3>
-                    <p className="text-xs opacity-80 mt-1 font-normal">
-                      Data tersimpan di browser. Cocok untuk penggunaan pribadi.
+                    <p className="text-xs opacity-80 mt-1 font-normal leading-relaxed break-words">
+                      Data tersimpan di database. Cocok untuk penggunaan pribadi.
                     </p>
                   </div>
                 </div>
@@ -162,12 +175,12 @@ export default function OnboardingPage() {
                 onClick={() => setMode('webhook')}
                 className="w-full h-auto p-4 justify-start"
               >
-                <div className="flex items-start gap-3 text-left">
-                  <div className="text-2xl">🔗</div>
-                  <div className="flex-1">
+                <div className="flex items-start gap-3 text-left w-full">
+                  <div className="text-2xl shrink-0">🔗</div>
+                  <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-base">Mode Webhook</h3>
-                    <p className="text-xs opacity-80 mt-1 font-normal">
-                      Kirim data ke n8n atau layanan lainnya. Untuk advanced.
+                    <p className="text-xs opacity-80 mt-1 font-normal leading-relaxed break-words">
+                      Kirim data ke n8n atau webhook lainnya.
                     </p>
                   </div>
                 </div>

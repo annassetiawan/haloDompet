@@ -60,7 +60,12 @@ export default function HomePage() {
       const data = await response.json();
 
       if (response.ok) {
-        
+        // Check if user hasn't completed onboarding
+        if (data.user.initial_balance === null || data.user.initial_balance === undefined) {
+          router.push("/onboarding");
+          return;
+        }
+
         // Check if trial has expired
         if (isTrialExpired(data.user)) {
           router.push("/trial-expired");
