@@ -2,8 +2,18 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url)
+  const requestUrl = new URL(request.url)
+  const { searchParams, origin } = requestUrl
   const code = searchParams.get('code')
+
+  // Debug logging
+  console.log('🔍 Auth Callback Debug:', {
+    fullUrl: request.url,
+    origin,
+    host: request.headers.get('host'),
+    forwardedHost: request.headers.get('x-forwarded-host'),
+    forwardedProto: request.headers.get('x-forwarded-proto'),
+  })
 
   if (code) {
     const supabase = await createClient()
@@ -32,20 +42,23 @@ export async function GET(request: Request) {
       // Allow override with "next" param if provided
       const next = searchParams.get('next') ?? redirectPath
 
-      const forwardedHost = request.headers.get('x-forwarded-host') // original origin before load balancer
-      const isLocalEnv = process.env.NODE_ENV === 'development'
+      // Determine redirect URL - use actual request host, not URL origin
+      // This ensures redirect goes to the same domain user is accessing from
+      const host = request.headers.get('host') || new URL(request.url).host
+      const protocol = request.headers.get('x-forwarded-proto') ||
+                      (host.includes('localhost') ? 'http' : 'https')
 
-      if (isLocalEnv) {
-        // we can be sure that there is no load balancer in between, so no need to watch for X-Forwarded-Host
-        return NextResponse.redirect(`${origin}${next}`)
-      } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`)
-      } else {
-        return NextResponse.redirect(`${origin}${next}`)
-      }
+      const redirectUrl = `${protocol}://${host}${next}`
+
+      console.log('✅ Redirecting to:', redirectUrl)
+
+      return NextResponse.redirect(redirectUrl)
     }
   }
 
   // return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/login?error=auth_failed`)
+  const host = request.headers.get('host') || new URL(request.url).host
+  const protocol = request.headers.get('x-forwarded-proto') ||
+                  (host.includes('localhost') ? 'http' : 'https')
+  return NextResponse.redirect(`${protocol}://${host}/login?error=auth_failed`)
 }
