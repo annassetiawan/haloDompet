@@ -7,16 +7,6 @@ import { createClient } from '@/lib/supabase/client';
 import { SaldoDisplay } from '@/components/SaldoDisplay';
 import { TransactionCard } from '@/components/TransactionCard';
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogTrigger
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Mic, MicOff, Settings, Loader2, LogOut, History, ArrowRight, BarChart3 } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 import type { User as UserProfile, Transaction } from '@/types';
@@ -29,8 +19,6 @@ export default function HomePage() {
   const [isListening, setIsListening] = useState(false);
   const [status, setStatus] = useState("Siap merekam");
   const [webhookUrl, setWebhookUrl] = useState("");
-  const [tempWebhookUrl, setTempWebhookUrl] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const router = useRouter();
@@ -91,15 +79,6 @@ export default function HomePage() {
     router.push('/login');
   };
 
-  // Save webhook URL to localStorage
-  const saveWebhookUrl = () => {
-    localStorage.setItem('halodompet_webhook_url', tempWebhookUrl);
-    setWebhookUrl(tempWebhookUrl);
-    setIsDialogOpen(false);
-    setStatus("Webhook URL tersimpan!");
-    setTimeout(() => setStatus("Siap merekam"), 2000);
-  };
-
   // Web Speech API Handler
   const handleListen = async () => {
     // Cek apakah browser support Web Speech API
@@ -110,8 +89,8 @@ export default function HomePage() {
 
     // Cek apakah webhook URL sudah diset
     if (!webhookUrl) {
-      setStatus("Atur webhook URL terlebih dahulu!");
-      setIsDialogOpen(true);
+      setStatus("Atur webhook URL di halaman Settings!");
+      router.push('/settings');
       return;
     }
 
@@ -230,124 +209,71 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Dialog Pengaturan */}
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
+        <div className="flex gap-2">
+          {/* History Button */}
+          <Link href="/history">
             <Button
               variant="outline"
               size="icon"
-              onClick={() => setTempWebhookUrl(webhookUrl)}
-              className="relative overflow-hidden group border-2 hover:border-primary/50 transition-all duration-300"
+              title="Riwayat Transaksi"
+            >
+              <History className="h-4 w-4" />
+            </Button>
+          </Link>
+
+          {/* Reports Button */}
+          <Link href="/reports">
+            <Button
+              variant="outline"
+              size="icon"
+              title="Laporan & Analisis"
+            >
+              <BarChart3 className="h-4 w-4" />
+            </Button>
+          </Link>
+
+          {/* Settings Button */}
+          <Link href="/settings">
+            <Button
+              variant="outline"
+              size="icon"
+              title="Pengaturan"
             >
               <Settings className="h-4 w-4" />
             </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Pengaturan Webhook</DialogTitle>
-              <DialogDescription>
-                Masukkan URL webhook n8n Anda untuk mengirim data pengeluaran.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Input
-                  id="webhook-url"
-                  placeholder="https://your-n8n-instance.com/webhook/..."
-                  value={tempWebhookUrl}
-                  onChange={(e) => setTempWebhookUrl(e.target.value)}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button onClick={saveWebhookUrl}>
-                Simpan
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          </Link>
 
-        {/* Logout Button */}
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={handleLogout}
-          title="Logout"
-        >
-          <LogOut className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
-
-      {/* Main Content - Tombol Rekam 3D - Scale in animation */ }
-  <div className="relative z-10 flex-grow flex flex-col items-center justify-center gap-6 md:gap-8 animate-scale-in max-w-2xl mx-auto w-full py-8 md:py-0">
-    {/* Glow effect ring */}
-    <div className={`absolute w-32 h-32 md:w-40 md:h-40 rounded-full transition-all duration-500 ${isListening
-      ? 'bg-red-500/20 dark:bg-red-500/30 blur-2xl animate-pulse'
-      : isProcessing
-        ? 'bg-blue-500/20 dark:bg-blue-500/30 blur-2xl animate-pulse'
-        : 'hidden'
-      }`} />
-
-    <button
-      onClick={handleListen}
-      disabled={isListening || isProcessing}
-      className={`
-            relative h-32 w-32 md:h-40 md:w-40 rounded-full
-            font-normal text-lg
-            transition-all duration-300 ease-out
-            disabled:opacity-50 disabled:cursor-not-allowed
-            ${isListening
-          ? 'bg-gradient-to-br from-red-500 via-red-600 to-red-700 shadow-[0_8px_30px_rgb(239,68,68,0.5)] hover:shadow-[0_12px_40px_rgb(239,68,68,0.6)]'
-          : isProcessing
-            ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 shadow-[0_8px_30px_rgb(59,130,246,0.5)]'
-            : 'bg-gradient-to-br from-primary via-primary/90 to-primary/80 shadow-[0_8px_30px_rgb(0,0,0,0.3)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.4)] dark:shadow-[0_8px_30px_rgb(255,255,255,0.1)] dark:hover:shadow-[0_12px_40px_rgb(255,255,255,0.15)] md:animate-button-bounce'
-        }
-            hover:scale-105 active:scale-95 hover:animate-none
-            before:content-[''] before:absolute before:inset-0 before:rounded-full
-            before:bg-gradient-to-br before:from-white/20 before:to-transparent
-            before:opacity-0 hover:before:opacity-100 before:transition-opacity
-            after:content-[''] after:absolute after:inset-[2px] after:rounded-full
-            after:bg-gradient-to-br after:from-transparent after:via-transparent after:to-black/10
-            group
-          `}
-    >
-      {/* Inner shadow untuk efek depth */}
-      <div className="absolute inset-[3px] rounded-full bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
-
-      {/* Icon container */}
-      <div className="relative z-10 flex items-center justify-center h-full w-full text-white">
-        {isListening ? (
-          <Mic className="h-12 w-12 md:h-16 md:w-16 animate-pulse drop-shadow-lg" />
-        ) : isProcessing ? (
-          <Loader2 className="h-12 w-12 md:h-16 md:w-16 animate-spin drop-shadow-lg" />
-        ) : (
-          <MicOff className="h-12 w-12 md:h-16 md:w-16 drop-shadow-lg group-hover:scale-110 transition-transform" />
-        )}
+          {/* Logout Button */}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleLogout}
+            title="Logout"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
-      {/* Bottom shadow untuk efek 3D */}
-      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-24 h-3 md:w-32 md:h-4 bg-black/20 rounded-full blur-md" />
-    </button>
-    {/* Main Content Container */}
-    <div className="relative z-10 flex-grow max-w-2xl mx-auto w-full space-y-6 py-6 md:py-12">
-      {/* Balance Display */}
-      <div className="animate-slide-down">
-        <SaldoDisplay
-          currentBalance={userProfile?.current_balance || 0}
-          initialBalance={userProfile?.initial_balance}
-          isLoading={isLoadingProfile}
-        />
-      </div>
+      {/* Main Content Container */}
+      <div className="relative z-10 flex-grow max-w-2xl mx-auto w-full space-y-6 py-6 md:py-12">
+        {/* Balance Display */}
+        <div className="animate-slide-down">
+          <SaldoDisplay
+            currentBalance={userProfile?.current_balance || 0}
+            initialBalance={userProfile?.initial_balance}
+            isLoading={isLoadingProfile}
+          />
+        </div>
 
-      {/* Voice Recording Button */}
-      <div className="flex flex-col items-center gap-6 md:gap-8 animate-scale-in">
+        {/* Voice Recording Button */}
+        <div className="flex flex-col items-center gap-6 md:gap-8 animate-scale-in">
         <div className="neomorphic-container">
           <input
             id="record-checkbox"
             type="checkbox"
             checked={isListening}
-            onChange={() => { }}
+            onChange={() => {}}
             className="neomorphic-input"
           />
           <label
@@ -381,15 +307,17 @@ export default function HomePage() {
           </div>
 
           {!webhookUrl && (
-            <div className="flex items-center justify-center gap-2 text-xs md:text-sm text-muted-foreground bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 dark:border-amber-500/30 rounded-xl px-3 py-1.5 md:px-4 md:py-2">
-              <Settings className="h-3 w-3 md:h-3.5 md:w-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-              <span className="text-left">Klik ikon pengaturan untuk setup webhook URL</span>
-            </div>
+            <Link href="/settings">
+              <div className="flex items-center justify-center gap-2 text-xs md:text-sm text-muted-foreground bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 dark:border-amber-500/30 rounded-xl px-3 py-1.5 md:px-4 md:py-2 cursor-pointer hover:bg-amber-500/20 dark:hover:bg-amber-500/30 transition-colors">
+                <Settings className="h-3 w-3 md:h-3.5 md:w-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                <span className="text-left">Klik untuk setup webhook URL di Settings</span>
+              </div>
+            </Link>
           )}
         </div>
 
-        {/* Footer - Fade in from bottom */}
-        <div className="relative z-10 text-center space-y-1.5 md:space-y-2 animate-slide-up px-2 pb-4 md:pb-0 max-w-2xl mx-auto w-full">
+        {/* Instruction Text */}
+        <div className="text-center space-y-1.5 md:space-y-2 px-2">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-muted/30 dark:bg-muted/50 backdrop-blur-sm border border-border/30 dark:border-border/50">
             <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 animate-ping" />
             <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 absolute left-[14px] md:left-[18px]" />
@@ -399,6 +327,35 @@ export default function HomePage() {
             Contoh: &quot;Beli kopi 25000&quot; atau &quot;Makan siang 50000&quot;
           </p>
         </div>
-      </main>
-      );
+        </div>
+
+        {/* Recent Transactions */}
+        {recentTransactions.length > 0 && (
+          <div className="space-y-4 animate-slide-up">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-normal text-foreground">
+                Transaksi Terakhir
+              </h2>
+              <Link href="/history">
+                <Button variant="ghost" size="sm" className="gap-1">
+                  Lihat Semua
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+
+            <div className="space-y-2">
+              {recentTransactions.map((transaction) => (
+                <TransactionCard
+                  key={transaction.id}
+                  transaction={transaction}
+                  onClick={() => router.push('/history')}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </main>
+  );
 }
