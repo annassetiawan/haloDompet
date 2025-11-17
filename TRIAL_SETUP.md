@@ -20,7 +20,23 @@ Migration ini akan:
 - ✅ Update function `handle_new_user()` agar auto-set trial 30 hari
 - ✅ Membuat tabel `admin_users` dan `audit_log`
 
-### 2. Add Admin User
+### 2. Fix RLS Policy (IMPORTANT!)
+
+Ada bug di RLS policy yang menyebabkan infinite recursion. Jalankan fix ini:
+
+**Buka Supabase Dashboard → SQL Editor → New Query**
+
+Copy dan paste isi file `supabase/fix-admin-rls.sql`, lalu klik **Run**.
+
+Fix ini akan:
+- ✅ Disable RLS di tabel `admin_users` (aman karena cuma isi email admin)
+- ✅ Fix policy di `audit_log` table
+- ✅ Menghilangkan infinite recursion error
+
+**Verify:** Jalankan `SELECT * FROM public.admin_users;` - harus berhasil tanpa error.
+
+### 3. Add Admin User
+### 4. Add Admin User
 
 Setelah migration selesai, tambahkan diri kamu sebagai admin:
 
@@ -35,7 +51,7 @@ VALUES ('your-user-id-here', 'your-email@gmail.com');
 2. Buka Supabase Dashboard → Authentication → Users
 3. Copy UUID kamu
 
-### 3. Test Trial System
+### 5. Test Trial System
 
 1. **New User Signup:**
    - Logout dari aplikasi
