@@ -22,8 +22,9 @@ export async function GET(request: Request) {
           .eq('id', user.id)
           .single()
 
-        // If profile exists and initial_balance is set (not null and not 0), user has completed onboarding
-        if (profile && profile.initial_balance !== null && profile.initial_balance !== undefined) {
+        // If profile exists and initial_balance is set (not null, not undefined, and > 0), user has completed onboarding
+        // Balance = 0 or NULL means user hasn't completed onboarding yet
+        if (profile && profile.initial_balance !== null && profile.initial_balance !== undefined && profile.initial_balance > 0) {
           redirectPath = '/' // Go to dashboard
         }
       }

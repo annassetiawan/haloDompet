@@ -61,7 +61,8 @@ export default function HomePage() {
 
       if (response.ok) {
         // Check if user hasn't completed onboarding
-        if (data.user.initial_balance === null || data.user.initial_balance === undefined) {
+        // Balance = 0, NULL, or undefined means user hasn't completed onboarding yet
+        if (data.user.initial_balance === null || data.user.initial_balance === undefined || data.user.initial_balance === 0) {
           router.push("/onboarding");
           return;
         }

@@ -35,8 +35,9 @@ export default function OnboardingPage() {
       .eq('id', user.id)
       .single();
 
-    // If user already has initial_balance set, they've completed onboarding
-    if (profile && profile.initial_balance !== null && profile.initial_balance !== undefined) {
+    // If user already has initial_balance set (> 0), they've completed onboarding
+    // Balance = 0, NULL, or undefined means user hasn't completed onboarding yet
+    if (profile && profile.initial_balance !== null && profile.initial_balance !== undefined && profile.initial_balance > 0) {
       router.push('/'); // Redirect to dashboard
     }
   };
