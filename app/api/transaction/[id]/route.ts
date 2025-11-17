@@ -4,7 +4,7 @@ import { getTransaction, updateTransaction, deleteTransaction } from '@/lib/db'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
@@ -17,7 +17,8 @@ export async function GET(
       )
     }
 
-    const transaction = await getTransaction(params.id)
+    const { id } = await params
+    const transaction = await getTransaction(id)
 
     if (!transaction) {
       return NextResponse.json(
@@ -49,7 +50,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
@@ -62,8 +63,9 @@ export async function PUT(
       )
     }
 
+    const { id } = await params
     // Check if transaction exists and user owns it
-    const existingTransaction = await getTransaction(params.id)
+    const existingTransaction = await getTransaction(id)
     if (!existingTransaction) {
       return NextResponse.json(
         { error: 'Transaction not found' },
@@ -90,7 +92,7 @@ export async function PUT(
     }
 
     // Update transaction
-    const updatedTransaction = await updateTransaction(params.id, {
+    const updatedTransaction = await updateTransaction(id, {
       item,
       amount,
       category,
@@ -120,7 +122,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
@@ -133,8 +135,9 @@ export async function DELETE(
       )
     }
 
+    const { id } = await params
     // Check if transaction exists and user owns it
-    const existingTransaction = await getTransaction(params.id)
+    const existingTransaction = await getTransaction(id)
     if (!existingTransaction) {
       return NextResponse.json(
         { error: 'Transaction not found' },
@@ -150,7 +153,7 @@ export async function DELETE(
     }
 
     // Delete transaction
-    const success = await deleteTransaction(params.id)
+    const success = await deleteTransaction(id)
 
     if (!success) {
       return NextResponse.json(
