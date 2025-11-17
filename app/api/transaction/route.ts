@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createTransaction, getTransactions } from '@/lib/db'
+import { createTransaction, getTransactions, deleteTransaction } from '@/lib/db'
 
 export async function POST(request: NextRequest) {
   try {
@@ -97,6 +97,52 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('Transaction GET API error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Parse query parameters
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Missing transaction ID' },
+        { status: 400 }
+      )
+    }
+
+    // Delete transaction
+    const success = await deleteTransaction(user.id, id)
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Failed to delete transaction' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Transaction deleted successfully',
+    })
+  } catch (error) {
+    console.error('Transaction DELETE API error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

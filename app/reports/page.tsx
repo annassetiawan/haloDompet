@@ -192,14 +192,18 @@ export default function ReportsPage() {
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
           </div>
         ) : transactions.length === 0 ? (
-          <div className="text-center py-12 bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl">
-            <div className="text-5xl mb-4">📊</div>
-            <h3 className="text-lg font-normal text-foreground mb-2">
-              Belum ada transaksi
+          <div className="text-center py-16 bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl animate-scale-in">
+            <div className="text-6xl mb-4">📊</div>
+            <h3 className="text-xl font-normal text-foreground mb-2">
+              Belum ada data untuk bulan ini
             </h3>
-            <p className="text-sm text-muted-foreground">
-              Tidak ada data untuk bulan ini
+            <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+              {format(selectedMonth, 'MMMM yyyy', { locale: idLocale })} belum memiliki transaksi. Mulai rekam pengeluaran untuk melihat analisis.
             </p>
+            <Button onClick={() => router.push('/')} className="gap-2">
+              <TrendingDown className="h-4 w-4" />
+              Rekam Pengeluaran
+            </Button>
           </div>
         ) : (
           <>

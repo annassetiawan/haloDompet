@@ -153,7 +153,7 @@ export async function DELETE(
     }
 
     // Delete transaction
-    const success = await deleteTransaction(id)
+    const success = await deleteTransaction(user.id, id)
 
     if (!success) {
       return NextResponse.json(

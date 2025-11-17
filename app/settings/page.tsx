@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ArrowLeft, Save, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
 import type { User as UserProfile } from '@/types'
 
@@ -85,11 +86,11 @@ export default function SettingsPage() {
         localStorage.setItem('halodompet_webhook_url', webhookUrl)
       }
 
-      alert('Pengaturan berhasil disimpan!')
-      router.push('/')
+      toast.success('Pengaturan berhasil disimpan!')
+      setTimeout(() => router.push('/'), 500)
     } catch (error) {
       console.error('Error saving settings:', error)
-      alert('Gagal menyimpan pengaturan. Silakan coba lagi.')
+      toast.error('Gagal menyimpan pengaturan. Silakan coba lagi.')
     } finally {
       setIsSaving(false)
     }
