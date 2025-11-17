@@ -61,21 +61,54 @@ Setelah project ready:
 - Klik hasil pertama
 - Klik **"Enable"**
 
-### 4. Configure OAuth Consent Screen
+### 4. Configure OAuth Consent Screen (LENGKAP - JANGAN SKIP!)
 - Di sidebar: **APIs & Services** > **OAuth consent screen**
 - User Type: **External**
 - Klik **"Create"**
+
+**⚠️ PENTING: Isi form dengan LENGKAP, jangan skip field apapun!**
 
 Fill in form:
 ```
 App name: HaloDompet
 User support email: [your email]
-Developer contact: [your email]
+
+App domain (opsional tapi disarankan):
+  Application home page: https://your-app.vercel.app
+  Application privacy policy link: https://your-app.vercel.app
+  Application terms of service link: https://your-app.vercel.app
+
+Authorized domains:
+  vercel.app
+  supabase.co
+
+Developer contact information:
+  Email addresses: [your email]
 ```
+
 - Klik **"Save and Continue"**
-- Skip "Scopes" (klik Continue)
-- Skip "Test users" (klik Continue)
+
+**Scopes (WAJIB):**
+- Klik **"Add or Remove Scopes"**
+- Cari dan centang scopes ini:
+  - ✅ `.../auth/userinfo.email`
+  - ✅ `.../auth/userinfo.profile`
+  - ✅ `openid`
+- Klik **"Update"**
+- Klik **"Save and Continue"**
+
+**Test Users (WAJIB untuk Testing mode):**
+- Klik **"+ Add Users"**
+- Masukkan **email Google Anda** yang akan login (e.g., `yourname@gmail.com`)
+- Klik **"Add"**
+- Klik **"Save and Continue"**
+- Review summary
 - Klik **"Back to Dashboard"**
+
+**📌 Catatan:**
+- App akan dalam status **"Testing"** - ini normal
+- **HANYA test users yang bisa login** saat mode Testing
+- Untuk production (semua orang bisa login), nanti perlu "Publish App"
 
 ### 5. Create OAuth 2.0 Credentials
 - Di sidebar: **APIs & Services** > **Credentials**
@@ -284,7 +317,51 @@ Di Supabase:
 
 ## 🐛 Troubleshooting
 
-### 🚨 Login redirect ke localhost:3000 (COMMON!)
+### 🚨 "Access blocked: This app's request is invalid" (VERY COMMON!)
+**Penyebab:** OAuth Consent Screen tidak dikonfigurasi lengkap atau Test User belum ditambahkan
+
+**Fix (Step-by-step):**
+
+1. **Cek Status App di Google Console:**
+   - Go to: APIs & Services > OAuth consent screen
+   - Pastikan status: **"Testing"** atau **"In production"**
+   - Jika belum ada status, konfigurasi belum selesai!
+
+2. **Tambahkan Test Users (WAJIB saat Testing mode):**
+   - Di halaman OAuth consent screen
+   - Scroll ke bagian **"Test users"**
+   - Klik **"+ Add Users"**
+   - Masukkan email Google yang akan login (e.g., `yourname@gmail.com`)
+   - Klik **"Save"**
+
+3. **Pastikan Scopes Sudah Benar:**
+   - Kembali ke OAuth consent screen
+   - Klik **"Edit App"**
+   - Di step "Scopes", pastikan ada:
+     - `.../auth/userinfo.email`
+     - `.../auth/userinfo.profile`
+     - `openid`
+   - Klik **"Update"** dan **"Save and Continue"**
+
+4. **Cek Authorized Domains:**
+   - Di OAuth consent screen
+   - Pastikan **Authorized domains** ada:
+     - `vercel.app`
+     - `supabase.co`
+
+5. **Wait & Retry:**
+   - Tunggu 5 menit setelah perubahan
+   - Clear browser cache atau buka Incognito
+   - Coba login lagi
+
+6. **Jika masih error, coba Publish App:**
+   - Go to: OAuth consent screen
+   - Klik **"Publish App"**
+   - Confirm **"Prepare for verification"**
+   - Status berubah jadi "In production"
+   - Sekarang semua orang bisa login (tidak perlu test users)
+
+### 🚨 Login redirect ke localhost:3000
 **Penyebab:** Redirect URLs belum dikonfigurasi dengan benar
 
 **Fix (Step-by-step):**
