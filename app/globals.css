@@ -1,66 +1,69 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
-  --color-background: 0 0% 100%;
-  --color-foreground: 0 0% 3.9%;
-  --color-card: 0 0% 100%;
-  --color-card-foreground: 0 0% 3.9%;
-  --color-popover: 0 0% 100%;
-  --color-popover-foreground: 0 0% 3.9%;
-  --color-primary: 0 0% 9%;
-  --color-primary-foreground: 0 0% 98%;
-  --color-secondary: 0 0% 96.1%;
-  --color-secondary-foreground: 0 0% 9%;
-  --color-muted: 0 0% 96.1%;
-  --color-muted-foreground: 0 0% 45.1%;
-  --color-accent: 0 0% 96.1%;
-  --color-accent-foreground: 0 0% 9%;
-  --color-destructive: 0 84.2% 60.2%;
-  --color-destructive-foreground: 0 0% 98%;
-  --color-border: 0 0% 89.8%;
-  --color-input: 0 0% 89.8%;
-  --color-ring: 0 0% 3.9%;
-
-  --radius: 0.5rem;
-
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-background: 0 0% 3.9%;
-    --color-foreground: 0 0% 98%;
-    --color-card: 0 0% 3.9%;
-    --color-card-foreground: 0 0% 98%;
-    --color-popover: 0 0% 3.9%;
-    --color-popover-foreground: 0 0% 98%;
-    --color-primary: 0 0% 98%;
-    --color-primary-foreground: 0 0% 9%;
-    --color-secondary: 0 0% 14.9%;
-    --color-secondary-foreground: 0 0% 98%;
-    --color-muted: 0 0% 14.9%;
-    --color-muted-foreground: 0 0% 63.9%;
-    --color-accent: 0 0% 14.9%;
-    --color-accent-foreground: 0 0% 98%;
-    --color-destructive: 0 62.8% 30.6%;
-    --color-destructive-foreground: 0 0% 98%;
-    --color-border: 0 0% 14.9%;
-    --color-input: 0 0% 14.9%;
-    --color-ring: 0 0% 83.1%;
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --radius: 0.5rem;
   }
-}
 
-body {
-  background-color: hsl(var(--color-background));
-  color: hsl(var(--color-foreground));
-  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-weight: 400;
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
+      "Segoe UI", Roboto, sans-serif;
+    font-weight: 400;
+  }
 }
 
 /* Custom Animations */
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) translateX(0px);
   }
   33% {
@@ -72,7 +75,8 @@ body {
 }
 
 @keyframes float-delayed {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) translateX(0px);
   }
   33% {
@@ -117,7 +121,8 @@ body {
 }
 
 @keyframes glow-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.5;
     transform: scale(1);
   }
@@ -128,7 +133,8 @@ body {
 }
 
 @keyframes button-bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -183,12 +189,16 @@ body {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 4px solid hsl(var(--color-border));
+  border: 4px solid hsl(var(--border));
   background-color: transparent;
-  background-image: linear-gradient(145deg, hsl(var(--color-muted)), hsl(var(--color-card)));
+  background-image: linear-gradient(
+    145deg,
+    hsl(var(--muted)),
+    hsl(var(--card))
+  );
   box-sizing: border-box;
-  box-shadow: inset 2px 2px 0 hsl(var(--color-muted-foreground) / 0.3),
-              inset -2px -2px 0px hsl(var(--color-background));
+  box-shadow: inset 2px 2px 0 hsl(var(--muted-foreground) / 0.3),
+    inset -2px -2px 0px hsl(var(--background));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -207,16 +217,20 @@ body {
   height: calc(100% + 0.5rem);
   border-radius: inherit;
   background-color: transparent;
-  background-image: linear-gradient(145deg, hsl(var(--color-card)), hsl(var(--color-muted)));
+  background-image: linear-gradient(
+    145deg,
+    hsl(var(--card)),
+    hsl(var(--muted))
+  );
   z-index: -1;
-  box-shadow: 11px 11px 22px hsl(var(--color-background) / 0.8),
-              -11px -11px 22px hsl(var(--color-muted) / 0.3);
+  box-shadow: 11px 11px 22px hsl(var(--background) / 0.8),
+    -11px -11px 22px hsl(var(--muted) / 0.3);
 }
 
 @media (prefers-color-scheme: dark) {
   .neomorphic-button::before {
     box-shadow: 11px 11px 22px rgba(0, 0, 0, 0.5),
-                -11px -11px 22px rgba(82, 82, 82, 0.1);
+      -11px -11px 22px rgba(82, 82, 82, 0.1);
   }
 }
 
@@ -236,14 +250,14 @@ body {
 .neomorphic-button .neomorphic-icon svg {
   height: 100%;
   width: 100%;
-  stroke: hsl(var(--color-muted-foreground));
+  stroke: hsl(var(--muted-foreground));
   transition: all 0.3s ease;
 }
 
 /* Active state (listening) */
 .neomorphic-button.active {
-  box-shadow: inset -2px -2px 0 hsl(var(--color-muted-foreground) / 0.4),
-              inset 2px 2px 0 hsl(var(--color-background));
+  box-shadow: inset -2px -2px 0 hsl(var(--muted-foreground) / 0.4),
+    inset 2px 2px 0 hsl(var(--background));
   border: 4px solid rgba(239, 68, 68, 0.3);
   animation: animeBorderRed 0.3s linear alternate-reverse infinite;
 }
@@ -255,8 +269,8 @@ body {
 
 /* Processing state */
 .neomorphic-button.processing {
-  box-shadow: inset -2px -2px 0 hsl(var(--color-muted-foreground) / 0.4),
-              inset 2px 2px 0 hsl(var(--color-background));
+  box-shadow: inset -2px -2px 0 hsl(var(--muted-foreground) / 0.4),
+    inset 2px 2px 0 hsl(var(--background));
   border: 4px solid rgba(59, 130, 246, 0.3);
   animation: animeBorderBlue 0.3s linear alternate-reverse infinite;
 }
