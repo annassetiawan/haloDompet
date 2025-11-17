@@ -67,6 +67,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Create or update user profile
+    console.log('Attempting to create/update profile for user:', user.id)
+    console.log('Profile data:', { initial_balance, mode, webhook_url })
+
     const profile = await createOrUpdateUserProfile(user.id, user.email!, {
       initial_balance,
       current_balance: initial_balance, // Set current balance to initial balance on first setup
@@ -75,8 +78,13 @@ export async function POST(request: NextRequest) {
     })
 
     if (!profile) {
+      console.error('createOrUpdateUserProfile returned null for user:', user.id)
       return NextResponse.json(
-        { error: 'Failed to update user profile' },
+        {
+          error: 'Failed to update user profile',
+          details: 'Check server logs for more information. This might be an RLS policy issue.',
+          userId: user.id,
+        },
         { status: 500 }
       )
     }

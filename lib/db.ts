@@ -52,24 +52,48 @@ export async function createOrUpdateUserProfile(
 
     if (error) {
       console.error('Error updating user profile:', error)
+      console.error('Error details:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        userId,
+        dataToUpdate: data,
+      })
       return null
     }
 
     return updatedUser
   } else {
-    // Create new user
+    // Create new user (this should rarely happen since trigger creates users)
+    console.log('Creating new user profile for:', userId)
     const { data: newUser, error } = await supabase
       .from('users')
       .insert({
         id: userId,
         email,
-        ...data,
+        initial_balance: data.initial_balance || 0,
+        current_balance: data.current_balance || data.initial_balance || 0,
+        mode: data.mode || 'simple',
+        webhook_url: data.webhook_url || null,
+        account_status: 'trial',
+        trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        trial_started_at: new Date().toISOString(),
       })
       .select()
       .single()
 
     if (error) {
       console.error('Error creating user profile:', error)
+      console.error('Error details:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        userId,
+        email,
+        dataToInsert: data,
+      })
       return null
     }
 
