@@ -1,30 +1,42 @@
 "use client"
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Mic, MicOff, Loader2, Square } from 'lucide-react'
 import { toast } from 'sonner'
 import RecordRTC from 'recordrtc'
+import { useAudioLevel } from '@/hooks/useAudioLevel'
 
-interface iOSMediaRecorderProps {
+interface IOSMediaRecorderProps {
   onTranscript: (text: string) => void
   onError?: (error: string) => void
   onStatusChange?: (status: string) => void
+  onAudioLevelChange?: (level: number) => void
 }
 
 /**
  * iOS-optimized audio recorder using RecordRTC
  * Handles Safari iOS MediaRecorder limitations
  */
-export function iOSMediaRecorder({
+export function IOSMediaRecorder({
   onTranscript,
   onError,
-  onStatusChange
-}: iOSMediaRecorderProps) {
+  onStatusChange,
+  onAudioLevelChange
+}: IOSMediaRecorderProps) {
   const [isRecording, setIsRecording] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [stream, setStream] = useState<MediaStream | null>(null)
   const recorderRef = useRef<RecordRTC | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const recordingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Track audio level
+  const audioLevel = useAudioLevel(stream, isRecording)
+
+  // Pass audio level to parent
+  useEffect(() => {
+    onAudioLevelChange?.(audioLevel)
+  }, [audioLevel, onAudioLevelChange])
 
   const startRecording = async () => {
     try {
@@ -32,7 +44,7 @@ export function iOSMediaRecorder({
       onStatusChange?.("Meminta izin mikrofon...")
 
       // Request microphone with iOS-optimized constraints
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
@@ -41,10 +53,11 @@ export function iOSMediaRecorder({
       })
 
       console.log('✅ [iOS] Microphone permission granted')
-      streamRef.current = stream
+      streamRef.current = mediaStream
+      setStream(mediaStream) // Store for audio level detection
 
       // Create RecordRTC instance with iOS-optimized settings
-      const recorder = new RecordRTC(stream, {
+      const recorder = new RecordRTC(mediaStream, {
         type: 'audio',
         mimeType: 'audio/wav', // WAV is most compatible with iOS
         recorderType: RecordRTC.StereoAudioRecorder,
@@ -121,6 +134,7 @@ export function iOSMediaRecorder({
           streamRef.current.getTracks().forEach(track => track.stop())
           streamRef.current = null
         }
+        setStream(null) // Clear stream state
 
         recorderRef.current.destroy()
         recorderRef.current = null
