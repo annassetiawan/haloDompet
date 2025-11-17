@@ -96,30 +96,50 @@ export default function HomePage() {
       setIsProcessing(true);
 
       try {
-        // Kirim ke backend untuk diproses
-        const response = await fetch('/api/process', {
+        // Step 1: Extract JSON from voice using Gemini
+        const processResponse = await fetch('/api/process', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             text: transcript,
-            webhookUrl: webhookUrl,
+            webhookUrl: webhookUrl, // For webhook mode
           }),
         });
 
-        const data = await response.json();
+        const processData = await processResponse.json();
 
-        if (response.ok) {
-          setStatus(`Berhasil! Data terkirim ke n8n 🎉`);
-          setTimeout(() => setStatus("Siap merekam"), 3000);
-        } else {
-          setStatus(`Error: ${data.error || 'Gagal memproses'}`);
-          setTimeout(() => setStatus("Siap merekam"), 3000);
+        if (!processResponse.ok) {
+          throw new Error(processData.error || 'Gagal memproses suara');
         }
+
+        // Step 2: Save to database
+        const transactionResponse = await fetch('/api/transaction', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            item: processData.data.item,
+            amount: processData.data.amount,
+            category: processData.data.category,
+            date: processData.data.date,
+            voice_text: transcript,
+          }),
+        });
+
+        const transactionData = await transactionResponse.json();
+
+        if (!transactionResponse.ok) {
+          throw new Error(transactionData.error || 'Gagal menyimpan transaksi');
+        }
+
+        setStatus(`Berhasil! ${processData.data.item} - Rp ${processData.data.amount.toLocaleString('id-ID')} 🎉`);
+        setTimeout(() => setStatus("Siap merekam"), 3000);
       } catch (error) {
         console.error('Error:', error);
-        setStatus("Error mengirim data. Cek koneksi internet.");
+        setStatus(`Error: ${error instanceof Error ? error.message : 'Gagal memproses'}`);
         setTimeout(() => setStatus("Siap merekam"), 3000);
       } finally {
         setIsProcessing(false);

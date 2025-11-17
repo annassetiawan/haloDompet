@@ -37,7 +37,26 @@ export default function OnboardingPage() {
         return;
       }
 
-      // Save user settings (in the future, this will go to Supabase database)
+      // Save user settings to Supabase database via API
+      const response = await fetch('/api/user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          initial_balance: parseFloat(initialBalance),
+          mode: mode,
+          webhook_url: mode === 'webhook' ? webhookUrl : null,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save settings');
+      }
+
+      // Also save to localStorage for backward compatibility
       localStorage.setItem('halodompet_initial_balance', initialBalance);
       localStorage.setItem('halodompet_mode', mode);
       if (mode === 'webhook' && webhookUrl) {
