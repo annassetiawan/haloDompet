@@ -164,28 +164,49 @@ Kembali ke Supabase Dashboard:
 5. Klik **"Save"**
 
 ### 7. Configure Site URL & Redirect URLs
-**PENTING:** Ini langkah yang sering terlewat dan menyebabkan redirect ke localhost!
+**🚨 CRITICAL:** Ini langkah yang WAJIB dan sering terlewat - menyebabkan redirect ke localhost!
+
+**BEFORE configuring, get your Vercel domain:**
+1. Buka **Vercel Dashboard**: https://vercel.com
+2. Pilih project **halodompet**
+3. Copy domain yang aktif (terlihat di bagian atas):
+   - Format: `halodompet-xxxx.vercel.app` atau
+   - Custom domain jika ada: `halodompet.com`
+
+**NOW configure Supabase:**
 
 1. Go to: **Authentication** > **URL Configuration**
-2. Set **Site URL**:
-   ```
-   https://your-app.vercel.app
-   ```
-   *Ganti dengan domain Vercel Anda!*
 
-3. Set **Redirect URLs** (tambahkan semua):
+2. Set **Site URL** (ini domain UTAMA production):
    ```
-   https://your-app.vercel.app/**
+   https://halodompet-xxxx.vercel.app
+   ```
+   ⚠️ **Ganti dengan domain Vercel Anda yang AKTIF!**
+
+   ❌ **JANGAN** pakai `http://localhost:3000`
+   ❌ **JANGAN** pakai `your-app.vercel.app` (contoh saja)
+   ✅ **HARUS** domain Vercel yang real
+
+3. Set **Redirect URLs** (tambahkan SEMUA domain yang boleh redirect):
+   ```
+   https://halodompet-xxxx.vercel.app/**
    http://localhost:3000/**
    ```
    *Klik "Add URL" untuk setiap entry*
 
+   💡 Wildcard `/**` = semua path di domain tersebut
+
 4. Klik **"Save"**
 
+**Test:**
+- Clear browser cache
+- Buka production URL: `https://halodompet-xxxx.vercel.app`
+- Coba login → should stay in production! ✅
+
 **Penjelasan:**
-- **Site URL** = domain utama production Anda
-- **Redirect URLs** = semua domain yang boleh redirect setelah login
-- Wildcard `/**` mengizinkan semua path di domain tersebut
+- **Site URL** = domain utama yang digunakan Supabase untuk redirect setelah OAuth
+- Jika Site URL masih `localhost:3000` → login akan redirect ke localhost
+- **Redirect URLs** = whitelist semua domain yang BOLEH menerima redirect
 
 ---
 
@@ -414,32 +435,43 @@ Error 400: redirect_uri_mismatch
    - Status berubah jadi "In production"
    - Sekarang semua orang bisa login (tidak perlu test users)
 
-### 🚨 Login redirect ke localhost:3000
-**Penyebab:** Redirect URLs belum dikonfigurasi dengan benar
+### 🚨 Login redirect ke localhost:3000 (VERY COMMON!)
+**Symptoms:** Login berhasil di Google, tapi redirect ke `http://localhost:3000` instead of production
+
+**Penyebab:** Site URL di Supabase masih default ke localhost
 
 **Fix (Step-by-step):**
 
-1. **Google Cloud Console:**
-   - Go to: APIs & Services > Credentials
-   - Klik OAuth Client ID yang sudah dibuat
-   - Di **Authorized redirect URIs**, pastikan ada:
-     ```
-     https://xxxxx.supabase.co/auth/v1/callback
-     https://your-app.vercel.app/auth/callback
-     ```
-   - Klik **"Save"**
+1. **Cek Domain Vercel Anda:**
+   - Buka Vercel Dashboard: https://vercel.com
+   - Pilih project halodompet
+   - Copy domain aktif (e.g., `halodompet-abc123.vercel.app`)
 
-2. **Supabase Dashboard:**
-   - Go to: Authentication > URL Configuration
-   - **Site URL:** `https://your-app.vercel.app`
-   - **Redirect URLs:**
+2. **Update Supabase Site URL:**
+   - Go to: Supabase Dashboard > **Authentication** > **URL Configuration**
+   - **Site URL:** Ubah dari `http://localhost:3000` ke:
      ```
-     https://your-app.vercel.app/**
+     https://halodompet-abc123.vercel.app
+     ```
+     *(Ganti dengan domain Vercel Anda yang real!)*
+
+3. **Update Redirect URLs:**
+   - Di bagian **Redirect URLs**, pastikan ada:
+     ```
+     https://halodompet-abc123.vercel.app/**
      http://localhost:3000/**
      ```
    - Klik **"Save"**
 
-3. **Test lagi** - refresh page dan coba login
+4. **Test dari Production URL:**
+   - **JANGAN** test dari localhost
+   - Buka production: `https://halodompet-abc123.vercel.app`
+   - Klik login → should stay in production! ✅
+
+**Verification:**
+- Site URL ≠ `http://localhost:3000` ✅
+- Site URL = domain Vercel production ✅
+- Redirect URLs contains `https://your-vercel.app/**` ✅
 
 ### Error: "Unauthorized" saat login
 **Fix:**
