@@ -82,18 +82,43 @@ export default function OnboardingPage() {
         throw new Error(errorMsg);
       }
 
-      console.log('Onboarding saved successfully:', data);
+      console.log('✅ Onboarding saved successfully:', data);
 
-      // Also save to localStorage for backward compatibility
-      localStorage.setItem('halodompet_initial_balance', initialBalance);
-      localStorage.setItem('halodompet_mode', mode);
-      if (mode === 'webhook' && webhookUrl) {
-        localStorage.setItem('halodompet_webhook_url', webhookUrl);
+      // Verify data was actually saved by fetching it back
+      console.log('🔍 Verifying saved data...');
+      const verifyResponse = await fetch('/api/user');
+      const verifyData = await verifyResponse.json();
+
+      console.log('Verification result:', verifyData);
+
+      if (verifyResponse.ok && verifyData.user) {
+        const savedBalance = verifyData.user.initial_balance;
+        console.log('✅ Data verified! Saved balance:', savedBalance);
+
+        if (savedBalance === null || savedBalance === undefined) {
+          console.error('❌ CRITICAL: Data not saved! Balance is still null after save');
+          toast.error('Data tidak tersimpan! Coba lagi atau hubungi admin.', {
+            duration: 10000,
+          });
+          return; // Don't redirect
+        }
+
+        // Also save to localStorage for backward compatibility
+        localStorage.setItem('halodompet_initial_balance', initialBalance);
+        localStorage.setItem('halodompet_mode', mode);
+        if (mode === 'webhook' && webhookUrl) {
+          localStorage.setItem('halodompet_webhook_url', webhookUrl);
+        }
+
+        // Redirect to main app
+        toast.success('Selamat datang di HaloDompet! Trial 30 hari aktif. 🎉');
+        setTimeout(() => router.push('/'), 500);
+      } else {
+        console.error('❌ Failed to verify saved data');
+        toast.error('Gagal memverifikasi data. Coba lagi.', {
+          duration: 5000,
+        });
       }
-
-      // Redirect to main app
-      toast.success('Selamat datang di HaloDompet! Trial 30 hari aktif. 🎉');
-      setTimeout(() => router.push('/'), 500);
     } catch (error: any) {
       console.error('Error completing onboarding:', error);
       // Don't show generic error if we already showed a specific one

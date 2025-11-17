@@ -67,8 +67,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Create or update user profile
-    console.log('Attempting to create/update profile for user:', user.id)
-    console.log('Profile data:', { initial_balance, mode, webhook_url })
+    console.log('📝 POST /api/user - Attempting to create/update profile')
+    console.log('User ID:', user.id)
+    console.log('User Email:', user.email)
+    console.log('Profile data to save:', { initial_balance, mode, webhook_url })
 
     const profile = await createOrUpdateUserProfile(user.id, user.email!, {
       initial_balance,
@@ -78,16 +80,26 @@ export async function POST(request: NextRequest) {
     })
 
     if (!profile) {
-      console.error('createOrUpdateUserProfile returned null for user:', user.id)
+      console.error('❌ createOrUpdateUserProfile returned null for user:', user.id)
+      console.error('This usually means UPDATE or INSERT failed due to RLS policy or permission issue')
       return NextResponse.json(
         {
           error: 'Failed to update user profile',
-          details: 'Check server logs for more information. This might be an RLS policy issue.',
+          details: 'Database operation failed. Check server logs and RLS policies.',
           userId: user.id,
         },
         { status: 500 }
       )
     }
+
+    console.log('✅ Profile saved successfully!')
+    console.log('Saved data:', {
+      id: profile.id,
+      email: profile.email,
+      initial_balance: profile.initial_balance,
+      current_balance: profile.current_balance,
+      mode: profile.mode,
+    })
 
     return NextResponse.json({
       success: true,
