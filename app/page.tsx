@@ -9,7 +9,9 @@ import { TransactionCard } from '@/components/TransactionCard';
 import { DarkModeToggle } from '@/components/DarkModeToggle';
 import { TransactionListSkeleton } from '@/components/TransactionSkeleton';
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, Settings, Loader2, LogOut, History, ArrowRight, BarChart3, Menu, Sparkles } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Mic, MicOff, Settings, Loader2, LogOut, History, ArrowRight, BarChart3, Menu, Sparkles, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import type { User } from '@supabase/supabase-js';
 import type { User as UserProfile, Transaction } from '@/types';
@@ -25,6 +27,12 @@ export default function HomePage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
+
+  // Review dialog state
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [pendingTranscript, setPendingTranscript] = useState("");
+  const [editedTranscript, setEditedTranscript] = useState("");
+
   const router = useRouter();
   const supabase = createClient();
 
@@ -85,6 +93,88 @@ export default function HomePage() {
     router.push('/login');
   };
 
+  // Handle confirm from review dialog
+  const handleConfirmTranscript = async () => {
+    setIsReviewOpen(false);
+    await processTranscript(editedTranscript);
+  };
+
+  // Handle cancel from review dialog
+  const handleCancelTranscript = () => {
+    setIsReviewOpen(false);
+    setPendingTranscript("");
+    setEditedTranscript("");
+    setStatus("Siap merekam");
+  };
+
+  // Process transcript (called after user confirms in dialog)
+  const processTranscript = async (transcript: string) => {
+    setIsProcessing(true);
+    setStatus(`Memproses: "${transcript}"`);
+
+    try {
+      // Step 1: Extract JSON from voice using Gemini
+      const processPayload: { text: string; webhookUrl?: string } = {
+        text: transcript,
+      };
+
+      // Only include webhookUrl for webhook mode
+      if (userProfile?.mode === 'webhook' && webhookUrl) {
+        processPayload.webhookUrl = webhookUrl;
+      }
+
+      const processResponse = await fetch('/api/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(processPayload),
+      });
+
+      const processData = await processResponse.json();
+
+      if (!processResponse.ok) {
+        throw new Error(processData.error || 'Gagal memproses suara');
+      }
+
+      // Step 2: Save to database
+      const transactionResponse = await fetch('/api/transaction', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          item: processData.data.item,
+          amount: processData.data.amount,
+          category: processData.data.category,
+          date: processData.data.date,
+          voice_text: transcript,
+        }),
+      });
+
+      const transactionData = await transactionResponse.json();
+
+      if (!transactionResponse.ok) {
+        throw new Error(transactionData.error || 'Gagal menyimpan transaksi');
+      }
+
+      // Reload profile and transactions after successful save
+      loadUserProfile();
+      loadRecentTransactions();
+
+      // Show success toast
+      toast.success(`${processData.data.item} - Rp ${processData.data.amount.toLocaleString('id-ID')} tercatat!`);
+      setStatus("Siap merekam");
+    } catch (error) {
+      console.error('Error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Gagal memproses';
+      toast.error(errorMessage);
+      setStatus("Siap merekam");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   // Web Speech API Handler
   const handleListen = async () => {
     // Cek apakah browser support Web Speech API
@@ -114,71 +204,13 @@ export default function HomePage() {
 
     recognition.onresult = async (event: any) => {
       const transcript = event.results[0][0].transcript;
-      setStatus(`Mendengar: "${transcript}"`);
       setIsListening(false);
-      setIsProcessing(true);
 
-      try {
-        // Step 1: Extract JSON from voice using Gemini
-        const processPayload: { text: string; webhookUrl?: string } = {
-          text: transcript,
-        };
-
-        // Only include webhookUrl for webhook mode
-        if (userProfile?.mode === 'webhook' && webhookUrl) {
-          processPayload.webhookUrl = webhookUrl;
-        }
-
-        const processResponse = await fetch('/api/process', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(processPayload),
-        });
-
-        const processData = await processResponse.json();
-
-        if (!processResponse.ok) {
-          throw new Error(processData.error || 'Gagal memproses suara');
-        }
-
-        // Step 2: Save to database
-        const transactionResponse = await fetch('/api/transaction', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            item: processData.data.item,
-            amount: processData.data.amount,
-            category: processData.data.category,
-            date: processData.data.date,
-            voice_text: transcript,
-          }),
-        });
-
-        const transactionData = await transactionResponse.json();
-
-        if (!transactionResponse.ok) {
-          throw new Error(transactionData.error || 'Gagal menyimpan transaksi');
-        }
-
-        // Reload profile and transactions after successful save
-        loadUserProfile();
-        loadRecentTransactions();
-
-        // Show success toast
-        toast.success(`${processData.data.item} - Rp ${processData.data.amount.toLocaleString('id-ID')} tercatat!`);
-        setStatus("Siap merekam");
-      } catch (error) {
-        console.error('Error:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Gagal memproses';
-        toast.error(errorMessage);
-        setStatus("Siap merekam");
-      } finally {
-        setIsProcessing(false);
-      }
+      // Show review dialog for user to confirm/edit transcript
+      setPendingTranscript(transcript);
+      setEditedTranscript(transcript);
+      setIsReviewOpen(true);
+      setStatus(`Terdeteksi: "${transcript}"`);
     };
 
     recognition.onerror = (event: any) => {
@@ -383,6 +415,54 @@ export default function HomePage() {
           )}
         </div>
       </main>
+
+      {/* Review Transcript Dialog */}
+      <Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Review Hasil Rekaman</DialogTitle>
+            <DialogDescription>
+              Periksa dan edit hasil rekaman suara Anda sebelum menyimpan transaksi.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="transcript-edit" className="text-sm font-medium text-foreground">
+                Teks yang terdeteksi:
+              </label>
+              <Input
+                id="transcript-edit"
+                value={editedTranscript}
+                onChange={(e) => setEditedTranscript(e.target.value)}
+                placeholder="Contoh: Beli kopi 25000"
+                className="w-full"
+                autoFocus
+              />
+              <p className="text-xs text-muted-foreground">
+                Anda dapat mengedit teks di atas jika ada kesalahan deteksi.
+              </p>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={handleCancelTranscript}
+              className="gap-2"
+            >
+              <XCircle className="h-4 w-4" />
+              Batal
+            </Button>
+            <Button
+              onClick={handleConfirmTranscript}
+              disabled={!editedTranscript.trim()}
+              className="gap-2"
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              Proses
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
