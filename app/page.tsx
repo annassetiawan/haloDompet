@@ -325,7 +325,7 @@ export default function HomePage() {
                 </p>
               </div>
               <p className="text-xs text-muted-foreground/70">
-                Contoh: &quot;Beli kopi 25000&quot; atau &quot;Makan siang 50000&quot;
+                Contoh: &quot;Beli kopi 25000 di fore dengan gopay
               </p>
             </div>
           </div>
