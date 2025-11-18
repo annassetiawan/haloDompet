@@ -605,19 +605,27 @@ export default function ReportsPage() {
             {/* Tab 2: Charts - All Visualizations */}
             <TabsContent value="charts" className="space-y-3 md:space-y-4">
             {/* Bar Chart - Top Categories */}
-            <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4 md:mb-6">
-                <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
-                  <BarChart3 className="h-5 w-5 text-primary" />
+            <div className="bg-card border border-border rounded-xl shadow-sm">
+              {/* Header */}
+              <div className="p-4 md:p-6 border-b border-border">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
+                    <BarChart3 className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-base md:text-lg font-semibold text-foreground">
+                      Top 5 Kategori Pengeluaran
+                    </h3>
+                    <p className="text-xs md:text-sm text-muted-foreground">
+                      Kategori dengan pengeluaran tertinggi bulan ini
+                    </p>
+                  </div>
                 </div>
-                <h2 className="text-base md:text-lg font-normal text-foreground">
-                  Top 5 Kategori Pengeluaran
-                </h2>
               </div>
 
-              {/* Flexbox container for centering */}
-              <div className="flex justify-center items-center w-full">
-                <ChartContainer config={barChartConfig} className="h-[250px] md:h-[300px] w-full max-w-3xl">
+              {/* Content - Chart */}
+              <div className="p-4 md:p-6">
+                <ChartContainer config={barChartConfig} className="w-full h-[300px] aspect-auto">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -663,22 +671,36 @@ export default function ReportsPage() {
                   </ResponsiveContainer>
                 </ChartContainer>
               </div>
+
+              {/* Footer */}
+              <div className="p-4 border-t border-border flex items-center gap-2 text-xs text-muted-foreground">
+                <TrendingUp className="h-4 w-4" />
+                <span>Showing top 5 spending categories this month</span>
+              </div>
             </div>
 
             {/* Pie Chart - Category Distribution */}
-            <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4 md:mb-6">
-                <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
-                  <Tag className="h-5 w-5 text-primary" />
+            <div className="bg-card border border-border rounded-xl shadow-sm">
+              {/* Header */}
+              <div className="p-4 md:p-6 border-b border-border">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
+                    <Tag className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-base md:text-lg font-semibold text-foreground">
+                      Distribusi Kategori
+                    </h3>
+                    <p className="text-xs md:text-sm text-muted-foreground">
+                      Perbandingan pengeluaran antar kategori
+                    </p>
+                  </div>
                 </div>
-                <h2 className="text-base md:text-lg font-normal text-foreground">
-                  Distribusi Kategori
-                </h2>
               </div>
 
-              {/* Flexbox container for centering */}
-              <div className="flex justify-center items-center w-full">
-                <ChartContainer config={pieChartConfig} className="h-[250px] md:h-[300px] w-full max-w-3xl">
+              {/* Content - Chart */}
+              <div className="p-4 md:p-6">
+                <ChartContainer config={pieChartConfig} className="w-full h-[300px] aspect-auto">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <ChartTooltip
@@ -717,22 +739,36 @@ export default function ReportsPage() {
                   </ResponsiveContainer>
                 </ChartContainer>
               </div>
+
+              {/* Footer */}
+              <div className="p-4 border-t border-border flex items-center gap-2 text-xs text-muted-foreground">
+                <BarChart3 className="h-4 w-4" />
+                <span>Total spending breakdown by category</span>
+              </div>
             </div>
 
             {/* Line Chart - Daily Spending Trend */}
-            <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4 md:mb-6">
-                <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
-                  <TrendingUp className="h-5 w-5 text-primary" />
+            <div className="bg-card border border-border rounded-xl shadow-sm">
+              {/* Header */}
+              <div className="p-4 md:p-6 border-b border-border">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
+                    <TrendingUp className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-base md:text-lg font-semibold text-foreground">
+                      Tren Pengeluaran Harian
+                    </h3>
+                    <p className="text-xs md:text-sm text-muted-foreground">
+                      Grafik pengeluaran per hari bulan ini
+                    </p>
+                  </div>
                 </div>
-                <h2 className="text-base md:text-lg font-normal text-foreground">
-                  Tren Pengeluaran Harian
-                </h2>
               </div>
 
-              {/* Flexbox container for centering */}
-              <div className="flex justify-center items-center w-full">
-                <ChartContainer config={lineChartConfig} className="h-[250px] md:h-[300px] w-full max-w-3xl">
+              {/* Content - Chart */}
+              <div className="p-4 md:p-6">
+                <ChartContainer config={lineChartConfig} className="w-full h-[300px] aspect-auto">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={lineChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -780,6 +816,12 @@ export default function ReportsPage() {
                     </LineChart>
                   </ResponsiveContainer>
                 </ChartContainer>
+              </div>
+
+              {/* Footer */}
+              <div className="p-4 border-t border-border flex items-center gap-2 text-xs text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                <span>Daily spending pattern for current month</span>
               </div>
             </div>
             </TabsContent>
