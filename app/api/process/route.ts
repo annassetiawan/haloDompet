@@ -45,7 +45,9 @@ Tugas kamu:
      "item": "nama barang/jasa",
      "amount": angka (tanpa titik atau koma),
      "category": "kategori pengeluaran",
-     "date": "${today}"
+     "date": "${today}",
+     "location": "lokasi transaksi (jika disebutkan, jika tidak isi null)",
+     "payment_method": "metode pembayaran (jika disebutkan, jika tidak isi null)"
    }
 
 KATEGORI YANG TERSEDIA DAN CONTOHNYA:
@@ -85,40 +87,42 @@ Aturan Pemilihan Kategori:
 
 Aturan Ekstraksi dari Input Natural:
 - User bisa memberikan input detail seperti lokasi, metode pembayaran, dll
-- EKSTRAK HANYA: item utama dan amount
-- ABAIKAN: lokasi toko, metode pembayaran (gopay, ovo, cash, dll), detail lainnya
-- Fokus pada BARANG/JASA yang dibeli dan JUMLAH uangnya
+- EKSTRAK: item utama, amount, location (jika ada), payment_method (jika ada)
+- Location: nama toko/tempat (fore, pertamina, guardian, uniqlo, warteg, mall, gramedia, dll)
+- Payment method: cara bayar (gopay, ovo, cash, kartu kredit, transfer BCA, shopee paylater, dll)
+- Jika location atau payment_method tidak disebutkan, set null
+- Fokus pada BARANG/JASA yang dibeli, JUMLAH, LOKASI, dan METODE BAYAR
 
 Contoh-contoh Input Natural:
 Input: "Beli kopi 25000 di fore bayar dengan gopay"
-Output: {"item": "Kopi", "amount": 25000, "category": "Makanan", "date": "${today}"}
+Output: {"item": "Kopi", "amount": 25000, "category": "Makanan", "location": "Fore", "payment_method": "Gopay", "date": "${today}"}
 
 Input: "Isi bensin 50000 di pertamina pakai ovo"
-Output: {"item": "Bensin", "amount": 50000, "category": "Transportasi", "date": "${today}"}
+Output: {"item": "Bensin", "amount": 50000, "category": "Transportasi", "location": "Pertamina", "payment_method": "OVO", "date": "${today}"}
 
 Input: "Langganan Netflix premium 186000 bayar pakai kartu kredit"
-Output: {"item": "Netflix Premium", "amount": 186000, "category": "Hiburan", "date": "${today}"}
+Output: {"item": "Netflix Premium", "amount": 186000, "category": "Hiburan", "location": null, "payment_method": "Kartu Kredit", "date": "${today}"}
 
 Input: "Beli vitamin C 35000 di guardian bayar cash"
-Output: {"item": "Vitamin C", "amount": 35000, "category": "Kesehatan", "date": "${today}"}
+Output: {"item": "Vitamin C", "amount": 35000, "category": "Kesehatan", "location": "Guardian", "payment_method": "Cash", "date": "${today}"}
 
 Input: "Bayar wifi indihome bulan ini 300000 transfer BCA"
-Output: {"item": "Wifi Indihome", "amount": 300000, "category": "Tagihan", "date": "${today}"}
+Output: {"item": "Wifi Indihome", "amount": 300000, "category": "Tagihan", "location": null, "payment_method": "Transfer BCA", "date": "${today}"}
 
 Input: "Parkir di mall 5000"
-Output: {"item": "Parkir", "amount": 5000, "category": "Transportasi", "date": "${today}"}
+Output: {"item": "Parkir", "amount": 5000, "category": "Transportasi", "location": "Mall", "payment_method": null, "date": "${today}"}
 
 Input: "Makan siang di warteg 15000 bayar cash"
-Output: {"item": "Makan Siang", "amount": 15000, "category": "Makanan", "date": "${today}"}
+Output: {"item": "Makan Siang", "amount": 15000, "category": "Makanan", "location": "Warteg", "payment_method": "Cash", "date": "${today}"}
 
 Input: "Beli baju di uniqlo 250000 pakai shopee paylater"
-Output: {"item": "Baju", "amount": 250000, "category": "Belanja", "date": "${today}"}
+Output: {"item": "Baju", "amount": 250000, "category": "Belanja", "location": "Uniqlo", "payment_method": "Shopee Paylater", "date": "${today}"}
 
 Input: "Gojek ke kantor 25000"
-Output: {"item": "Gojek", "amount": 25000, "category": "Transportasi", "date": "${today}"}
+Output: {"item": "Gojek", "amount": 25000, "category": "Transportasi", "location": null, "payment_method": null, "date": "${today}"}
 
 Input: "Beli buku atomic habits 95000 di gramedia"
-Output: {"item": "Buku Atomic Habits", "amount": 95000, "category": "Pendidikan", "date": "${today}"}
+Output: {"item": "Buku Atomic Habits", "amount": 95000, "category": "Pendidikan", "location": "Gramedia", "payment_method": null, "date": "${today}"}
 
 Sekarang proses teks ini:
 "${text}"

@@ -183,6 +183,8 @@ export default function HomePage() {
           category: processData.data.category,
           date: processData.data.date,
           voice_text: transcript,
+          location: processData.data.location || null,
+          payment_method: processData.data.payment_method || null,
         }),
       });
 

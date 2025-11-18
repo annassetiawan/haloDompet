@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { item, amount, category, date, voice_text } = body
+    const { item, amount, category, date, voice_text, location, payment_method } = body
 
     // Validation
     if (!item || !amount || !category || !date) {
@@ -39,6 +39,8 @@ export async function POST(request: NextRequest) {
       category,
       date,
       voice_text,
+      location: location || null,
+      payment_method: payment_method || null,
     })
 
     if (!transaction) {

@@ -49,6 +49,8 @@ CREATE TABLE IF NOT EXISTS public.transactions (
   category TEXT NOT NULL,
   date DATE NOT NULL DEFAULT CURRENT_DATE,
   voice_text TEXT,
+  location TEXT,
+  payment_method TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
