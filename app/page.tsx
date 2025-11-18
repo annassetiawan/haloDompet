@@ -107,10 +107,20 @@ export default function HomePage() {
   };
 
   // Handle transcript from recorder
-  const handleTranscript = (transcript: string) => {
+  const handleTranscript = async (transcript: string) => {
+    // Show processing state briefly
+    setIsProcessing(true);
+    setStatus("Memproses hasil rekaman...");
+
+    // Small delay to show processing state
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    setIsProcessing(false);
+
     // Open review dialog with transcript
     setEditedTranscript(transcript);
     setIsReviewOpen(true);
+    setStatus("Siap merekam");
   };
 
   // Handle status change from recorder
@@ -186,13 +196,23 @@ export default function HomePage() {
       loadUserProfile();
       loadRecentTransactions();
 
+      // Show success state with confetti
+      setStatus("Berhasil! Transaksi tersimpan");
+
       // Show success toast
       toast.success(`${processData.data.item} - Rp ${processData.data.amount.toLocaleString('id-ID')} tercatat!`);
+
+      // Wait a bit to show success state, then reset
+      await new Promise(resolve => setTimeout(resolve, 2000));
       setStatus("Siap merekam");
     } catch (error) {
       console.error('Error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Gagal memproses';
       toast.error(errorMessage);
+      setStatus("Gagal memproses");
+
+      // Reset after showing error
+      await new Promise(resolve => setTimeout(resolve, 2000));
       setStatus("Siap merekam");
     } finally {
       setIsProcessing(false);
