@@ -61,3 +61,16 @@ export function isSafariBrowser(): boolean {
 
   return isSafari
 }
+
+/**
+ * Detect if device is Android
+ * Safe for SSR - returns false on server
+ */
+export function isAndroidDevice(): boolean {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  const userAgent = window.navigator.userAgent.toLowerCase()
+  return /android/.test(userAgent)
+}

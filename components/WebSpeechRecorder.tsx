@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { Mic, MicOff, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { isIOSDevice } from '@/lib/utils'
 
 interface WebSpeechRecorderProps {
   onTranscript: (text: string) => void
@@ -18,8 +19,14 @@ export function WebSpeechRecorder({
   const [isListening, setIsListening] = useState(false)
   const recognitionRef = useRef<any>(null)
   const finalTranscriptRef = useRef<string>('')
+  const shouldBeListeningRef = useRef<boolean>(false)
+  const restartCountRef = useRef<number>(0)
+  const isIOSRef = useRef<boolean>(false)
 
   const stopListening = () => {
+    shouldBeListeningRef.current = false
+    restartCountRef.current = 0
+    isIOSRef.current = false
     if (recognitionRef.current) {
       recognitionRef.current.stop()
       setIsListening(false)
@@ -38,20 +45,36 @@ export function WebSpeechRecorder({
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     const recognition = new SpeechRecognition()
 
+    const isIOS = isIOSDevice()
+    isIOSRef.current = isIOS
+
     recognition.lang = 'id-ID'
-    recognition.continuous = true  // Allow continuous recording until manually stopped
+    // iOS needs continuous=true to capture full transcript
+    // Android/Desktop needs continuous=false to prevent duplicates
+    recognition.continuous = isIOS ? true : false
     recognition.interimResults = true  // Get interim results for better UX
     recognition.maxAlternatives = 1
 
     recognitionRef.current = recognition
+    shouldBeListeningRef.current = true
+    restartCountRef.current = 0
 
     recognition.onstart = () => {
       setIsListening(true)
-      finalTranscriptRef.current = ''
+      if (restartCountRef.current === 0) {
+        finalTranscriptRef.current = ''
+      }
       onStatusChange?.("Merekam... (Klik lagi untuk berhenti)")
     }
 
     recognition.onresult = (event: any) => {
+      // For Android/Desktop: stop auto-restart once we get result (prevents duplicates)
+      // For iOS: keep auto-restart running (continuous mode needs it)
+      if (!isIOSRef.current) {
+        shouldBeListeningRef.current = false
+        restartCountRef.current = 0
+      }
+
       let interimTranscript = ''
       let finalTranscript = ''
 
@@ -77,15 +100,45 @@ export function WebSpeechRecorder({
     }
 
     recognition.onerror = (event: any) => {
+      // Auto-restart on no-speech error (WebSpeech timeout is too short)
+      if (event.error === 'no-speech' && shouldBeListeningRef.current) {
+        restartCountRef.current++
+
+        // Prevent infinite restart loop (max 20 times = ~1 minute)
+        if (restartCountRef.current > 20) {
+          shouldBeListeningRef.current = false
+          setIsListening(false)
+          toast.error("Tidak mendengar suara. Silakan coba lagi!")
+          onStatusChange?.("Siap merekam")
+          return
+        }
+
+        // Restart recognition immediately
+        setTimeout(() => {
+          if (shouldBeListeningRef.current && recognitionRef.current) {
+            try {
+              recognitionRef.current.start()
+            } catch (err) {
+              console.error('Error restarting:', err)
+            }
+          }
+        }, 100)
+        return
+      }
+
+      // Other errors - stop listening
+      shouldBeListeningRef.current = false
       setIsListening(false)
 
       let errorMsg = 'Terjadi kesalahan'
-      if (event.error === 'no-speech') {
-        errorMsg = "Tidak mendengar suara. Coba lagi!"
-      } else if (event.error === 'not-allowed') {
+      if (event.error === 'not-allowed') {
         errorMsg = "Izinkan akses mikrofon di browser!"
       } else if (event.error === 'network') {
         errorMsg = "Koneksi internet bermasalah"
+      } else if (event.error === 'aborted') {
+        return // Don't show error for aborted
+      } else if (event.error === 'audio-capture') {
+        errorMsg = "Gagal mengakses mikrofon"
       } else {
         errorMsg = `Error: ${event.error}`
       }
@@ -96,10 +149,16 @@ export function WebSpeechRecorder({
     }
 
     recognition.onend = () => {
+      // If we should still be listening (auto-restart case), don't process yet
+      if (shouldBeListeningRef.current) {
+        return
+      }
+
       setIsListening(false)
 
       // Send final transcript to parent if we have any
       const finalText = finalTranscriptRef.current.trim()
+
       if (finalText) {
         onStatusChange?.(`Terdeteksi: "${finalText}"`)
         onTranscript(finalText)
@@ -111,6 +170,7 @@ export function WebSpeechRecorder({
       // Clear ref
       finalTranscriptRef.current = ''
       recognitionRef.current = null
+      restartCountRef.current = 0
     }
 
     // Start listening

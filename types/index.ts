@@ -20,6 +20,8 @@ export interface Transaction {
   category: string
   date: string
   voice_text?: string
+  location?: string | null
+  payment_method?: string | null
   created_at: string
 }
 
@@ -32,6 +34,8 @@ export interface ExtractedTransaction {
   amount: number
   category: string
   date: string
+  location?: string | null
+  payment_method?: string | null
 }
 
 export type TransactionMode = 'simple' | 'webhook'

@@ -170,19 +170,7 @@ export function AnimatedRecordButton({
         {getLabel()}
       </motion.p>
 
-      {/* Voice Level Indicator */}
-      <AnimatePresence mode="wait">
-        {state === 'recording' && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.2 }}
-          >
-            <VoiceLevelBars level={audioLevel} barCount={5} color="#ef4444" />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Voice Level Indicator - DISABLED */}
 
       {/* Screen reader only live region */}
       <div className="sr-only" role="status" aria-live="assertive">
