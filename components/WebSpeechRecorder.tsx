@@ -18,8 +18,13 @@ export function WebSpeechRecorder({
   const [isListening, setIsListening] = useState(false)
   const recognitionRef = useRef<any>(null)
   const finalTranscriptRef = useRef<string>('')
+  const shouldBeListeningRef = useRef<boolean>(false)
+  const restartCountRef = useRef<number>(0)
 
   const stopListening = () => {
+    console.log('⏸️ Stopping listening...')
+    shouldBeListeningRef.current = false
+    restartCountRef.current = 0
     if (recognitionRef.current) {
       recognitionRef.current.stop()
       setIsListening(false)
@@ -57,11 +62,15 @@ export function WebSpeechRecorder({
     })
 
     recognitionRef.current = recognition
+    shouldBeListeningRef.current = true
+    restartCountRef.current = 0
 
     recognition.onstart = () => {
       console.log('🎙️ Recognition started')
       setIsListening(true)
-      finalTranscriptRef.current = ''
+      if (restartCountRef.current === 0) {
+        finalTranscriptRef.current = ''
+      }
       onStatusChange?.("Merekam... (Klik lagi untuk berhenti)")
     }
 
@@ -96,18 +105,51 @@ export function WebSpeechRecorder({
 
     recognition.onerror = (event: any) => {
       console.error('❌ Recognition error:', event.error, event)
+
+      // Auto-restart on no-speech error (WebSpeech timeout is too short)
+      if (event.error === 'no-speech' && shouldBeListeningRef.current) {
+        console.log('⚠️ No speech detected, auto-restarting...')
+        restartCountRef.current++
+
+        // Prevent infinite restart loop (max 10 times)
+        if (restartCountRef.current > 10) {
+          console.error('❌ Too many restarts, stopping...')
+          shouldBeListeningRef.current = false
+          setIsListening(false)
+          toast.error("Tidak mendengar suara setelah beberapa kali mencoba. Silakan coba lagi!")
+          onStatusChange?.("Siap merekam")
+          return
+        }
+
+        // Restart recognition
+        setTimeout(() => {
+          if (shouldBeListeningRef.current && recognitionRef.current) {
+            try {
+              console.log('🔄 Restarting recognition...')
+              recognitionRef.current.start()
+            } catch (err) {
+              console.error('Error restarting:', err)
+            }
+          }
+        }, 100)
+        return
+      }
+
+      // Other errors - stop listening
+      shouldBeListeningRef.current = false
       setIsListening(false)
 
       let errorMsg = 'Terjadi kesalahan'
-      if (event.error === 'no-speech') {
-        errorMsg = "Tidak mendengar suara. Coba lagi!"
-      } else if (event.error === 'not-allowed') {
+      if (event.error === 'not-allowed') {
         errorMsg = "Izinkan akses mikrofon di browser!"
       } else if (event.error === 'network') {
         errorMsg = "Koneksi internet bermasalah"
       } else if (event.error === 'aborted') {
         errorMsg = "Rekaman dibatalkan"
         console.log('⚠️ Recognition aborted')
+        return // Don't show error for aborted
+      } else if (event.error === 'audio-capture') {
+        errorMsg = "Gagal mengakses mikrofon"
       } else {
         errorMsg = `Error: ${event.error}`
       }
@@ -120,6 +162,13 @@ export function WebSpeechRecorder({
 
     recognition.onend = () => {
       console.log('⏹️ Recognition ended')
+
+      // If we should still be listening (auto-restart case), don't process yet
+      if (shouldBeListeningRef.current) {
+        console.log('⚠️ Recognition ended but should still be listening, will auto-restart')
+        return
+      }
+
       setIsListening(false)
 
       // Send final transcript to parent if we have any
@@ -139,6 +188,7 @@ export function WebSpeechRecorder({
       // Clear ref
       finalTranscriptRef.current = ''
       recognitionRef.current = null
+      restartCountRef.current = 0
     }
 
     // Start listening
