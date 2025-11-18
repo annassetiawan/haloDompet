@@ -1,7 +1,7 @@
 import { Transaction } from '@/types'
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
-import { Calendar, Tag, MessageSquare, Trash2 } from 'lucide-react'
+import { Calendar, Tag, MessageSquare, Trash2, MapPin, Wallet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface TransactionCardProps {
@@ -23,12 +23,14 @@ export function TransactionCard({ transaction, onClick, onDelete, showDelete = f
   const categoryEmoji: Record<string, string> = {
     makanan: '🍔',
     minuman: '☕',
+    transportasi: '🚗',
     transport: '🚗',
     belanja: '🛒',
     hiburan: '🎬',
     kesehatan: '💊',
     pendidikan: '📚',
     tagihan: '💳',
+    olahraga: '⚽',
     lainnya: '📦',
   }
 
@@ -54,7 +56,7 @@ export function TransactionCard({ transaction, onClick, onDelete, showDelete = f
                 {transaction.item}
               </h3>
 
-              <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
                   <span>{formattedDate}</span>
@@ -64,6 +66,22 @@ export function TransactionCard({ transaction, onClick, onDelete, showDelete = f
                   <Tag className="h-3 w-3" />
                   <span className="capitalize">{transaction.category}</span>
                 </div>
+
+                {/* Location (if available) */}
+                {transaction.location && (
+                  <div className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    <span>{transaction.location}</span>
+                  </div>
+                )}
+
+                {/* Payment Method (if available) */}
+                {transaction.payment_method && (
+                  <div className="flex items-center gap-1">
+                    <Wallet className="h-3 w-3" />
+                    <span>{transaction.payment_method}</span>
+                  </div>
+                )}
               </div>
 
               {/* Voice Text (if available) */}
