@@ -9,7 +9,7 @@ import type { User } from '@supabase/supabase-js'
 import type { Transaction } from '@/types'
 import { format, startOfMonth, endOfMonth } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@/components/ui/chart'
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@/components/ui/chart'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell, Legend, Line, LineChart } from 'recharts'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
@@ -150,31 +150,31 @@ export default function ReportsPage() {
     lainnya: '📦',
   }
 
-  // Category color mapping
+  // Category color mapping (Shadcn pattern)
   const categoryColors: Record<string, string> = {
-    makanan: 'hsl(var(--chart-1))',
-    minuman: 'hsl(var(--chart-2))',
-    transport: 'hsl(var(--chart-3))',
-    belanja: 'hsl(var(--chart-4))',
-    hiburan: 'hsl(var(--chart-5))',
-    kesehatan: 'hsl(220 70% 50%)',
-    pendidikan: 'hsl(280 65% 60%)',
-    tagihan: 'hsl(340 75% 55%)',
-    lainnya: 'hsl(0 0% 50%)',
+    makanan: 'var(--chart-1)',
+    minuman: 'var(--chart-2)',
+    transport: 'var(--chart-3)',
+    belanja: 'var(--chart-4)',
+    hiburan: 'var(--chart-5)',
+    kesehatan: 'var(--chart-1)',
+    pendidikan: 'var(--chart-2)',
+    tagihan: 'var(--chart-3)',
+    lainnya: 'var(--chart-4)',
   }
 
-  // Prepare data for bar chart (top 5 categories)
+  // Prepare data for bar chart (top 5 categories) - no fill in data
   const barChartData = sortedCategories.slice(0, 5).map((item) => ({
     category: item.category.charAt(0).toUpperCase() + item.category.slice(1),
     amount: item.total,
-    fill: categoryColors[item.category.toLowerCase()] || 'hsl(var(--chart-1))',
+    fill: categoryColors[item.category.toLowerCase()] || 'var(--chart-1)', // Keep for Cell reference
   }))
 
   // Prepare data for pie chart (all categories)
   const pieChartData = sortedCategories.map((item, index) => ({
     name: item.category.charAt(0).toUpperCase() + item.category.slice(1),
     value: item.total,
-    fill: categoryColors[item.category.toLowerCase()] || `hsl(var(--chart-${(index % 5) + 1}))`,
+    fill: categoryColors[item.category.toLowerCase()] || `var(--chart-${(index % 5) + 1})`,
     percentage: item.percentage,
   }))
 
@@ -281,7 +281,7 @@ export default function ReportsPage() {
       color: item.fill,
     };
     return acc;
-  }, {} as Record<string, { label: string; color: string }>);
+  }, {} as ChartConfig);
 
   // Pie Chart Config - All Categories
   const pieChartConfig = pieChartData.reduce((acc, item, index) => {
@@ -291,15 +291,15 @@ export default function ReportsPage() {
       color: item.fill,
     };
     return acc;
-  }, {} as Record<string, { label: string; color: string }>);
+  }, {} as ChartConfig);
 
   // Line Chart Config - Daily Spending
   const lineChartConfig = {
     amount: {
       label: 'Pengeluaran',
-      color: 'hsl(var(--chart-1))',
+      color: 'var(--chart-1)',
     },
-  } satisfies Record<string, { label: string; color: string }>;
+  } satisfies ChartConfig;
 
   // Export to CSV
   const exportToCSV = () => {
