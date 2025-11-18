@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { Mic, MicOff, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { isIOSDevice } from '@/lib/utils'
 
 interface WebSpeechRecorderProps {
   onTranscript: (text: string) => void
@@ -20,10 +21,12 @@ export function WebSpeechRecorder({
   const finalTranscriptRef = useRef<string>('')
   const shouldBeListeningRef = useRef<boolean>(false)
   const restartCountRef = useRef<number>(0)
+  const isIOSRef = useRef<boolean>(false)
 
   const stopListening = () => {
     shouldBeListeningRef.current = false
     restartCountRef.current = 0
+    isIOSRef.current = false
     if (recognitionRef.current) {
       recognitionRef.current.stop()
       setIsListening(false)
@@ -42,8 +45,13 @@ export function WebSpeechRecorder({
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     const recognition = new SpeechRecognition()
 
+    const isIOS = isIOSDevice()
+    isIOSRef.current = isIOS
+
     recognition.lang = 'id-ID'
-    recognition.continuous = false  // Don't use continuous mode to avoid duplicates
+    // iOS needs continuous=true to capture full transcript
+    // Android/Desktop needs continuous=false to prevent duplicates
+    recognition.continuous = isIOS ? true : false
     recognition.interimResults = true  // Get interim results for better UX
     recognition.maxAlternatives = 1
 
@@ -60,9 +68,12 @@ export function WebSpeechRecorder({
     }
 
     recognition.onresult = (event: any) => {
-      // Stop auto-restart once we get any result (speech detected)
-      shouldBeListeningRef.current = false
-      restartCountRef.current = 0
+      // For Android/Desktop: stop auto-restart once we get result (prevents duplicates)
+      // For iOS: keep auto-restart running (continuous mode needs it)
+      if (!isIOSRef.current) {
+        shouldBeListeningRef.current = false
+        restartCountRef.current = 0
+      }
 
       let interimTranscript = ''
       let finalTranscript = ''
