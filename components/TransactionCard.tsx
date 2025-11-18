@@ -46,7 +46,7 @@ export function TransactionCard({ transaction, onClick, onDelete, showDelete = f
           {/* Left side - Icon & Details */}
           <div className="flex items-start gap-3 flex-1 min-w-0">
             {/* Category Icon */}
-            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-accent/10 dark:bg-accent/20 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
               {emoji}
             </div>
 
