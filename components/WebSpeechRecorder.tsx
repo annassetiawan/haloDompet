@@ -16,7 +16,6 @@ export function WebSpeechRecorder({
   onStatusChange
 }: WebSpeechRecorderProps) {
   const [isListening, setIsListening] = useState(false)
-  const [isProcessing, setIsProcessing] = useState(false)
 
   const handleListen = async () => {
     // Check browser support
@@ -43,18 +42,14 @@ export function WebSpeechRecorder({
     recognition.onresult = async (event: any) => {
       const transcript = event.results[0][0].transcript
       setIsListening(false)
-      setIsProcessing(true)
-      onStatusChange?.("Memproses transkrip...")
+      onStatusChange?.(`Terdeteksi: "${transcript}"`)
 
-      // Pass transcript to parent
+      // Pass transcript to parent (parent will handle processing state)
       onTranscript(transcript)
-
-      setIsProcessing(false)
     }
 
     recognition.onerror = (event: any) => {
       setIsListening(false)
-      setIsProcessing(false)
 
       let errorMsg = 'Terjadi kesalahan'
       if (event.error === 'no-speech') {
@@ -74,9 +69,7 @@ export function WebSpeechRecorder({
 
     recognition.onend = () => {
       setIsListening(false)
-      if (!isProcessing) {
-        onStatusChange?.("Siap merekam")
-      }
+      // Don't reset status here - let parent handle it
     }
 
     // Start listening
@@ -87,7 +80,6 @@ export function WebSpeechRecorder({
       toast.error(errorMsg)
       onError?.(errorMsg)
       setIsListening(false)
-      setIsProcessing(false)
     }
   }
 
@@ -101,11 +93,11 @@ export function WebSpeechRecorder({
         className="neomorphic-input"
       />
       <label
-        className={`neomorphic-button ${isListening ? 'active' : ''} ${isProcessing ? 'processing' : ''}`}
+        className={`neomorphic-button ${isListening ? 'active' : ''}`}
         htmlFor="record-checkbox"
         onClick={(e) => {
           e.preventDefault()
-          if (!isListening && !isProcessing) {
+          if (!isListening) {
             handleListen()
           }
         }}
@@ -113,8 +105,6 @@ export function WebSpeechRecorder({
         <span className="neomorphic-icon">
           {isListening ? (
             <Mic className="h-12 w-12 md:h-16 md:w-16" />
-          ) : isProcessing ? (
-            <Loader2 className="h-12 w-12 md:h-16 md:w-16 animate-spin" />
           ) : (
             <MicOff className="h-12 w-12 md:h-16 md:w-16" />
           )}

@@ -20,46 +20,61 @@ export function useAudioLevel(stream: MediaStream | null, isActive: boolean) {
         animationFrameRef.current = null
       }
       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close()
+        try {
+          audioContextRef.current.close()
+        } catch (e) {
+          console.warn('Failed to close AudioContext:', e)
+        }
         audioContextRef.current = null
       }
       setAudioLevel(0)
       return
     }
 
-    // Create audio context
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-    const analyser = audioContext.createAnalyser()
-    const microphone = audioContext.createMediaStreamSource(stream)
+    try {
+      // Create audio context
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const analyser = audioContext.createAnalyser()
+      const microphone = audioContext.createMediaStreamSource(stream)
 
-    analyser.fftSize = 256
-    analyser.smoothingTimeConstant = 0.8
-    microphone.connect(analyser)
+      analyser.fftSize = 256
+      analyser.smoothingTimeConstant = 0.8
 
-    audioContextRef.current = audioContext
-    analyserRef.current = analyser
+      // Connect microphone to analyser (read-only, doesn't modify stream)
+      microphone.connect(analyser)
 
-    const dataArray = new Uint8Array(analyser.frequencyBinCount)
+      // IMPORTANT: Don't connect analyser to destination (speakers)
+      // This is read-only mode to prevent feedback
 
-    // Analyze audio level continuously
-    const checkAudioLevel = () => {
-      if (!analyserRef.current) return
+      audioContextRef.current = audioContext
+      analyserRef.current = analyser
 
-      analyserRef.current.getByteFrequencyData(dataArray)
+      const dataArray = new Uint8Array(analyser.frequencyBinCount)
 
-      // Calculate average volume
-      const sum = dataArray.reduce((a, b) => a + b, 0)
-      const average = sum / dataArray.length
+      // Analyze audio level continuously
+      const checkAudioLevel = () => {
+        if (!analyserRef.current) return
 
-      // Normalize to 0-1 range
-      const normalized = Math.min(average / 128, 1)
+        analyserRef.current.getByteFrequencyData(dataArray)
 
-      setAudioLevel(normalized)
+        // Calculate average volume
+        const sum = dataArray.reduce((a, b) => a + b, 0)
+        const average = sum / dataArray.length
 
-      animationFrameRef.current = requestAnimationFrame(checkAudioLevel)
+        // Normalize to 0-1 range
+        const normalized = Math.min(average / 128, 1)
+
+        setAudioLevel(normalized)
+
+        animationFrameRef.current = requestAnimationFrame(checkAudioLevel)
+      }
+
+      checkAudioLevel()
+    } catch (error) {
+      console.error('Error setting up audio level detection:', error)
+      // Silently fail - audio level is nice-to-have, not critical
+      setAudioLevel(0)
     }
-
-    checkAudioLevel()
 
     // Cleanup
     return () => {
@@ -68,7 +83,11 @@ export function useAudioLevel(stream: MediaStream | null, isActive: boolean) {
         animationFrameRef.current = null
       }
       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close()
+        try {
+          audioContextRef.current.close()
+        } catch (e) {
+          console.warn('Failed to close AudioContext in cleanup:', e)
+        }
         audioContextRef.current = null
       }
       analyserRef.current = null
