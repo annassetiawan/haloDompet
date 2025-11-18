@@ -615,8 +615,10 @@ export default function ReportsPage() {
                 </h2>
               </div>
 
-              <ChartContainer config={barChartConfig} className="h-[250px] md:h-[300px] w-full">
-                <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+              {/* Flexbox container for centering */}
+              <div className="flex justify-center items-center w-full">
+                <ChartContainer config={barChartConfig} className="h-[250px] md:h-[300px] w-full max-w-3xl">
+                  <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis
                     dataKey="category"
@@ -658,6 +660,7 @@ export default function ReportsPage() {
                   </Bar>
                 </BarChart>
               </ChartContainer>
+              </div>
             </div>
 
             {/* Pie Chart - Category Distribution */}
@@ -671,8 +674,10 @@ export default function ReportsPage() {
                 </h2>
               </div>
 
-              <ChartContainer config={pieChartConfig} className="h-[250px] md:h-[300px] w-full">
-                <PieChart>
+              {/* Flexbox container for centering */}
+              <div className="flex justify-center items-center w-full">
+                <ChartContainer config={pieChartConfig} className="h-[250px] md:h-[300px] w-full max-w-3xl">
+                  <PieChart>
                   <ChartTooltip
                     content={
                       <ChartTooltipContent
@@ -707,6 +712,7 @@ export default function ReportsPage() {
                   </Pie>
                 </PieChart>
               </ChartContainer>
+              </div>
             </div>
 
             {/* Line Chart - Daily Spending Trend */}
@@ -720,8 +726,10 @@ export default function ReportsPage() {
                 </h2>
               </div>
 
-              <ChartContainer config={lineChartConfig} className="h-[250px] md:h-[300px] w-full">
-                <LineChart data={lineChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              {/* Flexbox container for centering */}
+              <div className="flex justify-center items-center w-full">
+                <ChartContainer config={lineChartConfig} className="h-[250px] md:h-[300px] w-full max-w-3xl">
+                  <LineChart data={lineChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis
                     dataKey="date"
@@ -766,6 +774,7 @@ export default function ReportsPage() {
                   />
                 </LineChart>
               </ChartContainer>
+              </div>
             </div>
             </TabsContent>
 
