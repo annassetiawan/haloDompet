@@ -83,21 +83,42 @@ Aturan Pemilihan Kategori:
 - Amount harus angka murni (contoh: 25000, bukan "25.000")
 - Jika tidak ada informasi amount, set amount ke 0
 
-Contoh-contoh:
-Input: "Beli kopi 25000"
+Aturan Ekstraksi dari Input Natural:
+- User bisa memberikan input detail seperti lokasi, metode pembayaran, dll
+- EKSTRAK HANYA: item utama dan amount
+- ABAIKAN: lokasi toko, metode pembayaran (gopay, ovo, cash, dll), detail lainnya
+- Fokus pada BARANG/JASA yang dibeli dan JUMLAH uangnya
+
+Contoh-contoh Input Natural:
+Input: "Beli kopi 25000 di fore bayar dengan gopay"
 Output: {"item": "Kopi", "amount": 25000, "category": "Makanan", "date": "${today}"}
 
-Input: "Isi bensin 50000"
+Input: "Isi bensin 50000 di pertamina pakai ovo"
 Output: {"item": "Bensin", "amount": 50000, "category": "Transportasi", "date": "${today}"}
 
-Input: "Langganan Netflix"
-Output: {"item": "Netflix", "amount": 0, "category": "Hiburan", "date": "${today}"}
+Input: "Langganan Netflix premium 186000 bayar pakai kartu kredit"
+Output: {"item": "Netflix Premium", "amount": 186000, "category": "Hiburan", "date": "${today}"}
 
-Input: "Beli vitamin C 35000"
+Input: "Beli vitamin C 35000 di guardian bayar cash"
 Output: {"item": "Vitamin C", "amount": 35000, "category": "Kesehatan", "date": "${today}"}
 
-Input: "Bayar wifi 300000"
-Output: {"item": "Wifi", "amount": 300000, "category": "Tagihan", "date": "${today}"}
+Input: "Bayar wifi indihome bulan ini 300000 transfer BCA"
+Output: {"item": "Wifi Indihome", "amount": 300000, "category": "Tagihan", "date": "${today}"}
+
+Input: "Parkir di mall 5000"
+Output: {"item": "Parkir", "amount": 5000, "category": "Transportasi", "date": "${today}"}
+
+Input: "Makan siang di warteg 15000 bayar cash"
+Output: {"item": "Makan Siang", "amount": 15000, "category": "Makanan", "date": "${today}"}
+
+Input: "Beli baju di uniqlo 250000 pakai shopee paylater"
+Output: {"item": "Baju", "amount": 250000, "category": "Belanja", "date": "${today}"}
+
+Input: "Gojek ke kantor 25000"
+Output: {"item": "Gojek", "amount": 25000, "category": "Transportasi", "date": "${today}"}
+
+Input: "Beli buku atomic habits 95000 di gramedia"
+Output: {"item": "Buku Atomic Habits", "amount": 95000, "category": "Pendidikan", "date": "${today}"}
 
 Sekarang proses teks ini:
 "${text}"
