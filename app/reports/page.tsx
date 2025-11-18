@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { BottomNav } from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, TrendingDown, Calendar, Tag, Download, BarChart3, TrendingUp, ArrowUp, ArrowDown, Minus, Sparkles, AlertCircle } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
@@ -309,7 +310,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <main className="relative min-h-screen flex flex-col p-4 md:p-8 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
+    <main className="relative min-h-screen flex flex-col p-4 md:p-8 pb-20 md:pb-8 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
       <div className="relative z-10 w-full max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between animate-slide-down">
@@ -791,6 +792,9 @@ export default function ReportsPage() {
           </Tabs>
         )}
       </div>
+
+      {/* Bottom Navigation - Mobile Only */}
+      <BottomNav />
     </main>
   )
 }

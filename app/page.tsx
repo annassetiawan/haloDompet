@@ -10,6 +10,7 @@ import { TrialWarningBanner } from '@/components/trial-warning-banner';
 import { DarkModeToggle } from '@/components/DarkModeToggle';
 import { TransactionListSkeleton } from '@/components/TransactionSkeleton';
 import { RecordButton } from '@/components/RecordButton';
+import { BottomNav } from '@/components/BottomNav';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -223,8 +224,8 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top Navigation - Fixed */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+      {/* Top Navigation - Desktop Only */}
+      <nav className="hidden md:block fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left side - Menu items */}
@@ -267,8 +268,11 @@ export default function HomePage() {
         </div>
       </nav>
 
+      {/* Bottom Navigation - Mobile Only */}
+      <BottomNav />
+
       {/* Main Content */}
-      <main className="pt-16">
+      <main className="md:pt-16 pb-20 md:pb-0">
         <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
           {/* Header Section */}
           <div className="space-y-1">
@@ -325,7 +329,7 @@ export default function HomePage() {
                 </p>
               </div>
               <p className="text-xs text-muted-foreground/70">
-                Contoh: &quot;Beli kopi 25000 di fore dengan gopay
+                Contoh: &quot;Beli kopi 25000 di fore dengan gopay&quot;
               </p>
             </div>
           </div>

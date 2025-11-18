@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { BottomNav } from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ArrowLeft, Save, Loader2 } from 'lucide-react'
@@ -97,7 +98,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <main className="relative min-h-screen flex flex-col p-4 md:p-8 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
+    <main className="relative min-h-screen flex flex-col p-4 md:p-8 pb-20 md:pb-8 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
       <div className="relative z-10 w-full max-w-2xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3 animate-slide-down">
@@ -256,6 +257,9 @@ export default function SettingsPage() {
           </div>
         )}
       </div>
+
+      {/* Bottom Navigation - Mobile Only */}
+      <BottomNav />
     </main>
   )
 }
