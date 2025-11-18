@@ -29,19 +29,15 @@ export function RecordButton({
     setIsClient(true)
 
     // Determine best recorder for this device
-    // Priority: iOS first, then Android, then desktop
-    if (isIOSDevice()) {
-      // iOS (iPhone/iPad) - Use IOSMediaRecorder (RecordRTC + Gemini)
-      setRecorderType('ios')
-      console.log('🍎 iOS device detected, using IOSMediaRecorder')
-    } else if (isAndroidDevice()) {
-      // Android - Use Web Audio API (most reliable for Android)
-      setRecorderType('webaudio')
-      console.log('🤖 Android device detected, using Web Audio API')
-    } else if (isSpeechRecognitionSupported()) {
-      // Desktop Chrome, Edge - Web Speech API for instant results
+    // Use Web Speech API for all platforms that support it (iOS, Android, Desktop)
+    if (isSpeechRecognitionSupported()) {
+      // iOS, Android, Desktop Chrome/Edge - Web Speech API works best
       setRecorderType('webspeech')
-      console.log('💻 Desktop with Web Speech API detected')
+      console.log('✅ Web Speech API detected and enabled')
+    } else if (isIOSDevice()) {
+      // iOS fallback if Web Speech not available
+      setRecorderType('ios')
+      console.log('🍎 iOS fallback to IOSMediaRecorder')
     } else {
       // Firefox, Safari Desktop, others - MediaRecorder + Gemini
       setRecorderType('mediarecorder')
@@ -72,7 +68,10 @@ export function RecordButton({
   }
 
   const handleAudioLevelChange = (level: number) => {
-    setAudioLevel(level)
+    // Only update audio level for recorders that support it (not WebSpeech)
+    if (recorderType !== 'webspeech') {
+      setAudioLevel(level)
+    }
   }
 
   const handleAnimatedButtonClick = () => {
@@ -98,7 +97,7 @@ export function RecordButton({
       <AnimatedRecordButton
         state={recordingState}
         onClick={handleAnimatedButtonClick}
-        audioLevel={audioLevel}
+        audioLevel={recorderType === 'webspeech' ? 0 : audioLevel}
         size="large"
       />
 
