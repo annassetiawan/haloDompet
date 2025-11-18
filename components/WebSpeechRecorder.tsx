@@ -18,10 +18,16 @@ export function WebSpeechRecorder({
   const [isListening, setIsListening] = useState(false)
   const recognitionRef = useRef<any>(null)
   const finalTranscriptRef = useRef<string>('')
+  const hasSubmittedRef = useRef<boolean>(false)
+  const lastProcessedIndexRef = useRef<number>(-1)
 
   const stopListening = () => {
     if (recognitionRef.current) {
-      recognitionRef.current.stop()
+      try {
+        recognitionRef.current.stop()
+      } catch (error) {
+        // Ignore error if already stopped
+      }
       setIsListening(false)
     }
   }
@@ -48,23 +54,32 @@ export function WebSpeechRecorder({
     recognition.onstart = () => {
       setIsListening(true)
       finalTranscriptRef.current = ''
+      hasSubmittedRef.current = false
+      lastProcessedIndexRef.current = -1
       onStatusChange?.("Merekam... (Klik lagi untuk berhenti)")
     }
 
     recognition.onresult = (event: any) => {
+      // Android fix: Only process new results to prevent duplicates
+      if (event.resultIndex <= lastProcessedIndexRef.current) {
+        return // Skip already processed results
+      }
+
       let interimTranscript = ''
       let finalTranscript = ''
 
+      // Only process results from the new index onwards
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript
         if (event.results[i].isFinal) {
           finalTranscript += transcript + ' '
+          lastProcessedIndexRef.current = i // Track last processed index
         } else {
           interimTranscript += transcript
         }
       }
 
-      // Update final transcript
+      // Update final transcript only with new content
       if (finalTranscript) {
         finalTranscriptRef.current += finalTranscript
       }
@@ -98,9 +113,15 @@ export function WebSpeechRecorder({
     recognition.onend = () => {
       setIsListening(false)
 
+      // Android fix: Prevent multiple submissions when onend fires multiple times
+      if (hasSubmittedRef.current) {
+        return
+      }
+
       // Send final transcript to parent if we have any
       const finalText = finalTranscriptRef.current.trim()
       if (finalText) {
+        hasSubmittedRef.current = true
         onStatusChange?.(`Terdeteksi: "${finalText}"`)
         onTranscript(finalText)
       } else {
@@ -108,8 +129,9 @@ export function WebSpeechRecorder({
         toast.info("Tidak ada suara terdeteksi. Coba lagi!")
       }
 
-      // Clear ref
+      // Clear refs
       finalTranscriptRef.current = ''
+      lastProcessedIndexRef.current = -1
       recognitionRef.current = null
     }
 
