@@ -29,19 +29,19 @@ export function RecordButton({
     setIsClient(true)
 
     // Determine best recorder for this device
-    // iOS uses WebSpeech API if available, others use MediaRecorder
-    if (isIOSDevice() && isSpeechRecognitionSupported()) {
-      // iOS with Web Speech API - works best
+    // Use WebSpeech API for all platforms that support it
+    if (isSpeechRecognitionSupported()) {
+      // iOS, Android, Desktop Chrome/Edge - WebSpeech API
       setRecorderType('webspeech')
-      console.log('✅ iOS Web Speech API enabled')
+      console.log('✅ WebSpeech API enabled')
     } else if (isIOSDevice()) {
       // iOS fallback if Web Speech not available
       setRecorderType('ios')
       console.log('🍎 iOS fallback to IOSMediaRecorder')
     } else {
-      // Android, Desktop, all other platforms - MediaRecorder + Gemini
+      // Firefox, Safari Desktop, others - MediaRecorder + Gemini
       setRecorderType('mediarecorder')
-      console.log('🌐 Using MediaRecorder + Gemini STT')
+      console.log('🌐 Fallback to MediaRecorder + Gemini STT')
     }
   }, [])
 
