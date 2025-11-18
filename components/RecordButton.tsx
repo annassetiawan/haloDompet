@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { isSpeechRecognitionSupported, isIOSDevice } from '@/lib/utils'
 import { AnimatedRecordButton, RecordingState } from './AnimatedRecordButton'
+import { WebSpeechRecorder } from './WebSpeechRecorder'
 import { MediaRecorderButton } from './MediaRecorderButton'
 import { IOSMediaRecorder } from './iOSMediaRecorder'
 
@@ -95,6 +96,14 @@ export function RecordButton({
 
       {/* Hidden Recorder (Logic Only) */}
       <div className="hidden-recorder-button absolute opacity-0 pointer-events-none -z-10">
+        {recorderType === 'webspeech' && (
+          <WebSpeechRecorder
+            onTranscript={onTranscript}
+            onError={onError}
+            onStatusChange={handleInternalStatusChange}
+          />
+        )}
+
         {recorderType === 'ios' && (
           <IOSMediaRecorder
             onTranscript={onTranscript}
@@ -113,15 +122,6 @@ export function RecordButton({
           />
         )}
       </div>
-
-      {/* WebSpeech API doesn't support audio level detection */}
-      {recorderType === 'webspeech' && (
-        <div className="mt-2 text-center">
-          <p className="text-xs text-muted-foreground">
-            Deteksi level audio tidak tersedia untuk WebSpeech API
-          </p>
-        </div>
-      )}
     </div>
   )
 }

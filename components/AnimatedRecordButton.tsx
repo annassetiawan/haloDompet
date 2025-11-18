@@ -93,10 +93,10 @@ export function AnimatedRecordButton({
   const getStateColor = () => {
     switch (state) {
       case 'idle': return 'bg-primary/10 hover:bg-primary/20'
-      case 'recording': return 'bg-red-500/20 animate-pulse'
-      case 'processing': return 'bg-blue-500/20'
-      case 'success': return 'bg-green-500/20'
-      case 'error': return 'bg-red-500/20'
+      case 'recording': return 'bg-transparent'
+      case 'processing': return 'bg-blue-500/10'
+      case 'success': return 'bg-green-500/10'
+      case 'error': return 'bg-red-500/10'
     }
   }
 
