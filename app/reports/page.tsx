@@ -10,7 +10,7 @@ import type { Transaction } from '@/types'
 import { format, startOfMonth, endOfMonth } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@/components/ui/chart'
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell, Legend, Line, LineChart } from 'recharts'
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell, Legend, Line, LineChart, ResponsiveContainer } from 'recharts'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function ReportsPage() {
@@ -618,48 +618,50 @@ export default function ReportsPage() {
               {/* Flexbox container for centering */}
               <div className="flex justify-center items-center w-full">
                 <ChartContainer config={barChartConfig} className="h-[250px] md:h-[300px] w-full max-w-3xl">
-                  <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis
-                    dataKey="category"
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
-                    className="text-xs"
-                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                  />
-                  <YAxis
-                    className="text-xs"
-                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                    tickFormatter={(value) =>
-                      new Intl.NumberFormat('id-ID', {
-                        notation: 'compact',
-                        compactDisplay: 'short',
-                      }).format(value)
-                    }
-                  />
-                  <ChartTooltip
-                    content={
-                      <ChartTooltipContent
-                        labelFormatter={(value: any) => value}
-                        formatter={(value: any, name: any) => [
-                          new Intl.NumberFormat('id-ID', {
-                            style: 'currency',
-                            currency: 'IDR',
-                            minimumFractionDigits: 0,
-                          }).format(value as number),
-                          'Total'
-                        ]}
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis
+                        dataKey="category"
+                        angle={-45}
+                        textAnchor="end"
+                        height={80}
+                        className="text-xs"
+                        tick={{ fill: 'hsl(var(--muted-foreground))' }}
                       />
-                    }
-                  />
-                  <Bar dataKey="amount" radius={[8, 8, 0, 0]}>
-                    {barChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ChartContainer>
+                      <YAxis
+                        className="text-xs"
+                        tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                        tickFormatter={(value) =>
+                          new Intl.NumberFormat('id-ID', {
+                            notation: 'compact',
+                            compactDisplay: 'short',
+                          }).format(value)
+                        }
+                      />
+                      <ChartTooltip
+                        content={
+                          <ChartTooltipContent
+                            labelFormatter={(value: any) => value}
+                            formatter={(value: any, name: any) => [
+                              new Intl.NumberFormat('id-ID', {
+                                style: 'currency',
+                                currency: 'IDR',
+                                minimumFractionDigits: 0,
+                              }).format(value as number),
+                              'Total'
+                            ]}
+                          />
+                        }
+                      />
+                      <Bar dataKey="amount" radius={[8, 8, 0, 0]}>
+                        {barChartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
               </div>
             </div>
 
@@ -677,41 +679,43 @@ export default function ReportsPage() {
               {/* Flexbox container for centering */}
               <div className="flex justify-center items-center w-full">
                 <ChartContainer config={pieChartConfig} className="h-[250px] md:h-[300px] w-full max-w-3xl">
-                  <PieChart>
-                  <ChartTooltip
-                    content={
-                      <ChartTooltipContent
-                        labelFormatter={(value: any) => value}
-                        formatter={(value: any, name: any) => [
-                          new Intl.NumberFormat('id-ID', {
-                            style: 'currency',
-                            currency: 'IDR',
-                            minimumFractionDigits: 0,
-                          }).format(value as number),
-                          name
-                        ]}
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <ChartTooltip
+                        content={
+                          <ChartTooltipContent
+                            labelFormatter={(value: any) => value}
+                            formatter={(value: any, name: any) => [
+                              new Intl.NumberFormat('id-ID', {
+                                style: 'currency',
+                                currency: 'IDR',
+                                minimumFractionDigits: 0,
+                              }).format(value as number),
+                              name
+                            ]}
+                          />
+                        }
                       />
-                    }
-                  />
-                  <Pie
-                    data={pieChartData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    label={(props: any) => {
-                      const entry = pieChartData.find(e => e.name === props.name)
-                      return entry ? `${props.name} (${entry.percentage.toFixed(1)}%)` : props.name
-                    }}
-                    labelLine={true}
-                  >
-                    {pieChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ChartContainer>
+                      <Pie
+                        data={pieChartData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={80}
+                        label={(props: any) => {
+                          const entry = pieChartData.find(e => e.name === props.name)
+                          return entry ? `${props.name} (${entry.percentage.toFixed(1)}%)` : props.name
+                        }}
+                        labelLine={true}
+                      >
+                        {pieChartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
               </div>
             </div>
 
@@ -729,51 +733,53 @@ export default function ReportsPage() {
               {/* Flexbox container for centering */}
               <div className="flex justify-center items-center w-full">
                 <ChartContainer config={lineChartConfig} className="h-[250px] md:h-[300px] w-full max-w-3xl">
-                  <LineChart data={lineChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis
-                    dataKey="date"
-                    className="text-xs"
-                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={60}
-                  />
-                  <YAxis
-                    className="text-xs"
-                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                    tickFormatter={(value) =>
-                      new Intl.NumberFormat('id-ID', {
-                        notation: 'compact',
-                        compactDisplay: 'short',
-                      }).format(value)
-                    }
-                  />
-                  <ChartTooltip
-                    content={
-                      <ChartTooltipContent
-                        labelFormatter={(value: any) => value}
-                        formatter={(value: any, name: any) => [
-                          new Intl.NumberFormat('id-ID', {
-                            style: 'currency',
-                            currency: 'IDR',
-                            minimumFractionDigits: 0,
-                          }).format(value as number),
-                          'Pengeluaran'
-                        ]}
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={lineChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis
+                        dataKey="date"
+                        className="text-xs"
+                        tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={60}
                       />
-                    }
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="amount"
-                    stroke={chartColors[1]}
-                    strokeWidth={2}
-                    dot={{ fill: chartColors[1], r: 4 }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ChartContainer>
+                      <YAxis
+                        className="text-xs"
+                        tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                        tickFormatter={(value) =>
+                          new Intl.NumberFormat('id-ID', {
+                            notation: 'compact',
+                            compactDisplay: 'short',
+                          }).format(value)
+                        }
+                      />
+                      <ChartTooltip
+                        content={
+                          <ChartTooltipContent
+                            labelFormatter={(value: any) => value}
+                            formatter={(value: any, name: any) => [
+                              new Intl.NumberFormat('id-ID', {
+                                style: 'currency',
+                                currency: 'IDR',
+                                minimumFractionDigits: 0,
+                              }).format(value as number),
+                              'Pengeluaran'
+                            ]}
+                          />
+                        }
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="amount"
+                        stroke={chartColors[1]}
+                        strokeWidth={2}
+                        dot={{ fill: chartColors[1], r: 4 }}
+                        activeDot={{ r: 6 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
               </div>
             </div>
             </TabsContent>
