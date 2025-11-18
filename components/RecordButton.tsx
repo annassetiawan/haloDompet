@@ -6,6 +6,7 @@ import { AnimatedRecordButton, RecordingState } from './AnimatedRecordButton'
 import { WebSpeechRecorder } from './WebSpeechRecorder'
 import { MediaRecorderButton } from './MediaRecorderButton'
 import { IOSMediaRecorder } from './iOSMediaRecorder'
+import { WebAudioRecorder } from './WebAudioRecorder'
 
 interface RecordButtonProps {
   onTranscript: (text: string) => void
@@ -19,7 +20,7 @@ export function RecordButton({
   onStatusChange
 }: RecordButtonProps) {
   const [isClient, setIsClient] = useState(false)
-  const [recorderType, setRecorderType] = useState<'webspeech' | 'ios' | 'mediarecorder'>('mediarecorder')
+  const [recorderType, setRecorderType] = useState<'webspeech' | 'ios' | 'mediarecorder' | 'webaudio'>('mediarecorder')
   const [recordingState, setRecordingState] = useState<RecordingState>('idle')
   const [audioLevel, setAudioLevel] = useState(0)
   const buttonClickRef = useRef<HTMLDivElement>(null)
@@ -34,9 +35,9 @@ export function RecordButton({
       setRecorderType('ios')
       console.log('🍎 iOS device detected, using IOSMediaRecorder')
     } else if (isAndroidDevice()) {
-      // Android - Use MediaRecorder + Gemini STT
-      setRecorderType('mediarecorder')
-      console.log('🤖 Android device detected, using MediaRecorder + Gemini STT')
+      // Android - Use Web Audio API (most reliable for Android)
+      setRecorderType('webaudio')
+      console.log('🤖 Android device detected, using Web Audio API')
     } else if (isSpeechRecognitionSupported()) {
       // Desktop Chrome, Edge - Web Speech API for instant results
       setRecorderType('webspeech')
@@ -122,6 +123,15 @@ export function RecordButton({
 
         {recorderType === 'mediarecorder' && (
           <MediaRecorderButton
+            onTranscript={onTranscript}
+            onError={onError}
+            onStatusChange={handleInternalStatusChange}
+            onAudioLevelChange={handleAudioLevelChange}
+          />
+        )}
+
+        {recorderType === 'webaudio' && (
+          <WebAudioRecorder
             onTranscript={onTranscript}
             onError={onError}
             onStatusChange={handleInternalStatusChange}
