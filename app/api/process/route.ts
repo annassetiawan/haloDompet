@@ -28,8 +28,15 @@ export async function POST(request: NextRequest) {
     // Menggunakan Gemini 2.5 Flash (model terbaru yang tersedia di API key Anda)
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
+    // Get tanggal hari ini
+    const today = new Date().toISOString().split('T')[0];
+
     const prompt = `
 Kamu adalah asisten AI yang mengekstrak data keuangan dari teks bahasa Indonesia.
+
+INFORMASI PENTING:
+- Tanggal hari ini adalah: ${today}
+- Kamu HARUS menggunakan tanggal ini untuk field "date"
 
 Tugas kamu:
 1. Ekstrak informasi dari teks yang diberikan
@@ -38,10 +45,11 @@ Tugas kamu:
      "item": "nama barang/jasa",
      "amount": angka (tanpa titik atau koma),
      "category": "kategori pengeluaran",
-     "date": "tanggal hari ini dalam format YYYY-MM-DD"
+     "date": "${today}"
    }
 
 Aturan:
+- Field "date" WAJIB diisi dengan: "${today}"
 - Jika kategori tidak disebutkan, tebak berdasarkan konteks item
 - Kategori umum: "Makanan", "Transportasi", "Belanja", "Hiburan", "Kesehatan", "Lainnya"
 - Amount harus angka murni (contoh: 25000, bukan "25.000")
@@ -53,13 +61,15 @@ Contoh output:
   "item": "Kopi",
   "amount": 25000,
   "category": "Makanan",
-  "date": "${new Date().toISOString().split('T')[0]}"
+  "date": "${today}"
 }
 
 Sekarang proses teks ini:
 "${text}"
 
-PENTING: Hanya berikan JSON, tanpa penjelasan atau teks tambahan.
+PENTING:
+1. Field "date" HARUS "${today}" (tanggal hari ini)
+2. Hanya berikan JSON, tanpa penjelasan atau teks tambahan
 `;
 
     const result = await model.generateContent(prompt);
@@ -83,6 +93,10 @@ PENTING: Hanya berikan JSON, tanpa penjelasan atau teks tambahan.
         { status: 500 }
       );
     }
+
+    // Validasi dan enforce tanggal hari ini
+    // Override apapun tanggal yang diberikan Gemini dengan tanggal hari ini
+    jsonData.date = today;
 
     // Tambahkan timestamp
     jsonData.timestamp = new Date().toISOString();
