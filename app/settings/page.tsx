@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { BottomNav } from '@/components/BottomNav'
+import { EditSaldoSection } from '@/components/EditSaldoSection'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ArrowLeft, Save, Loader2 } from 'lucide-react'
@@ -146,34 +147,15 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* Balance Settings */}
-            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-6">
-              <h2 className="text-lg font-normal text-foreground mb-4">
-                Pengaturan Saldo
-              </h2>
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="initial-balance" className="text-sm text-muted-foreground mb-2 block">
-                    Saldo Awal (Rp)
-                  </label>
-                  <Input
-                    id="initial-balance"
-                    type="number"
-                    placeholder="1000000"
-                    value={initialBalance}
-                    onChange={(e) => setInitialBalance(e.target.value)}
-                    className="h-12"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Saldo saat ini: {new Intl.NumberFormat('id-ID', {
-                      style: 'currency',
-                      currency: 'IDR',
-                      minimumFractionDigits: 0,
-                    }).format(userProfile?.current_balance || 0)}
-                  </p>
-                </div>
-              </div>
-            </div>
+            {/* Balance Management - New Enhanced Section */}
+            {userProfile && (
+              <EditSaldoSection
+                userId={user?.id || ''}
+                initialBalance={userProfile.initial_balance}
+                currentBalance={userProfile.current_balance}
+                onBalanceUpdate={loadUserProfile}
+              />
+            )}
 
             {/* Mode Settings */}
             <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-6">
