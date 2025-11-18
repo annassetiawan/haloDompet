@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef } from 'react'
-import { isSpeechRecognitionSupported, isIOSDevice } from '@/lib/utils'
+import { isSpeechRecognitionSupported, isIOSDevice, isAndroidDevice } from '@/lib/utils'
 import { AnimatedRecordButton, RecordingState } from './AnimatedRecordButton'
 import { WebSpeechRecorder } from './WebSpeechRecorder'
 import { MediaRecorderButton } from './MediaRecorderButton'
@@ -28,16 +28,23 @@ export function RecordButton({
     setIsClient(true)
 
     // Determine best recorder for this device
-    if (isSpeechRecognitionSupported()) {
-      // Chrome, Edge (Desktop & Android) - Fast, real-time Web Speech API
-      setRecorderType('webspeech')
-    } else if (isIOSDevice()) {
-      // iOS (iPhone/iPad) - Use RecordRTC for better compatibility
+    // Priority: iOS first, then Android, then desktop
+    if (isIOSDevice()) {
+      // iOS (iPhone/iPad) - Use IOSMediaRecorder (RecordRTC + Gemini)
       setRecorderType('ios')
-      console.log('🍎 iOS device detected, using RecordRTC recorder')
-    } else {
-      // Firefox, Safari Desktop, others - Standard MediaRecorder
+      console.log('🍎 iOS device detected, using IOSMediaRecorder')
+    } else if (isAndroidDevice()) {
+      // Android - Use MediaRecorder + Gemini STT
       setRecorderType('mediarecorder')
+      console.log('🤖 Android device detected, using MediaRecorder + Gemini STT')
+    } else if (isSpeechRecognitionSupported()) {
+      // Desktop Chrome, Edge - Web Speech API for instant results
+      setRecorderType('webspeech')
+      console.log('💻 Desktop with Web Speech API detected')
+    } else {
+      // Firefox, Safari Desktop, others - MediaRecorder + Gemini
+      setRecorderType('mediarecorder')
+      console.log('🌐 Fallback to MediaRecorder + Gemini STT')
     }
   }, [])
 
