@@ -44,7 +44,7 @@ export function WebSpeechRecorder({
       const transcript = event.results[0][0].transcript
       setIsListening(false)
       setIsProcessing(true)
-      onStatusChange?.(`Terdeteksi: "${transcript}"`)
+      onStatusChange?.("Memproses transkrip...")
 
       // Pass transcript to parent
       onTranscript(transcript)

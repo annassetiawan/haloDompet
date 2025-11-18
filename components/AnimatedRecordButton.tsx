@@ -2,14 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import Lottie from 'lottie-react'
 import confetti from 'canvas-confetti'
 import { Mic, Loader2, Check, X, Square } from 'lucide-react'
 import { VoiceLevelBars } from './VoiceLevelBars'
-
-// Animation imports (will load dynamically)
-import micPulseAnimation from '@/public/lottie/mic-pulse.json'
-import soundWaveAnimation from '@/public/lottie/sound-wave.json'
 
 export type RecordingState = 'idle' | 'recording' | 'processing' | 'success' | 'error'
 
@@ -143,42 +138,7 @@ export function AnimatedRecordButton({
         aria-label={getLabel()}
         aria-live="polite"
       >
-        {/* Background Lottie Animation - Lower z-index */}
-        <AnimatePresence mode="wait">
-          {!prefersReducedMotion && state === 'idle' && (
-            <motion.div
-              key="idle-animation"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.6 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 flex items-center justify-center z-0"
-            >
-              <Lottie
-                animationData={micPulseAnimation}
-                loop={true}
-                style={{ width: sizes.container, height: sizes.container }}
-              />
-            </motion.div>
-          )}
-
-          {!prefersReducedMotion && state === 'recording' && (
-            <motion.div
-              key="recording-animation"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 flex items-center justify-center z-0"
-            >
-              <Lottie
-                animationData={soundWaveAnimation}
-                loop={true}
-                style={{ width: sizes.container * 0.8, height: sizes.container * 0.8 }}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Foreground Icon - Higher z-index */}
+        {/* Foreground Icon */}
         <motion.div
           className="relative z-20"
           style={{ width: sizes.icon, height: sizes.icon }}
