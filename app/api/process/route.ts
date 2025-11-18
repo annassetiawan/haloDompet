@@ -28,8 +28,15 @@ export async function POST(request: NextRequest) {
     // Menggunakan Gemini 2.5 Flash (model terbaru yang tersedia di API key Anda)
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
+    // Get tanggal hari ini
+    const today = new Date().toISOString().split('T')[0];
+
     const prompt = `
 Kamu adalah asisten AI yang mengekstrak data keuangan dari teks bahasa Indonesia.
+
+INFORMASI PENTING:
+- Tanggal hari ini adalah: ${today}
+- Kamu HARUS menggunakan tanggal ini untuk field "date"
 
 Tugas kamu:
 1. Ekstrak informasi dari teks yang diberikan
@@ -38,28 +45,92 @@ Tugas kamu:
      "item": "nama barang/jasa",
      "amount": angka (tanpa titik atau koma),
      "category": "kategori pengeluaran",
-     "date": "tanggal hari ini dalam format YYYY-MM-DD"
+     "date": "${today}",
+     "location": "lokasi transaksi (jika disebutkan, jika tidak isi null)",
+     "payment_method": "metode pembayaran (jika disebutkan, jika tidak isi null)"
    }
 
-Aturan:
-- Jika kategori tidak disebutkan, tebak berdasarkan konteks item
-- Kategori umum: "Makanan", "Transportasi", "Belanja", "Hiburan", "Kesehatan", "Lainnya"
+KATEGORI YANG TERSEDIA DAN CONTOHNYA:
+1. "Makanan" - untuk makanan, minuman, kopi, snack, makan siang, sarapan, makan malam
+   Contoh: kopi, nasi goreng, burger, pizza, teh, jus, cemilan, makan siang
+
+2. "Transportasi" - untuk bensin, parkir, tol, ojek online, taksi, grab, gojek, KRL, bus
+   Contoh: bensin, parkir, tol, grab, gojek, ojol, tiket kereta, isi bensin
+
+3. "Belanja" - untuk pakaian, baju, sepatu, aksesoris, gadget, elektronik, alat tulis
+   Contoh: baju, celana, sepatu, tas, charger, headphone, mouse, pulpen
+
+4. "Hiburan" - untuk bioskop, game, konser, streaming, spotify, netflix, youtube premium
+   Contoh: tiket bioskop, langganan spotify, netflix, game, topup mobile legends
+
+5. "Kesehatan" - untuk obat, dokter, rumah sakit, vitamin, masker, hand sanitizer
+   Contoh: paracetamol, vitamin C, periksa dokter, rapid test, masker
+
+6. "Tagihan" - untuk listrik, air, internet, wifi, pulsa, token listrik, BPJS
+   Contoh: bayar listrik, token PLN, wifi, pulsa, paket data, BPJS
+
+7. "Pendidikan" - untuk buku, kursus, les, seminar, workshop, udemy, coursera
+   Contoh: beli buku, kursus online, les privat, workshop
+
+8. "Olahraga" - untuk gym, fitness, sepeda, yoga, membership gym, jersey
+   Contoh: membership gym, sepatu lari, yoga class, jersey
+
+9. "Lainnya" - untuk yang tidak masuk kategori di atas
+
+Aturan Pemilihan Kategori:
+- Pilih kategori yang PALING SPESIFIK berdasarkan item
+- Jangan selalu menggunakan "Makanan" atau "Lainnya"
+- Perhatikan kata kunci di contoh setiap kategori
+- Field "date" WAJIB diisi dengan: "${today}"
 - Amount harus angka murni (contoh: 25000, bukan "25.000")
 - Jika tidak ada informasi amount, set amount ke 0
 
-Contoh input: "Beli kopi 25000"
-Contoh output:
-{
-  "item": "Kopi",
-  "amount": 25000,
-  "category": "Makanan",
-  "date": "${new Date().toISOString().split('T')[0]}"
-}
+Aturan Ekstraksi dari Input Natural:
+- User bisa memberikan input detail seperti lokasi, metode pembayaran, dll
+- EKSTRAK: item utama, amount, location (jika ada), payment_method (jika ada)
+- Location: nama toko/tempat (fore, pertamina, guardian, uniqlo, warteg, mall, gramedia, dll)
+- Payment method: cara bayar (gopay, ovo, cash, kartu kredit, transfer BCA, shopee paylater, dll)
+- Jika location atau payment_method tidak disebutkan, set null
+- Fokus pada BARANG/JASA yang dibeli, JUMLAH, LOKASI, dan METODE BAYAR
+
+Contoh-contoh Input Natural:
+Input: "Beli kopi 25000 di fore bayar dengan gopay"
+Output: {"item": "Kopi", "amount": 25000, "category": "Makanan", "location": "Fore", "payment_method": "Gopay", "date": "${today}"}
+
+Input: "Isi bensin 50000 di pertamina pakai ovo"
+Output: {"item": "Bensin", "amount": 50000, "category": "Transportasi", "location": "Pertamina", "payment_method": "OVO", "date": "${today}"}
+
+Input: "Langganan Netflix premium 186000 bayar pakai kartu kredit"
+Output: {"item": "Netflix Premium", "amount": 186000, "category": "Hiburan", "location": null, "payment_method": "Kartu Kredit", "date": "${today}"}
+
+Input: "Beli vitamin C 35000 di guardian bayar cash"
+Output: {"item": "Vitamin C", "amount": 35000, "category": "Kesehatan", "location": "Guardian", "payment_method": "Cash", "date": "${today}"}
+
+Input: "Bayar wifi indihome bulan ini 300000 transfer BCA"
+Output: {"item": "Wifi Indihome", "amount": 300000, "category": "Tagihan", "location": null, "payment_method": "Transfer BCA", "date": "${today}"}
+
+Input: "Parkir di mall 5000"
+Output: {"item": "Parkir", "amount": 5000, "category": "Transportasi", "location": "Mall", "payment_method": null, "date": "${today}"}
+
+Input: "Makan siang di warteg 15000 bayar cash"
+Output: {"item": "Makan Siang", "amount": 15000, "category": "Makanan", "location": "Warteg", "payment_method": "Cash", "date": "${today}"}
+
+Input: "Beli baju di uniqlo 250000 pakai shopee paylater"
+Output: {"item": "Baju", "amount": 250000, "category": "Belanja", "location": "Uniqlo", "payment_method": "Shopee Paylater", "date": "${today}"}
+
+Input: "Gojek ke kantor 25000"
+Output: {"item": "Gojek", "amount": 25000, "category": "Transportasi", "location": null, "payment_method": null, "date": "${today}"}
+
+Input: "Beli buku atomic habits 95000 di gramedia"
+Output: {"item": "Buku Atomic Habits", "amount": 95000, "category": "Pendidikan", "location": "Gramedia", "payment_method": null, "date": "${today}"}
 
 Sekarang proses teks ini:
 "${text}"
 
-PENTING: Hanya berikan JSON, tanpa penjelasan atau teks tambahan.
+PENTING:
+1. Field "date" HARUS "${today}" (tanggal hari ini)
+2. Pilih kategori yang TEPAT, jangan asal pilih "Makanan" atau "Lainnya"
+3. Hanya berikan JSON, tanpa penjelasan atau teks tambahan
 `;
 
     const result = await model.generateContent(prompt);
@@ -83,6 +154,10 @@ PENTING: Hanya berikan JSON, tanpa penjelasan atau teks tambahan.
         { status: 500 }
       );
     }
+
+    // Validasi dan enforce tanggal hari ini
+    // Override apapun tanggal yang diberikan Gemini dengan tanggal hari ini
+    jsonData.date = today;
 
     // Tambahkan timestamp
     jsonData.timestamp = new Date().toISOString();

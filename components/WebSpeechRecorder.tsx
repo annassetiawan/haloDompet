@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Mic, MicOff, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { isIOSDevice } from '@/lib/utils'
 
 interface WebSpeechRecorderProps {
   onTranscript: (text: string) => void
@@ -16,7 +17,21 @@ export function WebSpeechRecorder({
   onStatusChange
 }: WebSpeechRecorderProps) {
   const [isListening, setIsListening] = useState(false)
-  const [isProcessing, setIsProcessing] = useState(false)
+  const recognitionRef = useRef<any>(null)
+  const finalTranscriptRef = useRef<string>('')
+  const shouldBeListeningRef = useRef<boolean>(false)
+  const restartCountRef = useRef<number>(0)
+  const isIOSRef = useRef<boolean>(false)
+
+  const stopListening = () => {
+    shouldBeListeningRef.current = false
+    restartCountRef.current = 0
+    isIOSRef.current = false
+    if (recognitionRef.current) {
+      recognitionRef.current.stop()
+      setIsListening(false)
+    }
+  }
 
   const handleListen = async () => {
     // Check browser support
@@ -30,39 +45,100 @@ export function WebSpeechRecorder({
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     const recognition = new SpeechRecognition()
 
+    const isIOS = isIOSDevice()
+    isIOSRef.current = isIOS
+
     recognition.lang = 'id-ID'
-    recognition.continuous = false
-    recognition.interimResults = false
+    // iOS needs continuous=true to capture full transcript
+    // Android/Desktop needs continuous=false to prevent duplicates
+    recognition.continuous = isIOS ? true : false
+    recognition.interimResults = true  // Get interim results for better UX
     recognition.maxAlternatives = 1
+
+    recognitionRef.current = recognition
+    shouldBeListeningRef.current = true
+    restartCountRef.current = 0
 
     recognition.onstart = () => {
       setIsListening(true)
-      onStatusChange?.("Mendengarkan... (Ucapkan pengeluaran Anda)")
+      if (restartCountRef.current === 0) {
+        finalTranscriptRef.current = ''
+      }
+      onStatusChange?.("Merekam... (Klik lagi untuk berhenti)")
     }
 
-    recognition.onresult = async (event: any) => {
-      const transcript = event.results[0][0].transcript
-      setIsListening(false)
-      setIsProcessing(true)
-      onStatusChange?.(`Terdeteksi: "${transcript}"`)
+    recognition.onresult = (event: any) => {
+      // For Android/Desktop: stop auto-restart once we get result (prevents duplicates)
+      // For iOS: keep auto-restart running (continuous mode needs it)
+      if (!isIOSRef.current) {
+        shouldBeListeningRef.current = false
+        restartCountRef.current = 0
+      }
 
-      // Pass transcript to parent
-      onTranscript(transcript)
+      let interimTranscript = ''
+      let finalTranscript = ''
 
-      setIsProcessing(false)
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript + ' '
+        } else {
+          interimTranscript += transcript
+        }
+      }
+
+      // Update final transcript
+      if (finalTranscript) {
+        finalTranscriptRef.current += finalTranscript
+      }
+
+      // Show current status with interim or final text
+      const currentText = (finalTranscriptRef.current + interimTranscript).trim()
+      if (currentText) {
+        onStatusChange?.(`Merekam: "${currentText}"`)
+      }
     }
 
     recognition.onerror = (event: any) => {
+      // Auto-restart on no-speech error (WebSpeech timeout is too short)
+      if (event.error === 'no-speech' && shouldBeListeningRef.current) {
+        restartCountRef.current++
+
+        // Prevent infinite restart loop (max 20 times = ~1 minute)
+        if (restartCountRef.current > 20) {
+          shouldBeListeningRef.current = false
+          setIsListening(false)
+          toast.error("Tidak mendengar suara. Silakan coba lagi!")
+          onStatusChange?.("Siap merekam")
+          return
+        }
+
+        // Restart recognition immediately
+        setTimeout(() => {
+          if (shouldBeListeningRef.current && recognitionRef.current) {
+            try {
+              recognitionRef.current.start()
+            } catch (err) {
+              console.error('Error restarting:', err)
+            }
+          }
+        }, 100)
+        return
+      }
+
+      // Other errors - stop listening
+      shouldBeListeningRef.current = false
       setIsListening(false)
-      setIsProcessing(false)
 
       let errorMsg = 'Terjadi kesalahan'
-      if (event.error === 'no-speech') {
-        errorMsg = "Tidak mendengar suara. Coba lagi!"
-      } else if (event.error === 'not-allowed') {
+      if (event.error === 'not-allowed') {
         errorMsg = "Izinkan akses mikrofon di browser!"
       } else if (event.error === 'network') {
         errorMsg = "Koneksi internet bermasalah"
+      } else if (event.error === 'aborted') {
+        return // Don't show error for aborted
+      } else if (event.error === 'audio-capture') {
+        errorMsg = "Gagal mengakses mikrofon"
       } else {
         errorMsg = `Error: ${event.error}`
       }
@@ -73,10 +149,28 @@ export function WebSpeechRecorder({
     }
 
     recognition.onend = () => {
-      setIsListening(false)
-      if (!isProcessing) {
-        onStatusChange?.("Siap merekam")
+      // If we should still be listening (auto-restart case), don't process yet
+      if (shouldBeListeningRef.current) {
+        return
       }
+
+      setIsListening(false)
+
+      // Send final transcript to parent if we have any
+      const finalText = finalTranscriptRef.current.trim()
+
+      if (finalText) {
+        onStatusChange?.(`Terdeteksi: "${finalText}"`)
+        onTranscript(finalText)
+      } else {
+        onStatusChange?.("Tidak ada suara terdeteksi")
+        toast.info("Tidak ada suara terdeteksi. Coba lagi!")
+      }
+
+      // Clear ref
+      finalTranscriptRef.current = ''
+      recognitionRef.current = null
+      restartCountRef.current = 0
     }
 
     // Start listening
@@ -87,7 +181,6 @@ export function WebSpeechRecorder({
       toast.error(errorMsg)
       onError?.(errorMsg)
       setIsListening(false)
-      setIsProcessing(false)
     }
   }
 
@@ -101,11 +194,13 @@ export function WebSpeechRecorder({
         className="neomorphic-input"
       />
       <label
-        className={`neomorphic-button ${isListening ? 'active' : ''} ${isProcessing ? 'processing' : ''}`}
+        className={`neomorphic-button ${isListening ? 'active' : ''}`}
         htmlFor="record-checkbox"
         onClick={(e) => {
           e.preventDefault()
-          if (!isListening && !isProcessing) {
+          if (isListening) {
+            stopListening()
+          } else {
             handleListen()
           }
         }}
@@ -113,8 +208,6 @@ export function WebSpeechRecorder({
         <span className="neomorphic-icon">
           {isListening ? (
             <Mic className="h-12 w-12 md:h-16 md:w-16" />
-          ) : isProcessing ? (
-            <Loader2 className="h-12 w-12 md:h-16 md:w-16 animate-spin" />
           ) : (
             <MicOff className="h-12 w-12 md:h-16 md:w-16" />
           )}

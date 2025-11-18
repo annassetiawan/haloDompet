@@ -156,6 +156,8 @@ export async function createTransaction(
     category: string
     date: string
     voice_text?: string
+    location?: string | null
+    payment_method?: string | null
   }
 ): Promise<Transaction | null> {
   const supabase = await createClient()

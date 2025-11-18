@@ -10,6 +10,7 @@ import { TrialWarningBanner } from '@/components/trial-warning-banner';
 import { DarkModeToggle } from '@/components/DarkModeToggle';
 import { TransactionListSkeleton } from '@/components/TransactionSkeleton';
 import { RecordButton } from '@/components/RecordButton';
+import { BottomNav } from '@/components/BottomNav';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -107,10 +108,20 @@ export default function HomePage() {
   };
 
   // Handle transcript from recorder
-  const handleTranscript = (transcript: string) => {
+  const handleTranscript = async (transcript: string) => {
+    // Show processing state briefly
+    setIsProcessing(true);
+    setStatus("Memproses hasil rekaman...");
+
+    // Small delay to show processing state
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    setIsProcessing(false);
+
     // Open review dialog with transcript
     setEditedTranscript(transcript);
     setIsReviewOpen(true);
+    setStatus("Siap merekam");
   };
 
   // Handle status change from recorder
@@ -173,6 +184,8 @@ export default function HomePage() {
           category: processData.data.category,
           date: processData.data.date,
           voice_text: transcript,
+          location: processData.data.location || null,
+          payment_method: processData.data.payment_method || null,
         }),
       });
 
@@ -186,13 +199,23 @@ export default function HomePage() {
       loadUserProfile();
       loadRecentTransactions();
 
+      // Show success state with confetti
+      setStatus("Berhasil! Transaksi tersimpan");
+
       // Show success toast
       toast.success(`${processData.data.item} - Rp ${processData.data.amount.toLocaleString('id-ID')} tercatat!`);
+
+      // Wait a bit to show success state, then reset
+      await new Promise(resolve => setTimeout(resolve, 2000));
       setStatus("Siap merekam");
     } catch (error) {
       console.error('Error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Gagal memproses';
       toast.error(errorMessage);
+      setStatus("Gagal memproses");
+
+      // Reset after showing error
+      await new Promise(resolve => setTimeout(resolve, 2000));
       setStatus("Siap merekam");
     } finally {
       setIsProcessing(false);
@@ -201,8 +224,8 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top Navigation - Fixed */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+      {/* Top Navigation - Desktop Only */}
+      <nav className="hidden md:block fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left side - Menu items */}
@@ -245,8 +268,11 @@ export default function HomePage() {
         </div>
       </nav>
 
+      {/* Bottom Navigation - Mobile Only */}
+      <BottomNav />
+
       {/* Main Content */}
-      <main className="pt-16">
+      <main className="md:pt-16 pb-20 md:pb-0">
         <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
           {/* Header Section */}
           <div className="space-y-1">
@@ -303,7 +329,7 @@ export default function HomePage() {
                 </p>
               </div>
               <p className="text-xs text-muted-foreground/70">
-                Contoh: &quot;Beli kopi 25000&quot; atau &quot;Makan siang 50000&quot;
+                Contoh: &quot;Beli kopi 25000 di fore dengan gopay&quot;
               </p>
             </div>
           </div>

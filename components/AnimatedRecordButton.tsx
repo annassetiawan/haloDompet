@@ -2,14 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import Lottie from 'lottie-react'
 import confetti from 'canvas-confetti'
-import { Mic, Loader2, Check, X } from 'lucide-react'
+import { Mic, Loader2, Check, X, Square } from 'lucide-react'
 import { VoiceLevelBars } from './VoiceLevelBars'
-
-// Animation imports (will load dynamically)
-import micPulseAnimation from '@/public/lottie/mic-pulse.json'
-import soundWaveAnimation from '@/public/lottie/sound-wave.json'
 
 export type RecordingState = 'idle' | 'recording' | 'processing' | 'success' | 'error'
 
@@ -93,10 +88,10 @@ export function AnimatedRecordButton({
   const getStateColor = () => {
     switch (state) {
       case 'idle': return 'bg-primary/10 hover:bg-primary/20'
-      case 'recording': return 'bg-red-500/20 animate-pulse'
-      case 'processing': return 'bg-blue-500/20'
-      case 'success': return 'bg-green-500/20'
-      case 'error': return 'bg-red-500/20'
+      case 'recording': return 'bg-transparent'
+      case 'processing': return 'bg-blue-500/10'
+      case 'success': return 'bg-green-500/10'
+      case 'error': return 'bg-red-500/10'
     }
   }
 
@@ -112,8 +107,8 @@ export function AnimatedRecordButton({
 
   const getLabel = () => {
     switch (state) {
-      case 'idle': return 'Tekan untuk rekam'
-      case 'recording': return 'Merekam...'
+      case 'idle': return 'Tekan untuk merekam'
+      case 'recording': return 'Tekan untuk berhenti'
       case 'processing': return 'Memproses...'
       case 'success': return 'Berhasil!'
       case 'error': return 'Coba lagi'
@@ -143,44 +138,9 @@ export function AnimatedRecordButton({
         aria-label={getLabel()}
         aria-live="polite"
       >
-        {/* Background Lottie Animation */}
-        <AnimatePresence mode="wait">
-          {!prefersReducedMotion && state === 'idle' && (
-            <motion.div
-              key="idle-animation"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.6 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 flex items-center justify-center"
-            >
-              <Lottie
-                animationData={micPulseAnimation}
-                loop={true}
-                style={{ width: sizes.container, height: sizes.container }}
-              />
-            </motion.div>
-          )}
-
-          {!prefersReducedMotion && state === 'recording' && (
-            <motion.div
-              key="recording-animation"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 flex items-center justify-center"
-            >
-              <Lottie
-                animationData={soundWaveAnimation}
-                loop={true}
-                style={{ width: sizes.container * 0.8, height: sizes.container * 0.8 }}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Foreground Icon */}
         <motion.div
-          className="relative z-10"
+          className="relative z-20"
           style={{ width: sizes.icon, height: sizes.icon }}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -210,19 +170,7 @@ export function AnimatedRecordButton({
         {getLabel()}
       </motion.p>
 
-      {/* Voice Level Indicator */}
-      <AnimatePresence mode="wait">
-        {state === 'recording' && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.2 }}
-          >
-            <VoiceLevelBars level={audioLevel} barCount={5} color="#ef4444" />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Voice Level Indicator - DISABLED */}
 
       {/* Screen reader only live region */}
       <div className="sr-only" role="status" aria-live="assertive">

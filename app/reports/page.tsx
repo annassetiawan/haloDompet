@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { BottomNav } from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, TrendingDown, Calendar, Tag, Download, BarChart3, TrendingUp, ArrowUp, ArrowDown, Minus, Sparkles, AlertCircle } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
@@ -309,7 +310,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <main className="relative min-h-screen flex flex-col p-4 md:p-8 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
+    <main className="relative min-h-screen flex flex-col p-4 md:p-8 pb-20 md:pb-8 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
       <div className="relative z-10 w-full max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between animate-slide-down">
@@ -582,43 +583,45 @@ export default function ReportsPage() {
                 </h2>
               </div>
 
-              <ChartContainer config={chartConfig} className="h-[250px] md:h-[300px] w-full">
-                <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis
-                    dataKey="category"
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
-                    className="text-xs"
-                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                  />
-                  <YAxis
-                    className="text-xs"
-                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                    tickFormatter={(value) =>
-                      new Intl.NumberFormat('id-ID', {
-                        notation: 'compact',
-                        compactDisplay: 'short',
-                      }).format(value)
-                    }
-                  />
-                  <ChartTooltip
-                    content={
-                      <ChartTooltipContent
-                        formatter={(value: any) =>
-                          new Intl.NumberFormat('id-ID', {
-                            style: 'currency',
-                            currency: 'IDR',
-                            minimumFractionDigits: 0,
-                          }).format(value as number)
-                        }
-                      />
-                    }
-                  />
-                  <Bar dataKey="amount" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ChartContainer>
+              <div className="h-[250px] md:h-[300px] w-full">
+                <ChartContainer config={chartConfig} className="h-full w-full">
+                  <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis
+                      dataKey="category"
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                      className="text-xs"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <YAxis
+                      className="text-xs"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      tickFormatter={(value) =>
+                        new Intl.NumberFormat('id-ID', {
+                          notation: 'compact',
+                          compactDisplay: 'short',
+                        }).format(value)
+                      }
+                    />
+                    <ChartTooltip
+                      content={
+                        <ChartTooltipContent
+                          formatter={(value: any) =>
+                            new Intl.NumberFormat('id-ID', {
+                              style: 'currency',
+                              currency: 'IDR',
+                              minimumFractionDigits: 0,
+                            }).format(value as number)
+                          }
+                        />
+                      }
+                    />
+                    <Bar dataKey="amount" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ChartContainer>
+              </div>
             </div>
 
             {/* Pie Chart - Category Distribution */}
@@ -632,47 +635,49 @@ export default function ReportsPage() {
                 </h2>
               </div>
 
-              <ChartContainer config={chartConfig} className="h-[250px] md:h-[300px] w-full">
-                <PieChart>
-                  <ChartTooltip
-                    content={
-                      <ChartTooltipContent
-                        formatter={(value: any, name: any) => (
-                          <>
-                            <div className="flex flex-col gap-1">
-                              <span className="font-medium">{name}</span>
-                              <span className="text-muted-foreground">
-                                {new Intl.NumberFormat('id-ID', {
-                                  style: 'currency',
-                                  currency: 'IDR',
-                                  minimumFractionDigits: 0,
-                                }).format(value as number)}
-                              </span>
-                            </div>
-                          </>
-                        )}
-                      />
-                    }
-                  />
-                  <Pie
-                    data={pieChartData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    label={(props: any) => {
-                      const entry = pieChartData.find(e => e.name === props.name)
-                      return entry ? `${props.name} (${entry.percentage.toFixed(1)}%)` : props.name
-                    }}
-                    labelLine={true}
-                  >
-                    {pieChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ChartContainer>
+              <div className="h-[250px] md:h-[300px] w-full">
+                <ChartContainer config={chartConfig} className="h-full w-full">
+                  <PieChart>
+                    <ChartTooltip
+                      content={
+                        <ChartTooltipContent
+                          formatter={(value: any, name: any) => (
+                            <>
+                              <div className="flex flex-col gap-1">
+                                <span className="font-medium">{name}</span>
+                                <span className="text-muted-foreground">
+                                  {new Intl.NumberFormat('id-ID', {
+                                    style: 'currency',
+                                    currency: 'IDR',
+                                    minimumFractionDigits: 0,
+                                  }).format(value as number)}
+                                </span>
+                              </div>
+                            </>
+                          )}
+                        />
+                      }
+                    />
+                    <Pie
+                      data={pieChartData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      label={(props: any) => {
+                        const entry = pieChartData.find(e => e.name === props.name)
+                        return entry ? `${props.name} (${entry.percentage.toFixed(1)}%)` : props.name
+                      }}
+                      labelLine={true}
+                    >
+                      {pieChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ChartContainer>
+              </div>
             </div>
 
             {/* Line Chart - Daily Spending Trend */}
@@ -686,50 +691,52 @@ export default function ReportsPage() {
                 </h2>
               </div>
 
-              <ChartContainer config={chartConfig} className="h-[250px] md:h-[300px] w-full">
-                <LineChart data={lineChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis
-                    dataKey="date"
-                    className="text-xs"
-                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={60}
-                  />
-                  <YAxis
-                    className="text-xs"
-                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                    tickFormatter={(value) =>
-                      new Intl.NumberFormat('id-ID', {
-                        notation: 'compact',
-                        compactDisplay: 'short',
-                      }).format(value)
-                    }
-                  />
-                  <ChartTooltip
-                    content={
-                      <ChartTooltipContent
-                        formatter={(value: any) =>
-                          new Intl.NumberFormat('id-ID', {
-                            style: 'currency',
-                            currency: 'IDR',
-                            minimumFractionDigits: 0,
-                          }).format(value as number)
-                        }
-                      />
-                    }
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="amount"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={2}
-                    dot={{ fill: 'hsl(var(--primary))', r: 4 }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ChartContainer>
+              <div className="h-[250px] md:h-[300px] w-full">
+                <ChartContainer config={chartConfig} className="h-full w-full">
+                  <LineChart data={lineChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis
+                      dataKey="date"
+                      className="text-xs"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                    />
+                    <YAxis
+                      className="text-xs"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      tickFormatter={(value) =>
+                        new Intl.NumberFormat('id-ID', {
+                          notation: 'compact',
+                          compactDisplay: 'short',
+                        }).format(value)
+                      }
+                    />
+                    <ChartTooltip
+                      content={
+                        <ChartTooltipContent
+                          formatter={(value: any) =>
+                            new Intl.NumberFormat('id-ID', {
+                              style: 'currency',
+                              currency: 'IDR',
+                              minimumFractionDigits: 0,
+                            }).format(value as number)
+                          }
+                        />
+                      }
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="amount"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={2}
+                      dot={{ fill: 'hsl(var(--primary))', r: 4 }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
+                </ChartContainer>
+              </div>
             </div>
             </TabsContent>
 
@@ -785,6 +792,9 @@ export default function ReportsPage() {
           </Tabs>
         )}
       </div>
+
+      {/* Bottom Navigation - Mobile Only */}
+      <BottomNav />
     </main>
   )
 }

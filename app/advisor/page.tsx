@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { BottomNav } from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ArrowLeft, Send, Sparkles, Loader2, TrendingUp, PiggyBank, Target, Lightbulb } from 'lucide-react'
@@ -157,8 +158,8 @@ export default function AdvisorPage() {
   }
 
   return (
-    <main className="relative min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
-      <div className="w-full max-w-4xl mx-auto flex flex-col h-screen">
+    <main className="relative min-h-screen flex flex-col pb-20 md:pb-0 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
+      <div className="w-full max-w-4xl mx-auto flex flex-col h-screen md:h-screen">
         {/* Header */}
         <div className="flex items-center gap-3 p-4 border-b border-border/50 bg-background/80 backdrop-blur-sm animate-slide-down">
           <Button
@@ -281,6 +282,9 @@ export default function AdvisorPage() {
           </div>
         </div>
       </div>
+
+      {/* Bottom Navigation - Mobile Only */}
+      <BottomNav />
     </main>
   )
 }

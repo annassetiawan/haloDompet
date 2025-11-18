@@ -1,10 +1,12 @@
 "use client"
 
 import { useEffect, useState, useRef } from 'react'
-import { isSpeechRecognitionSupported, isIOSDevice } from '@/lib/utils'
+import { isSpeechRecognitionSupported, isIOSDevice, isAndroidDevice } from '@/lib/utils'
 import { AnimatedRecordButton, RecordingState } from './AnimatedRecordButton'
+import { WebSpeechRecorder } from './WebSpeechRecorder'
 import { MediaRecorderButton } from './MediaRecorderButton'
 import { IOSMediaRecorder } from './iOSMediaRecorder'
+import { WebAudioRecorder } from './WebAudioRecorder'
 
 interface RecordButtonProps {
   onTranscript: (text: string) => void
@@ -18,7 +20,7 @@ export function RecordButton({
   onStatusChange
 }: RecordButtonProps) {
   const [isClient, setIsClient] = useState(false)
-  const [recorderType, setRecorderType] = useState<'webspeech' | 'ios' | 'mediarecorder'>('mediarecorder')
+  const [recorderType, setRecorderType] = useState<'webspeech' | 'ios' | 'mediarecorder' | 'webaudio'>('mediarecorder')
   const [recordingState, setRecordingState] = useState<RecordingState>('idle')
   const [audioLevel, setAudioLevel] = useState(0)
   const buttonClickRef = useRef<HTMLDivElement>(null)
@@ -27,16 +29,19 @@ export function RecordButton({
     setIsClient(true)
 
     // Determine best recorder for this device
+    // Use WebSpeech API for all platforms that support it
     if (isSpeechRecognitionSupported()) {
-      // Chrome, Edge (Desktop & Android) - Fast, real-time Web Speech API
+      // iOS, Android, Desktop Chrome/Edge - WebSpeech API
       setRecorderType('webspeech')
+      console.log('✅ WebSpeech API enabled')
     } else if (isIOSDevice()) {
-      // iOS (iPhone/iPad) - Use RecordRTC for better compatibility
+      // iOS fallback if Web Speech not available
       setRecorderType('ios')
-      console.log('🍎 iOS device detected, using RecordRTC recorder')
+      console.log('🍎 iOS fallback to IOSMediaRecorder')
     } else {
-      // Firefox, Safari Desktop, others - Standard MediaRecorder
+      // Firefox, Safari Desktop, others - MediaRecorder + Gemini
       setRecorderType('mediarecorder')
+      console.log('🌐 Fallback to MediaRecorder + Gemini STT')
     }
   }, [])
 
@@ -63,7 +68,10 @@ export function RecordButton({
   }
 
   const handleAudioLevelChange = (level: number) => {
-    setAudioLevel(level)
+    // Only update audio level for recorders that support it (not WebSpeech)
+    if (recorderType !== 'webspeech') {
+      setAudioLevel(level)
+    }
   }
 
   const handleAnimatedButtonClick = () => {
@@ -89,12 +97,20 @@ export function RecordButton({
       <AnimatedRecordButton
         state={recordingState}
         onClick={handleAnimatedButtonClick}
-        audioLevel={audioLevel}
+        audioLevel={recorderType === 'webspeech' ? 0 : audioLevel}
         size="large"
       />
 
       {/* Hidden Recorder (Logic Only) */}
       <div className="hidden-recorder-button absolute opacity-0 pointer-events-none -z-10">
+        {recorderType === 'webspeech' && (
+          <WebSpeechRecorder
+            onTranscript={onTranscript}
+            onError={onError}
+            onStatusChange={handleInternalStatusChange}
+          />
+        )}
+
         {recorderType === 'ios' && (
           <IOSMediaRecorder
             onTranscript={onTranscript}
@@ -112,16 +128,16 @@ export function RecordButton({
             onAudioLevelChange={handleAudioLevelChange}
           />
         )}
-      </div>
 
-      {/* WebSpeech API doesn't support audio level detection */}
-      {recorderType === 'webspeech' && (
-        <div className="mt-2 text-center">
-          <p className="text-xs text-muted-foreground">
-            Deteksi level audio tidak tersedia untuk WebSpeech API
-          </p>
-        </div>
-      )}
+        {recorderType === 'webaudio' && (
+          <WebAudioRecorder
+            onTranscript={onTranscript}
+            onError={onError}
+            onStatusChange={handleInternalStatusChange}
+            onAudioLevelChange={handleAudioLevelChange}
+          />
+        )}
+      </div>
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { TransactionCard } from '@/components/TransactionCard'
 import { TransactionListSkeleton } from '@/components/TransactionSkeleton'
+import { BottomNav } from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -125,7 +126,7 @@ export default function HistoryPage() {
   }, {} as Record<string, Transaction[]>)
 
   return (
-    <main className="relative min-h-screen flex flex-col p-4 md:p-8 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
+    <main className="relative min-h-screen flex flex-col p-4 md:p-8 pb-20 md:pb-8 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
       <div className="relative z-10 w-full max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between animate-slide-down">
@@ -276,6 +277,9 @@ export default function HistoryPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Bottom Navigation - Mobile Only */}
+      <BottomNav />
     </main>
   )
 }
