@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Lottie from 'lottie-react'
 import confetti from 'canvas-confetti'
-import { Mic, Loader2, Check, X } from 'lucide-react'
+import { Mic, Loader2, Check, X, Square } from 'lucide-react'
 import { VoiceLevelBars } from './VoiceLevelBars'
 
 // Animation imports (will load dynamically)
@@ -112,8 +112,8 @@ export function AnimatedRecordButton({
 
   const getLabel = () => {
     switch (state) {
-      case 'idle': return 'Tekan untuk rekam'
-      case 'recording': return 'Merekam...'
+      case 'idle': return 'Tekan untuk merekam'
+      case 'recording': return 'Tekan untuk berhenti'
       case 'processing': return 'Memproses...'
       case 'success': return 'Berhasil!'
       case 'error': return 'Coba lagi'
@@ -143,7 +143,7 @@ export function AnimatedRecordButton({
         aria-label={getLabel()}
         aria-live="polite"
       >
-        {/* Background Lottie Animation */}
+        {/* Background Lottie Animation - Lower z-index */}
         <AnimatePresence mode="wait">
           {!prefersReducedMotion && state === 'idle' && (
             <motion.div
@@ -151,7 +151,7 @@ export function AnimatedRecordButton({
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.6 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 flex items-center justify-center"
+              className="absolute inset-0 flex items-center justify-center z-0"
             >
               <Lottie
                 animationData={micPulseAnimation}
@@ -165,9 +165,9 @@ export function AnimatedRecordButton({
             <motion.div
               key="recording-animation"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              animate={{ opacity: 0.5 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 flex items-center justify-center"
+              className="absolute inset-0 flex items-center justify-center z-0"
             >
               <Lottie
                 animationData={soundWaveAnimation}
@@ -178,9 +178,9 @@ export function AnimatedRecordButton({
           )}
         </AnimatePresence>
 
-        {/* Foreground Icon */}
+        {/* Foreground Icon - Higher z-index */}
         <motion.div
-          className="relative z-10"
+          className="relative z-20"
           style={{ width: sizes.icon, height: sizes.icon }}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
