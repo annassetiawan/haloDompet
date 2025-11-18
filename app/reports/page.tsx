@@ -271,12 +271,35 @@ export default function ReportsPage() {
 
   const insights = generateInsights()
 
-  // Chart configuration
-  const chartConfig = {
+  // Chart configurations using Shadcn pattern
+
+  // Bar Chart Config - Top 5 Categories
+  const barChartConfig = barChartData.reduce((acc, item, index) => {
+    const key = item.category.toLowerCase().replace(/\s+/g, '_');
+    acc[key] = {
+      label: item.category,
+      color: item.fill,
+    };
+    return acc;
+  }, {} as Record<string, { label: string; color: string }>);
+
+  // Pie Chart Config - All Categories
+  const pieChartConfig = pieChartData.reduce((acc, item, index) => {
+    const key = item.name.toLowerCase().replace(/\s+/g, '_');
+    acc[key] = {
+      label: item.name,
+      color: item.fill,
+    };
+    return acc;
+  }, {} as Record<string, { label: string; color: string }>);
+
+  // Line Chart Config - Daily Spending
+  const lineChartConfig = {
     amount: {
-      label: 'Jumlah',
+      label: 'Pengeluaran',
+      color: 'hsl(var(--chart-1))',
     },
-  }
+  } satisfies Record<string, { label: string; color: string }>;
 
   // Export to CSV
   const exportToCSV = () => {
@@ -582,7 +605,7 @@ export default function ReportsPage() {
                 </h2>
               </div>
 
-              <ChartContainer config={chartConfig} className="h-[250px] md:h-[300px] w-full">
+              <ChartContainer config={barChartConfig} className="h-[250px] md:h-[300px] w-full">
                 <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis
@@ -606,13 +629,15 @@ export default function ReportsPage() {
                   <ChartTooltip
                     content={
                       <ChartTooltipContent
-                        formatter={(value: any) =>
+                        labelFormatter={(value: any) => value}
+                        formatter={(value: any, name: any) => [
                           new Intl.NumberFormat('id-ID', {
                             style: 'currency',
                             currency: 'IDR',
                             minimumFractionDigits: 0,
-                          }).format(value as number)
-                        }
+                          }).format(value as number),
+                          'Total'
+                        ]}
                       />
                     }
                   />
@@ -632,25 +657,20 @@ export default function ReportsPage() {
                 </h2>
               </div>
 
-              <ChartContainer config={chartConfig} className="h-[250px] md:h-[300px] w-full">
+              <ChartContainer config={pieChartConfig} className="h-[250px] md:h-[300px] w-full">
                 <PieChart>
                   <ChartTooltip
                     content={
                       <ChartTooltipContent
-                        formatter={(value: any, name: any) => (
-                          <>
-                            <div className="flex flex-col gap-1">
-                              <span className="font-medium">{name}</span>
-                              <span className="text-muted-foreground">
-                                {new Intl.NumberFormat('id-ID', {
-                                  style: 'currency',
-                                  currency: 'IDR',
-                                  minimumFractionDigits: 0,
-                                }).format(value as number)}
-                              </span>
-                            </div>
-                          </>
-                        )}
+                        labelFormatter={(value: any) => value}
+                        formatter={(value: any, name: any) => [
+                          new Intl.NumberFormat('id-ID', {
+                            style: 'currency',
+                            currency: 'IDR',
+                            minimumFractionDigits: 0,
+                          }).format(value as number),
+                          name
+                        ]}
                       />
                     }
                   />
@@ -686,7 +706,7 @@ export default function ReportsPage() {
                 </h2>
               </div>
 
-              <ChartContainer config={chartConfig} className="h-[250px] md:h-[300px] w-full">
+              <ChartContainer config={lineChartConfig} className="h-[250px] md:h-[300px] w-full">
                 <LineChart data={lineChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis
@@ -710,22 +730,24 @@ export default function ReportsPage() {
                   <ChartTooltip
                     content={
                       <ChartTooltipContent
-                        formatter={(value: any) =>
+                        labelFormatter={(value: any) => value}
+                        formatter={(value: any, name: any) => [
                           new Intl.NumberFormat('id-ID', {
                             style: 'currency',
                             currency: 'IDR',
                             minimumFractionDigits: 0,
-                          }).format(value as number)
-                        }
+                          }).format(value as number),
+                          'Pengeluaran'
+                        ]}
                       />
                     }
                   />
                   <Line
                     type="monotone"
                     dataKey="amount"
-                    stroke="hsl(var(--primary))"
+                    stroke="var(--color-amount)"
                     strokeWidth={2}
-                    dot={{ fill: 'hsl(var(--primary))', r: 4 }}
+                    dot={{ fill: 'var(--color-amount)', r: 4 }}
                     activeDot={{ r: 6 }}
                   />
                 </LineChart>
