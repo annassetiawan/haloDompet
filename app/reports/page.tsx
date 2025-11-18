@@ -624,8 +624,8 @@ export default function ReportsPage() {
               </div>
 
               {/* Content - Chart */}
-              <div className="p-4 md:p-6">
-                <ChartContainer config={barChartConfig} className="w-full h-[300px] aspect-auto">
+              <div className="p-4 md:p-6 min-w-0 w-full">
+                <ChartContainer config={barChartConfig} className="h-[300px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -699,8 +699,8 @@ export default function ReportsPage() {
               </div>
 
               {/* Content - Chart */}
-              <div className="p-4 md:p-6">
-                <ChartContainer config={pieChartConfig} className="w-full h-[300px] aspect-auto">
+              <div className="p-4 md:p-6 w-full">
+                <ChartContainer config={pieChartConfig} className="mx-auto aspect-square max-h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <ChartTooltip
@@ -767,8 +767,8 @@ export default function ReportsPage() {
               </div>
 
               {/* Content - Chart */}
-              <div className="p-4 md:p-6">
-                <ChartContainer config={lineChartConfig} className="w-full h-[300px] aspect-auto">
+              <div className="p-4 md:p-6 min-w-0 w-full">
+                <ChartContainer config={lineChartConfig} className="h-[300px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={lineChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
