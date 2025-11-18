@@ -150,31 +150,41 @@ export default function ReportsPage() {
     lainnya: '📦',
   }
 
-  // Category color mapping (Shadcn pattern)
-  const categoryColors: Record<string, string> = {
-    makanan: 'var(--chart-1)',
-    minuman: 'var(--chart-2)',
-    transport: 'var(--chart-3)',
-    belanja: 'var(--chart-4)',
-    hiburan: 'var(--chart-5)',
-    kesehatan: 'var(--chart-1)',
-    pendidikan: 'var(--chart-2)',
-    tagihan: 'var(--chart-3)',
-    lainnya: 'var(--chart-4)',
+  // Chart colors - actual HSL values from CSS variables
+  // Light mode colors from globals.css
+  const chartColors = {
+    1: 'hsl(12 76% 61%)',   // --chart-1
+    2: 'hsl(173 58% 39%)',  // --chart-2
+    3: 'hsl(197 37% 24%)',  // --chart-3
+    4: 'hsl(43 74% 66%)',   // --chart-4
+    5: 'hsl(27 87% 67%)',   // --chart-5
   }
 
-  // Prepare data for bar chart (top 5 categories) - no fill in data
+  // Category color mapping (Shadcn pattern)
+  const categoryColors: Record<string, string> = {
+    makanan: chartColors[1],
+    minuman: chartColors[2],
+    transport: chartColors[3],
+    belanja: chartColors[4],
+    hiburan: chartColors[5],
+    kesehatan: chartColors[1],
+    pendidikan: chartColors[2],
+    tagihan: chartColors[3],
+    lainnya: chartColors[4],
+  }
+
+  // Prepare data for bar chart (top 5 categories)
   const barChartData = sortedCategories.slice(0, 5).map((item) => ({
     category: item.category.charAt(0).toUpperCase() + item.category.slice(1),
     amount: item.total,
-    fill: categoryColors[item.category.toLowerCase()] || 'var(--chart-1)', // Keep for Cell reference
+    fill: categoryColors[item.category.toLowerCase()] || chartColors[1],
   }))
 
   // Prepare data for pie chart (all categories)
   const pieChartData = sortedCategories.map((item, index) => ({
     name: item.category.charAt(0).toUpperCase() + item.category.slice(1),
     value: item.total,
-    fill: categoryColors[item.category.toLowerCase()] || `var(--chart-${(index % 5) + 1})`,
+    fill: categoryColors[item.category.toLowerCase()] || chartColors[((index % 5) + 1) as 1 | 2 | 3 | 4 | 5],
     percentage: item.percentage,
   }))
 
@@ -297,7 +307,7 @@ export default function ReportsPage() {
   const lineChartConfig = {
     amount: {
       label: 'Pengeluaran',
-      color: 'var(--chart-1)',
+      color: chartColors[1],
     },
   } satisfies ChartConfig;
 
@@ -418,7 +428,7 @@ export default function ReportsPage() {
               {/* Summary Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
               {/* Total Spent */}
-              <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 md:p-6">
+              <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="p-2 rounded-lg bg-red-500/10 dark:bg-red-500/20">
                     <TrendingDown className="h-5 w-5 text-red-500" />
@@ -461,7 +471,7 @@ export default function ReportsPage() {
               </div>
 
               {/* Transaction Count */}
-              <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 md:p-6">
+              <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="p-2 rounded-lg bg-blue-500/10 dark:bg-blue-500/20">
                     <Calendar className="h-5 w-5 text-blue-500" />
@@ -504,7 +514,7 @@ export default function ReportsPage() {
               </div>
 
               {/* Average per Transaction */}
-              <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 md:p-6">
+              <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="p-2 rounded-lg bg-green-500/10 dark:bg-green-500/20">
                     <Tag className="h-5 w-5 text-green-500" />
@@ -553,7 +563,7 @@ export default function ReportsPage() {
 
               {/* Key Insights - Top 3 */}
               {insights.length > 0 && (
-                <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 md:p-6">
+                <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 rounded-lg bg-purple-500/10 dark:bg-purple-500/20">
                       <Sparkles className="h-5 w-5 text-purple-500" />
@@ -595,7 +605,7 @@ export default function ReportsPage() {
             {/* Tab 2: Charts - All Visualizations */}
             <TabsContent value="charts" className="space-y-3 md:space-y-4">
             {/* Bar Chart - Top Categories */}
-            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 md:p-6">
+            <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
               <div className="flex items-center gap-3 mb-4 md:mb-6">
                 <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
                   <BarChart3 className="h-5 w-5 text-primary" />
@@ -641,13 +651,17 @@ export default function ReportsPage() {
                       />
                     }
                   />
-                  <Bar dataKey="amount" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="amount" radius={[8, 8, 0, 0]}>
+                    {barChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ChartContainer>
             </div>
 
             {/* Pie Chart - Category Distribution */}
-            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 md:p-6">
+            <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
               <div className="flex items-center gap-3 mb-4 md:mb-6">
                 <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
                   <Tag className="h-5 w-5 text-primary" />
@@ -696,7 +710,7 @@ export default function ReportsPage() {
             </div>
 
             {/* Line Chart - Daily Spending Trend */}
-            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 md:p-6">
+            <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
               <div className="flex items-center gap-3 mb-4 md:mb-6">
                 <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
                   <TrendingUp className="h-5 w-5 text-primary" />
@@ -745,9 +759,9 @@ export default function ReportsPage() {
                   <Line
                     type="monotone"
                     dataKey="amount"
-                    stroke="var(--color-amount)"
+                    stroke={chartColors[1]}
                     strokeWidth={2}
-                    dot={{ fill: 'var(--color-amount)', r: 4 }}
+                    dot={{ fill: chartColors[1], r: 4 }}
                     activeDot={{ r: 6 }}
                   />
                 </LineChart>
@@ -758,7 +772,7 @@ export default function ReportsPage() {
             {/* Tab 3: Details - Category Breakdown */}
             <TabsContent value="details" className="space-y-3 md:space-y-4">
             {/* Category Breakdown */}
-            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 md:p-6">
+            <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
               <h2 className="text-base md:text-lg font-normal text-foreground mb-4 md:mb-6">
                 Pengeluaran per Kategori
               </h2>
