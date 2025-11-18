@@ -19,7 +19,6 @@ export function WebSpeechRecorder({
   const recognitionRef = useRef<any>(null)
   const finalTranscriptRef = useRef<string>('')
   const hasSubmittedRef = useRef<boolean>(false)
-  const processedTranscriptsRef = useRef<Set<string>>(new Set())
 
   const stopListening = () => {
     if (recognitionRef.current) {
@@ -55,38 +54,31 @@ export function WebSpeechRecorder({
       setIsListening(true)
       finalTranscriptRef.current = ''
       hasSubmittedRef.current = false
-      processedTranscriptsRef.current = new Set()
       onStatusChange?.("Merekam... (Klik lagi untuk berhenti)")
     }
 
     recognition.onresult = (event: any) => {
+      // Build transcript from scratch each time to get complete text
+      let completeFinalTranscript = ''
       let interimTranscript = ''
-      let newFinalTranscript = ''
 
-      // Process all results
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript.trim()
-
+      // Go through ALL results, not just from resultIndex
+      for (let i = 0; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript
         if (event.results[i].isFinal) {
-          // Android fix: Only add if we haven't seen this exact transcript before
-          if (!processedTranscriptsRef.current.has(transcript)) {
-            newFinalTranscript += transcript + ' '
-            processedTranscriptsRef.current.add(transcript)
-          }
+          completeFinalTranscript += transcript + ' '
         } else {
           interimTranscript += transcript
         }
       }
 
-      // Update final transcript only with new content
-      if (newFinalTranscript) {
-        finalTranscriptRef.current += newFinalTranscript
-      }
+      // Update the stored final transcript
+      finalTranscriptRef.current = completeFinalTranscript.trim()
 
-      // Show current status with interim or final text
-      const currentText = (finalTranscriptRef.current + interimTranscript).trim()
-      if (currentText) {
-        onStatusChange?.(`Merekam: "${currentText}"`)
+      // Show current status with what we have so far
+      const displayText = (completeFinalTranscript + interimTranscript).trim()
+      if (displayText) {
+        onStatusChange?.(`Merekam: "${displayText}"`)
       }
     }
 
@@ -112,12 +104,12 @@ export function WebSpeechRecorder({
     recognition.onend = () => {
       setIsListening(false)
 
-      // Android fix: Prevent multiple submissions when onend fires multiple times
+      // Prevent multiple submissions when onend fires multiple times (Android issue)
       if (hasSubmittedRef.current) {
         return
       }
 
-      // Send final transcript to parent if we have any
+      // Use the stored final transcript
       const finalText = finalTranscriptRef.current.trim()
       if (finalText) {
         hasSubmittedRef.current = true
@@ -130,7 +122,6 @@ export function WebSpeechRecorder({
 
       // Clear refs
       finalTranscriptRef.current = ''
-      processedTranscriptsRef.current.clear()
       recognitionRef.current = null
     }
 
