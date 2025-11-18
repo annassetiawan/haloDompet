@@ -48,28 +48,64 @@ Tugas kamu:
      "date": "${today}"
    }
 
-Aturan:
+KATEGORI YANG TERSEDIA DAN CONTOHNYA:
+1. "Makanan" - untuk makanan, minuman, kopi, snack, makan siang, sarapan, makan malam
+   Contoh: kopi, nasi goreng, burger, pizza, teh, jus, cemilan, makan siang
+
+2. "Transportasi" - untuk bensin, parkir, tol, ojek online, taksi, grab, gojek, KRL, bus
+   Contoh: bensin, parkir, tol, grab, gojek, ojol, tiket kereta, isi bensin
+
+3. "Belanja" - untuk pakaian, baju, sepatu, aksesoris, gadget, elektronik, alat tulis
+   Contoh: baju, celana, sepatu, tas, charger, headphone, mouse, pulpen
+
+4. "Hiburan" - untuk bioskop, game, konser, streaming, spotify, netflix, youtube premium
+   Contoh: tiket bioskop, langganan spotify, netflix, game, topup mobile legends
+
+5. "Kesehatan" - untuk obat, dokter, rumah sakit, vitamin, masker, hand sanitizer
+   Contoh: paracetamol, vitamin C, periksa dokter, rapid test, masker
+
+6. "Tagihan" - untuk listrik, air, internet, wifi, pulsa, token listrik, BPJS
+   Contoh: bayar listrik, token PLN, wifi, pulsa, paket data, BPJS
+
+7. "Pendidikan" - untuk buku, kursus, les, seminar, workshop, udemy, coursera
+   Contoh: beli buku, kursus online, les privat, workshop
+
+8. "Olahraga" - untuk gym, fitness, sepeda, yoga, membership gym, jersey
+   Contoh: membership gym, sepatu lari, yoga class, jersey
+
+9. "Lainnya" - untuk yang tidak masuk kategori di atas
+
+Aturan Pemilihan Kategori:
+- Pilih kategori yang PALING SPESIFIK berdasarkan item
+- Jangan selalu menggunakan "Makanan" atau "Lainnya"
+- Perhatikan kata kunci di contoh setiap kategori
 - Field "date" WAJIB diisi dengan: "${today}"
-- Jika kategori tidak disebutkan, tebak berdasarkan konteks item
-- Kategori umum: "Makanan", "Transportasi", "Belanja", "Hiburan", "Kesehatan", "Lainnya"
 - Amount harus angka murni (contoh: 25000, bukan "25.000")
 - Jika tidak ada informasi amount, set amount ke 0
 
-Contoh input: "Beli kopi 25000"
-Contoh output:
-{
-  "item": "Kopi",
-  "amount": 25000,
-  "category": "Makanan",
-  "date": "${today}"
-}
+Contoh-contoh:
+Input: "Beli kopi 25000"
+Output: {"item": "Kopi", "amount": 25000, "category": "Makanan", "date": "${today}"}
+
+Input: "Isi bensin 50000"
+Output: {"item": "Bensin", "amount": 50000, "category": "Transportasi", "date": "${today}"}
+
+Input: "Langganan Netflix"
+Output: {"item": "Netflix", "amount": 0, "category": "Hiburan", "date": "${today}"}
+
+Input: "Beli vitamin C 35000"
+Output: {"item": "Vitamin C", "amount": 35000, "category": "Kesehatan", "date": "${today}"}
+
+Input: "Bayar wifi 300000"
+Output: {"item": "Wifi", "amount": 300000, "category": "Tagihan", "date": "${today}"}
 
 Sekarang proses teks ini:
 "${text}"
 
 PENTING:
 1. Field "date" HARUS "${today}" (tanggal hari ini)
-2. Hanya berikan JSON, tanpa penjelasan atau teks tambahan
+2. Pilih kategori yang TEPAT, jangan asal pilih "Makanan" atau "Lainnya"
+3. Hanya berikan JSON, tanpa penjelasan atau teks tambahan
 `;
 
     const result = await model.generateContent(prompt);
