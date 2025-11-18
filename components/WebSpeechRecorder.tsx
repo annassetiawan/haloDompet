@@ -19,7 +19,7 @@ export function WebSpeechRecorder({
   const recognitionRef = useRef<any>(null)
   const finalTranscriptRef = useRef<string>('')
   const hasSubmittedRef = useRef<boolean>(false)
-  const lastProcessedIndexRef = useRef<number>(-1)
+  const processedTranscriptsRef = useRef<Set<string>>(new Set())
 
   const stopListening = () => {
     if (recognitionRef.current) {
@@ -55,33 +55,32 @@ export function WebSpeechRecorder({
       setIsListening(true)
       finalTranscriptRef.current = ''
       hasSubmittedRef.current = false
-      lastProcessedIndexRef.current = -1
+      processedTranscriptsRef.current = new Set()
       onStatusChange?.("Merekam... (Klik lagi untuk berhenti)")
     }
 
     recognition.onresult = (event: any) => {
-      // Android fix: Only process new results to prevent duplicates
-      if (event.resultIndex <= lastProcessedIndexRef.current) {
-        return // Skip already processed results
-      }
-
       let interimTranscript = ''
-      let finalTranscript = ''
+      let newFinalTranscript = ''
 
-      // Only process results from the new index onwards
+      // Process all results
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript
+        const transcript = event.results[i][0].transcript.trim()
+
         if (event.results[i].isFinal) {
-          finalTranscript += transcript + ' '
-          lastProcessedIndexRef.current = i // Track last processed index
+          // Android fix: Only add if we haven't seen this exact transcript before
+          if (!processedTranscriptsRef.current.has(transcript)) {
+            newFinalTranscript += transcript + ' '
+            processedTranscriptsRef.current.add(transcript)
+          }
         } else {
           interimTranscript += transcript
         }
       }
 
       // Update final transcript only with new content
-      if (finalTranscript) {
-        finalTranscriptRef.current += finalTranscript
+      if (newFinalTranscript) {
+        finalTranscriptRef.current += newFinalTranscript
       }
 
       // Show current status with interim or final text
@@ -131,7 +130,7 @@ export function WebSpeechRecorder({
 
       // Clear refs
       finalTranscriptRef.current = ''
-      lastProcessedIndexRef.current = -1
+      processedTranscriptsRef.current.clear()
       recognitionRef.current = null
     }
 
