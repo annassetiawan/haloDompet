@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Mic, MicOff, Loader2, Square } from 'lucide-react'
 import { toast } from 'sonner'
-import { useAudioLevel } from '@/hooks/useAudioLevel'
 
 interface IOSMediaRecorderProps {
   onTranscript: (text: string) => void
@@ -24,18 +23,14 @@ export function IOSMediaRecorder({
 }: IOSMediaRecorderProps) {
   const [isRecording, setIsRecording] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
-  const [stream, setStream] = useState<MediaStream | null>(null)
   const recorderRef = useRef<any>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const recordingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Track audio level
-  const audioLevel = useAudioLevel(stream, isRecording)
-
-  // Pass audio level to parent
+  // Pass audio level to parent (always 0 for iOS)
   useEffect(() => {
-    onAudioLevelChange?.(audioLevel)
-  }, [audioLevel, onAudioLevelChange])
+    onAudioLevelChange?.(0)
+  }, [onAudioLevelChange])
 
   const startRecording = async () => {
     try {
@@ -57,7 +52,6 @@ export function IOSMediaRecorder({
 
       console.log('✅ [iOS] Microphone permission granted')
       streamRef.current = mediaStream
-      setStream(mediaStream) // Store for audio level detection
 
       // Create RecordRTC instance with iOS-optimized settings
       const recorder = new RecordRTC(mediaStream, {
@@ -137,7 +131,6 @@ export function IOSMediaRecorder({
           streamRef.current.getTracks().forEach(track => track.stop())
           streamRef.current = null
         }
-        setStream(null) // Clear stream state
 
         recorderRef.current.destroy()
         recorderRef.current = null

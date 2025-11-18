@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Mic, MicOff, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -16,6 +16,15 @@ export function WebSpeechRecorder({
   onStatusChange
 }: WebSpeechRecorderProps) {
   const [isListening, setIsListening] = useState(false)
+  const recognitionRef = useRef<any>(null)
+  const finalTranscriptRef = useRef<string>('')
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop()
+      setIsListening(false)
+    }
+  }
 
   const handleListen = async () => {
     // Check browser support
@@ -30,22 +39,41 @@ export function WebSpeechRecorder({
     const recognition = new SpeechRecognition()
 
     recognition.lang = 'id-ID'
-    recognition.continuous = false
-    recognition.interimResults = false
+    recognition.continuous = true  // Allow continuous recording until manually stopped
+    recognition.interimResults = true  // Get interim results for better UX
     recognition.maxAlternatives = 1
+
+    recognitionRef.current = recognition
 
     recognition.onstart = () => {
       setIsListening(true)
-      onStatusChange?.("Mendengarkan... (Ucapkan pengeluaran Anda)")
+      finalTranscriptRef.current = ''
+      onStatusChange?.("Merekam... (Klik lagi untuk berhenti)")
     }
 
-    recognition.onresult = async (event: any) => {
-      const transcript = event.results[0][0].transcript
-      setIsListening(false)
-      onStatusChange?.(`Terdeteksi: "${transcript}"`)
+    recognition.onresult = (event: any) => {
+      let interimTranscript = ''
+      let finalTranscript = ''
 
-      // Pass transcript to parent (parent will handle processing state)
-      onTranscript(transcript)
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript + ' '
+        } else {
+          interimTranscript += transcript
+        }
+      }
+
+      // Update final transcript
+      if (finalTranscript) {
+        finalTranscriptRef.current += finalTranscript
+      }
+
+      // Show current status with interim or final text
+      const currentText = (finalTranscriptRef.current + interimTranscript).trim()
+      if (currentText) {
+        onStatusChange?.(`Merekam: "${currentText}"`)
+      }
     }
 
     recognition.onerror = (event: any) => {
@@ -69,7 +97,20 @@ export function WebSpeechRecorder({
 
     recognition.onend = () => {
       setIsListening(false)
-      // Don't reset status here - let parent handle it
+
+      // Send final transcript to parent if we have any
+      const finalText = finalTranscriptRef.current.trim()
+      if (finalText) {
+        onStatusChange?.(`Terdeteksi: "${finalText}"`)
+        onTranscript(finalText)
+      } else {
+        onStatusChange?.("Tidak ada suara terdeteksi")
+        toast.info("Tidak ada suara terdeteksi. Coba lagi!")
+      }
+
+      // Clear ref
+      finalTranscriptRef.current = ''
+      recognitionRef.current = null
     }
 
     // Start listening
@@ -97,7 +138,9 @@ export function WebSpeechRecorder({
         htmlFor="record-checkbox"
         onClick={(e) => {
           e.preventDefault()
-          if (!isListening) {
+          if (isListening) {
+            stopListening()
+          } else {
             handleListen()
           }
         }}
