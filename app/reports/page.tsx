@@ -603,11 +603,11 @@ export default function ReportsPage() {
             </TabsContent>
 
             {/* Tab 2: Charts - All Visualizations */}
-            <TabsContent value="charts" className="space-y-3 md:space-y-4">
+            <TabsContent value="charts" className="w-full space-y-3 md:space-y-4">
             {/* Bar Chart - Top Categories */}
-            <div className="bg-card border border-border rounded-xl shadow-sm">
+            <div className="w-full bg-card border border-border rounded-xl shadow-sm">
               {/* Header */}
-              <div className="p-4 md:p-6 border-b border-border">
+              <div className="p-4 md:p-6 border-b border-border w-full">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
                     <BarChart3 className="h-5 w-5 text-primary" />
@@ -624,10 +624,11 @@ export default function ReportsPage() {
               </div>
 
               {/* Content - Chart */}
-              <div className="p-4 md:p-6 min-w-0 w-full">
-                <ChartContainer config={barChartConfig} className="h-[300px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+              <div className="p-4 md:p-6 w-full">
+                <div className="w-full h-[350px]">
+                  <ChartContainer config={barChartConfig} className="h-full w-full aspect-auto min-w-[100%]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={barChartData} margin={{ top: 20, right: 0, left: 0, bottom: 60 }}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                       <XAxis
                         dataKey="category"
@@ -680,9 +681,9 @@ export default function ReportsPage() {
             </div>
 
             {/* Pie Chart - Category Distribution */}
-            <div className="bg-card border border-border rounded-xl shadow-sm">
+            <div className="w-full bg-card border border-border rounded-xl shadow-sm">
               {/* Header */}
-              <div className="p-4 md:p-6 border-b border-border">
+              <div className="p-4 md:p-6 border-b border-border w-full">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
                     <Tag className="h-5 w-5 text-primary" />
@@ -700,9 +701,10 @@ export default function ReportsPage() {
 
               {/* Content - Chart */}
               <div className="p-4 md:p-6 w-full">
-                <ChartContainer config={pieChartConfig} className="mx-auto aspect-square max-h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
+                <div className="w-full h-[350px]">
+                  <ChartContainer config={pieChartConfig} className="h-full w-full aspect-auto min-w-[100%]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
                       <ChartTooltip
                         content={
                           <ChartTooltipContent
@@ -738,6 +740,7 @@ export default function ReportsPage() {
                     </PieChart>
                   </ResponsiveContainer>
                 </ChartContainer>
+                </div>
               </div>
 
               {/* Footer */}
@@ -748,9 +751,9 @@ export default function ReportsPage() {
             </div>
 
             {/* Line Chart - Daily Spending Trend */}
-            <div className="bg-card border border-border rounded-xl shadow-sm">
+            <div className="w-full bg-card border border-border rounded-xl shadow-sm">
               {/* Header */}
-              <div className="p-4 md:p-6 border-b border-border">
+              <div className="p-4 md:p-6 border-b border-border w-full">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
                     <TrendingUp className="h-5 w-5 text-primary" />
@@ -767,10 +770,11 @@ export default function ReportsPage() {
               </div>
 
               {/* Content - Chart */}
-              <div className="p-4 md:p-6 min-w-0 w-full">
-                <ChartContainer config={lineChartConfig} className="h-[300px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={lineChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <div className="p-4 md:p-6 w-full">
+                <div className="w-full h-[350px]">
+                  <ChartContainer config={lineChartConfig} className="h-full w-full aspect-auto min-w-[100%]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={lineChartData} margin={{ top: 20, right: 0, left: 0, bottom: 20 }}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                       <XAxis
                         dataKey="date"
@@ -816,6 +820,7 @@ export default function ReportsPage() {
                     </LineChart>
                   </ResponsiveContainer>
                 </ChartContainer>
+                </div>
               </div>
 
               {/* Footer */}
