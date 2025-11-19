@@ -460,11 +460,21 @@ export default function HomePage() {
       <main className="md:pt-16 pb-20 md:pb-0">
         <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
           {/* Header Section */}
-          <div className="space">
-            <h1 className="text-2xl font-bold tracking-tight">HaloDompet</h1>
-            <p className="text-sm text-muted-foreground">
-              {user?.email || 'Voice-powered expense tracker'}
-            </p>
+          <div className="bg-[#f5f5f5] dark:bg-muted/20 px-6 py-4 rounded-b-2xl -mx-4">
+            <div className="flex justify-between items-center">
+              {/* Left: App Title & Greeting */}
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight">HaloDompet</h1>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Hai, <span className="font-medium">{user?.user_metadata?.full_name?.split(' ')[0] || user?.user_metadata?.name?.split(' ')[0] || user?.email?.split('@')[0]}</span> 👋
+                </p>
+              </div>
+
+              {/* Right: Dark Mode Toggle */}
+              <div className="md:hidden">
+                <DarkModeToggle />
+              </div>
+            </div>
           </div>
 
           {/* Trial Warning Banner */}
