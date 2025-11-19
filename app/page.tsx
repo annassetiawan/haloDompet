@@ -460,9 +460,9 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="md:pt-16 pb-20 md:pb-0">
-        <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+        <div className="max-w-2xl mx-auto">
           {/* Header Section */}
-          <div className="flex flex-row justify-between items-center">
+          <div className="bg-[#f5f5f5] dark:bg-muted/20 px-6 py-4 rounded-b-3xl flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold tracking-tight">HaloDompet</h1>
               <p className="text-sm text-muted-foreground">
@@ -480,8 +480,10 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Trial Warning Banner */}
-          <TrialWarningBanner profile={userProfile} />
+          {/* Content Section */}
+          <div className="px-4 py-6 space-y-6">
+            {/* Trial Warning Banner */}
+            <TrialWarningBanner profile={userProfile} />
 
           {/* Wallet Carousel - Multi-Wallet Display */}
           <WalletCarousel
@@ -615,6 +617,7 @@ export default function HomePage() {
                 </div>
               </div>
             )}
+          </div>
         </div>
       </main>
 
