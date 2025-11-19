@@ -41,6 +41,32 @@ export function WalletCarousel({
     return 'Rp ' + '•'.repeat(amount.toString().replace(/[^0-9]/g, '').length)
   }
 
+  // Helper function to get responsive font size based on amount length
+  const getBalanceFontSize = (amount: number): string => {
+    const formatted = formatCurrency(amount)
+    const length = formatted.length
+
+    if (length <= 12) return 'text-3xl' // e.g., "Rp 100.000"
+    if (length <= 16) return 'text-2xl' // e.g., "Rp 10.000.000"
+    return 'text-xl' // e.g., "Rp 100.000.000"
+  }
+
+  // Color mapping for multi-color gradients
+  const colorGradients: Record<string, string> = {
+    '#10b981': '#059669', // Emerald
+    '#3b82f6': '#2563eb', // Blue
+    '#f59e0b': '#f97316', // Orange
+    '#ef4444': '#dc2626', // Red
+    '#8b5cf6': '#7c3aed', // Purple
+    '#ec4899': '#db2777', // Pink
+    '#06b6d4': '#0891b2', // Cyan
+    '#84cc16': '#65a30d', // Lime
+  }
+
+  const getSecondaryColor = (primaryColor: string): string => {
+    return colorGradients[primaryColor] || primaryColor
+  }
+
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -117,7 +143,7 @@ export function WalletCarousel({
               </div>
 
               <div>
-                <p className="text-3xl font-bold text-white tracking-tight">
+                <p className={`${getBalanceFontSize(totalBalance)} font-bold text-white tracking-tight`}>
                   {isVisible ? formatCurrency(totalBalance) : maskedAmount(totalBalance)}
                 </p>
               </div>
@@ -134,7 +160,7 @@ export function WalletCarousel({
             <div
               className="relative overflow-hidden rounded-2xl h-48 p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer group"
               style={{
-                background: `linear-gradient(135deg, ${wallet.color || '#10b981'} 0%, ${wallet.color || '#10b981'}dd 100%)`
+                background: `linear-gradient(135deg, ${wallet.color || '#10b981'} 0%, ${getSecondaryColor(wallet.color || '#10b981')} 100%)`
               }}
             >
               {/* Decorative blur circles */}
@@ -186,7 +212,7 @@ export function WalletCarousel({
                 {/* Footer: Balance */}
                 <div>
                   <p className="text-xs text-white/70 mb-1">Saldo Aktif</p>
-                  <p className="text-3xl font-bold text-white">
+                  <p className={`${getBalanceFontSize(wallet.balance)} font-bold text-white`}>
                     {isVisible ? formatCurrency(wallet.balance) : maskedAmount(wallet.balance)}
                   </p>
                 </div>

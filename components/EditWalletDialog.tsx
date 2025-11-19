@@ -38,14 +38,14 @@ const walletIcons = [
 ]
 
 const walletColors = [
-  { value: '#10b981', label: 'Green' },
-  { value: '#3b82f6', label: 'Blue' },
-  { value: '#f59e0b', label: 'Orange' },
-  { value: '#ef4444', label: 'Red' },
-  { value: '#8b5cf6', label: 'Purple' },
-  { value: '#ec4899', label: 'Pink' },
-  { value: '#06b6d4', label: 'Cyan' },
-  { value: '#84cc16', label: 'Lime' },
+  { value: '#10b981', secondary: '#059669', label: 'Emerald' },
+  { value: '#3b82f6', secondary: '#2563eb', label: 'Blue' },
+  { value: '#f59e0b', secondary: '#f97316', label: 'Orange' },
+  { value: '#ef4444', secondary: '#dc2626', label: 'Red' },
+  { value: '#8b5cf6', secondary: '#7c3aed', label: 'Purple' },
+  { value: '#ec4899', secondary: '#db2777', label: 'Pink' },
+  { value: '#06b6d4', secondary: '#0891b2', label: 'Cyan' },
+  { value: '#84cc16', secondary: '#65a30d', label: 'Lime' },
 ]
 
 export function EditWalletDialog({ open, onOpenChange, wallet, onSuccess }: EditWalletDialogProps) {
@@ -270,7 +270,7 @@ export function EditWalletDialog({ open, onOpenChange, wallet, onSuccess }: Edit
                       <div
                         className="w-full h-full"
                         style={{
-                          background: `linear-gradient(135deg, ${color.value} 0%, ${color.value}dd 100%)`
+                          background: `linear-gradient(135deg, ${color.value} 0%, ${color.secondary} 100%)`
                         }}
                       />
                     </button>
