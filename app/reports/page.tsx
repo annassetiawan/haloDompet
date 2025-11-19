@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
+import { BottomNav } from '@/components/BottomNav'
 import { ArrowLeft, TrendingDown, Calendar, Tag, Download, BarChart3, TrendingUp, ArrowUp, ArrowDown, Minus, Sparkles, AlertCircle, Wallet } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 import type { Transaction } from '@/types'
@@ -441,7 +442,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <main className="relative min-h-screen flex flex-col p-4 md:p-8 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
+    <><main className="relative min-h-screen flex flex-col p-4 md:p-8 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
       <div className="relative z-10 w-full max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between animate-slide-down">
@@ -478,9 +479,9 @@ export default function ReportsPage() {
         {/* Month Selector */}
         <div className="flex gap-2 overflow-x-auto pb-2 animate-slide-down">
           {[-2, -1, 0, 1].map(offset => {
-            const date = new Date()
-            date.setMonth(date.getMonth() + offset)
-            const isSelected = format(date, 'yyyy-MM') === format(selectedMonth, 'yyyy-MM')
+            const date = new Date();
+            date.setMonth(date.getMonth() + offset);
+            const isSelected = format(date, 'yyyy-MM') === format(selectedMonth, 'yyyy-MM');
 
             return (
               <Button
@@ -492,7 +493,7 @@ export default function ReportsPage() {
               >
                 {format(date, 'MMM yyyy', { locale: idLocale })}
               </Button>
-            )
+            );
           })}
         </div>
 
@@ -685,8 +686,7 @@ export default function ReportsPage() {
                           ? 'bg-amber-500/5 border-amber-500/20 dark:bg-amber-500/10'
                           : insight.type === 'success'
                             ? 'bg-green-500/5 border-green-500/20 dark:bg-green-500/10'
-                            : 'bg-blue-500/5 border-blue-500/20 dark:bg-blue-500/10'
-                          }`}
+                            : 'bg-blue-500/5 border-blue-500/20 dark:bg-blue-500/10'}`}
                       >
                         {insight.type === 'warning' ? (
                           <AlertCircle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
@@ -738,33 +738,25 @@ export default function ReportsPage() {
                             height={30}
                             tickMargin={10}
                             className="text-xs"
-                            tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                          />
+                            tick={{ fill: 'hsl(var(--muted-foreground))' }} />
                           <YAxis
                             className="text-xs"
                             tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                            tickFormatter={(value) =>
-                              new Intl.NumberFormat('id-ID', {
-                                notation: 'compact',
-                                compactDisplay: 'short',
-                              }).format(value)
-                            }
-                          />
+                            tickFormatter={(value) => new Intl.NumberFormat('id-ID', {
+                              notation: 'compact',
+                              compactDisplay: 'short',
+                            }).format(value)} />
                           <ChartTooltip
-                            content={
-                              <ChartTooltipContent
-                                labelFormatter={(value: any) => value}
-                                formatter={(value: any, name: any) => [
-                                  new Intl.NumberFormat('id-ID', {
-                                    style: 'currency',
-                                    currency: 'IDR',
-                                    minimumFractionDigits: 0,
-                                  }).format(value as number),
-                                  'Total'
-                                ]}
-                              />
-                            }
-                          />
+                            content={<ChartTooltipContent
+                              labelFormatter={(value: any) => value}
+                              formatter={(value: any, name: any) => [
+                                new Intl.NumberFormat('id-ID', {
+                                  style: 'currency',
+                                  currency: 'IDR',
+                                  minimumFractionDigits: 0,
+                                }).format(value as number),
+                                'Total'
+                              ]} />} />
                           <Bar dataKey="amount" radius={[8, 8, 0, 0]}>
                             {incomeVsExpenseData.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -781,8 +773,7 @@ export default function ReportsPage() {
                     <span>
                       {netBalance >= 0
                         ? `Surplus ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(netBalance)} - Keuangan sehat!`
-                        : `Defisit ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(Math.abs(netBalance))} - Kurangi pengeluaran!`
-                      }
+                        : `Defisit ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(Math.abs(netBalance))} - Kurangi pengeluaran!`}
                     </span>
                   </div>
                 </div>
@@ -819,33 +810,25 @@ export default function ReportsPage() {
                             height={30}
                             tickMargin={10}
                             className="text-xs"
-                            tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                          />
+                            tick={{ fill: 'hsl(var(--muted-foreground))' }} />
                           <YAxis
                             className="text-xs"
                             tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                            tickFormatter={(value) =>
-                              new Intl.NumberFormat('id-ID', {
-                                notation: 'compact',
-                                compactDisplay: 'short',
-                              }).format(value)
-                            }
-                          />
+                            tickFormatter={(value) => new Intl.NumberFormat('id-ID', {
+                              notation: 'compact',
+                              compactDisplay: 'short',
+                            }).format(value)} />
                           <ChartTooltip
-                            content={
-                              <ChartTooltipContent
-                                labelFormatter={(value: any) => value}
-                                formatter={(value: any, name: any) => [
-                                  new Intl.NumberFormat('id-ID', {
-                                    style: 'currency',
-                                    currency: 'IDR',
-                                    minimumFractionDigits: 0,
-                                  }).format(value as number),
-                                  'Total'
-                                ]}
-                              />
-                            }
-                          />
+                            content={<ChartTooltipContent
+                              labelFormatter={(value: any) => value}
+                              formatter={(value: any, name: any) => [
+                                new Intl.NumberFormat('id-ID', {
+                                  style: 'currency',
+                                  currency: 'IDR',
+                                  minimumFractionDigits: 0,
+                                }).format(value as number),
+                                'Total'
+                              ]} />} />
                           <Bar dataKey="amount" radius={[8, 8, 0, 0]}>
                             {barChartData.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -890,20 +873,16 @@ export default function ReportsPage() {
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <ChartTooltip
-                            content={
-                              <ChartTooltipContent
-                                labelFormatter={(value: any) => value}
-                                formatter={(value: any, name: any) => [
-                                  new Intl.NumberFormat('id-ID', {
-                                    style: 'currency',
-                                    currency: 'IDR',
-                                    minimumFractionDigits: 0,
-                                  }).format(value as number),
-                                  name
-                                ]}
-                              />
-                            }
-                          />
+                            content={<ChartTooltipContent
+                              labelFormatter={(value: any) => value}
+                              formatter={(value: any, name: any) => [
+                                new Intl.NumberFormat('id-ID', {
+                                  style: 'currency',
+                                  currency: 'IDR',
+                                  minimumFractionDigits: 0,
+                                }).format(value as number),
+                                name
+                              ]} />} />
                           <Pie
                             data={pieChartData}
                             dataKey="value"
@@ -912,8 +891,8 @@ export default function ReportsPage() {
                             cy="50%"
                             outerRadius={80}
                             label={(props: any) => {
-                              const entry = pieChartData.find(e => e.name === props.name)
-                              return entry ? `${props.name} (${entry.percentage.toFixed(1)}%)` : props.name
+                              const entry = pieChartData.find(e => e.name === props.name);
+                              return entry ? `${props.name} (${entry.percentage.toFixed(1)}%)` : props.name;
                             }}
                             labelLine={true}
                           >
@@ -965,41 +944,32 @@ export default function ReportsPage() {
                             height={30}
                             tickMargin={10}
                             className="text-xs"
-                            tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                          />
+                            tick={{ fill: 'hsl(var(--muted-foreground))' }} />
                           <YAxis
                             className="text-xs"
                             tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                            tickFormatter={(value) =>
-                              new Intl.NumberFormat('id-ID', {
-                                notation: 'compact',
-                                compactDisplay: 'short',
-                              }).format(value)
-                            }
-                          />
+                            tickFormatter={(value) => new Intl.NumberFormat('id-ID', {
+                              notation: 'compact',
+                              compactDisplay: 'short',
+                            }).format(value)} />
                           <ChartTooltip
-                            content={
-                              <ChartTooltipContent
-                                labelFormatter={(value: any) => value}
-                                formatter={(value: any, name: any) => [
-                                  new Intl.NumberFormat('id-ID', {
-                                    style: 'currency',
-                                    currency: 'IDR',
-                                    minimumFractionDigits: 0,
-                                  }).format(value as number),
-                                  'Pengeluaran'
-                                ]}
-                              />
-                            }
-                          />
+                            content={<ChartTooltipContent
+                              labelFormatter={(value: any) => value}
+                              formatter={(value: any, name: any) => [
+                                new Intl.NumberFormat('id-ID', {
+                                  style: 'currency',
+                                  currency: 'IDR',
+                                  minimumFractionDigits: 0,
+                                }).format(value as number),
+                                'Pengeluaran'
+                              ]} />} />
                           <Line
                             type="monotone"
                             dataKey="amount"
                             stroke={chartColors[1]}
                             strokeWidth={2}
                             dot={{ fill: chartColors[1], r: 4 }}
-                            activeDot={{ r: 6 }}
-                          />
+                            activeDot={{ r: 6 }} />
                         </LineChart>
                       </ResponsiveContainer>
                     </ChartContainer>
@@ -1055,8 +1025,7 @@ export default function ReportsPage() {
                       <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-primary/70 rounded-full transition-all duration-500"
-                          style={{ width: `${percentage}%` }}
-                        />
+                          style={{ width: `${percentage}%` }} />
                       </div>
                     </div>
                   ))}
@@ -1066,6 +1035,7 @@ export default function ReportsPage() {
           </Tabs>
         )}
       </div>
-    </main>
+    </main><BottomNav /></>
   )
+
 }
