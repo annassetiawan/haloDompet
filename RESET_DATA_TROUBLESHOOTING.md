@@ -190,13 +190,34 @@ SELECT id, email, is_onboarded, current_balance FROM public.users WHERE id = aut
 
 The reset process uses a PostgreSQL function `reset_user_data()` that:
 
-1. **Disables trigger** `auto_update_wallet_balance` temporarily
-2. **Deletes all transactions** for the user
-3. **Re-enables trigger**
-4. **Resets wallet balances** to 0
-5. **Resets user balance** to 0
+1. **Loops through each transaction** and deletes one by one
+2. Each DELETE triggers `auto_update_wallet_balance` separately (no batch conflict)
+3. After all deletions, **force reset wallet balances** to 0
+4. **Resets user balance** to 0
 
-This approach avoids the "tuple already modified" error that occurs when triggers try to update the same row being updated by the main query.
+### Why One-by-One?
+
+**Batch DELETE Problem:**
+```sql
+-- This causes conflict:
+DELETE FROM transactions WHERE user_id = 'xxx';
+-- Trigger fires for ALL rows in single statement
+-- Multiple transactions with same wallet_id → tries to UPDATE same wallet multiple times
+-- PostgreSQL: "tuple already modified" error
+```
+
+**FOR LOOP Solution:**
+```sql
+-- This works:
+FOR transaction_id IN SELECT id FROM transactions...
+LOOP
+  DELETE FROM transactions WHERE id = transaction_id;  -- Single row
+  -- Trigger fires once, updates wallet
+  -- Next iteration: separate statement, no conflict
+END LOOP;
+```
+
+Each DELETE in the loop is a **separate statement**, so triggers don't conflict with each other.
 
 ## Prevention
 
