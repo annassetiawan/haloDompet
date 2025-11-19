@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { WalletCarousel } from '@/components/WalletCarousel';
+import { WalletSelector } from '@/components/WalletSelector';
+import { AddWalletDialog } from '@/components/AddWalletDialog';
+import { EditWalletDialog } from '@/components/EditWalletDialog';
 import { TransactionCard } from '@/components/TransactionCard';
 import { TrialWarningBanner } from '@/components/trial-warning-banner';
 import { DarkModeToggle } from '@/components/DarkModeToggle';
@@ -37,6 +40,12 @@ export default function HomePage() {
   // Review dialog state
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [editedTranscript, setEditedTranscript] = useState("");
+
+  // Wallet management state
+  const [isAddWalletOpen, setIsAddWalletOpen] = useState(false);
+  const [isEditWalletOpen, setIsEditWalletOpen] = useState(false);
+  const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null);
+  const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
 
   const router = useRouter();
   const supabase = createClient();
@@ -153,18 +162,33 @@ export default function HomePage() {
   // Handle confirm from review dialog
   const handleConfirmTranscript = async () => {
     setIsReviewOpen(false);
-    await processTranscript(editedTranscript);
+    await processTranscript(editedTranscript, selectedWalletId);
   };
 
   // Handle cancel from review dialog
   const handleCancelTranscript = () => {
     setIsReviewOpen(false);
     setEditedTranscript("");
+    setSelectedWalletId(null);
     setStatus("Siap merekam");
   };
 
+  // Handle wallet management
+  const handleAddWallet = () => {
+    setIsAddWalletOpen(true);
+  };
+
+  const handleEditWallet = (wallet: Wallet) => {
+    setSelectedWallet(wallet);
+    setIsEditWalletOpen(true);
+  };
+
+  const handleWalletSuccess = () => {
+    loadWallets();
+  };
+
   // Process transcript (called after user confirms in dialog)
-  const processTranscript = async (transcript: string) => {
+  const processTranscript = async (transcript: string, walletId: string | null = null) => {
     setIsProcessing(true);
     setStatus(`Memproses: "${transcript}"`);
 
@@ -207,6 +231,7 @@ export default function HomePage() {
           voice_text: transcript,
           location: processData.data.location || null,
           payment_method: processData.data.payment_method || null,
+          wallet_id: walletId, // Use selected wallet or default
         }),
       });
 
@@ -314,6 +339,8 @@ export default function HomePage() {
             wallets={wallets}
             totalBalance={totalBalance}
             isLoading={isLoadingWallets}
+            onAddWallet={handleAddWallet}
+            onEditWallet={handleEditWallet}
           />
 
           {/* Voice Recording Section */}
@@ -431,6 +458,14 @@ export default function HomePage() {
                 Anda dapat mengedit teks di atas jika ada kesalahan deteksi.
               </p>
             </div>
+
+            {/* Wallet Selector */}
+            <WalletSelector
+              wallets={wallets}
+              selectedWalletId={selectedWalletId}
+              onSelectWallet={setSelectedWalletId}
+              isLoading={isLoadingWallets}
+            />
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button
@@ -452,6 +487,21 @@ export default function HomePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Add Wallet Dialog */}
+      <AddWalletDialog
+        open={isAddWalletOpen}
+        onOpenChange={setIsAddWalletOpen}
+        onSuccess={handleWalletSuccess}
+      />
+
+      {/* Edit Wallet Dialog */}
+      <EditWalletDialog
+        open={isEditWalletOpen}
+        onOpenChange={setIsEditWalletOpen}
+        wallet={selectedWallet}
+        onSuccess={handleWalletSuccess}
+      />
     </div>
   );
 }

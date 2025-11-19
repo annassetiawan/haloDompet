@@ -1,9 +1,15 @@
 "use client";
 
 import { useState } from 'react'
-import { Eye, EyeOff, Plus, Wallet as WalletIcon } from 'lucide-react'
+import { Eye, EyeOff, Plus, Wallet as WalletIcon, MoreVertical, Edit, Star } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import type { Wallet } from '@/types'
 
 interface WalletCarouselProps {
@@ -11,13 +17,15 @@ interface WalletCarouselProps {
   totalBalance: number
   isLoading?: boolean
   onAddWallet?: () => void
+  onEditWallet?: (wallet: Wallet) => void
 }
 
 export function WalletCarousel({
   wallets,
   totalBalance,
   isLoading = false,
-  onAddWallet
+  onAddWallet,
+  onEditWallet
 }: WalletCarouselProps) {
   const [isVisible, setIsVisible] = useState(true)
 
@@ -130,6 +138,33 @@ export function WalletCarousel({
                     )}
                   </div>
                 </div>
+
+                {/* More Options Menu */}
+                {onEditWallet && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onEditWallet(wallet)}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit Dompet
+                      </DropdownMenuItem>
+                      {!wallet.is_default && (
+                        <DropdownMenuItem onClick={() => onEditWallet(wallet)}>
+                          <Star className="mr-2 h-4 w-4" />
+                          Jadikan Default
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
 
               <div className="mt-6">
