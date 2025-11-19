@@ -260,17 +260,18 @@ export function EditWalletDialog({ open, onOpenChange, wallet, onSuccess }: Edit
                       type="button"
                       onClick={() => setSelectedColor(color.value)}
                       disabled={isLoading}
-                      className={`h-10 rounded-lg border-2 transition-all hover:scale-105 ${
+                      className={`h-12 rounded-lg border-2 transition-all hover:scale-105 overflow-hidden ${
                         selectedColor === color.value
                           ? 'border-foreground ring-2 ring-offset-2 ring-foreground/50'
                           : 'border-border'
                       }`}
-                      style={{ backgroundColor: `${color.value}30` }}
                       title={color.label}
                     >
                       <div
-                        className="w-6 h-6 rounded-full mx-auto"
-                        style={{ backgroundColor: color.value }}
+                        className="w-full h-full"
+                        style={{
+                          background: `linear-gradient(135deg, ${color.value} 0%, ${color.value}dd 100%)`
+                        }}
                       />
                     </button>
                   ))}

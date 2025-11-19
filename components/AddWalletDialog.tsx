@@ -179,17 +179,18 @@ export function AddWalletDialog({ open, onOpenChange, onSuccess }: AddWalletDial
                     type="button"
                     onClick={() => setSelectedColor(color.value)}
                     disabled={isLoading}
-                    className={`h-10 rounded-lg border-2 transition-all hover:scale-105 ${
+                    className={`h-12 rounded-lg border-2 transition-all hover:scale-105 overflow-hidden ${
                       selectedColor === color.value
                         ? 'border-foreground ring-2 ring-offset-2 ring-foreground/50'
                         : 'border-border'
                     }`}
-                    style={{ backgroundColor: `${color.value}30` }}
                     title={color.label}
                   >
                     <div
-                      className="w-6 h-6 rounded-full mx-auto"
-                      style={{ backgroundColor: color.value }}
+                      className="w-full h-full"
+                      style={{
+                        background: `linear-gradient(135deg, ${color.value} 0%, ${color.value}dd 100%)`
+                      }}
                     />
                   </button>
                 ))}
@@ -200,23 +201,35 @@ export function AddWalletDialog({ open, onOpenChange, onSuccess }: AddWalletDial
             <div className="space-y-2">
               <Label>Preview</Label>
               <div
-                className="p-4 rounded-xl border"
+                className="relative overflow-hidden rounded-2xl h-32 p-4 text-white shadow-lg"
                 style={{
-                  background: `linear-gradient(135deg, ${selectedColor}15 0%, ${selectedColor}05 100%)`
+                  background: `linear-gradient(135deg, ${selectedColor} 0%, ${selectedColor}dd 100%)`
                 }}
               >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-xl"
-                    style={{ backgroundColor: `${selectedColor}20` }}
-                  >
-                    {selectedIcon}
+                {/* Decorative blur circles */}
+                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-2xl -mr-8 -mt-8" />
+                <div className="absolute bottom-0 left-0 w-16 h-16 bg-black/10 rounded-full blur-xl" />
+
+                <div className="relative z-10 flex flex-col justify-between h-full">
+                  {/* Header */}
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-xs font-medium text-white/80 uppercase tracking-wider mb-1">
+                        Dompet
+                      </p>
+                      <h3 className="text-base font-bold text-white">
+                        {name || 'Nama Dompet'}
+                      </h3>
+                    </div>
+                    <div className="bg-white/20 p-1.5 rounded-lg backdrop-blur-sm">
+                      <span className="text-lg">{selectedIcon}</span>
+                    </div>
                   </div>
+
+                  {/* Footer: Balance */}
                   <div>
-                    <p className="font-medium text-foreground">
-                      {name || 'Nama Dompet'}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs text-white/70 mb-0.5">Saldo Awal</p>
+                    <p className="text-xl font-bold text-white">
                       Rp {parseFloat(balance || '0').toLocaleString('id-ID')}
                     </p>
                   </div>
