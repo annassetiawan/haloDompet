@@ -167,18 +167,17 @@ export function AnimatedRecordButton({
             transition-all duration-300 ease-out
             disabled:opacity-50 disabled:cursor-not-allowed
             focus:outline-none
-            ${state === 'recording' ? 'recording-active' : ''}
+            border-4
+            ${state === 'recording'
+              ? 'recording-active border-red-500/30 shadow-[inset_-2px_-2px_0_#cccccc,inset_2px_2px_0_#e6e6e6] dark:shadow-[inset_-2px_-2px_0_#5e5e5e,inset_2px_2px_0_#1c1c1c]'
+              : 'border-gray-200 dark:border-[#090909] shadow-[inset_2px_2px_5px_#d1d1d1,inset_-2px_-2px_5px_#ffffff] dark:shadow-[inset_2px_2px_0_#7d7c7e,inset_-2px_-2px_0px_#1c1c1c]'
+            }
+            bg-[linear-gradient(145deg,#ffffff,#e6e6e6)]
+            dark:bg-[linear-gradient(145deg,#171717,#444245)]
           `}
           style={{
             width: sizes.container,
             height: sizes.container,
-            background: 'linear-gradient(145deg, #171717, #444245)',
-            boxShadow: state === 'recording'
-              ? 'inset -2px -2px 0 #5e5e5e, inset 2px 2px 0 #1c1c1c'
-              : 'inset 2px 2px 0 #7d7c7e, inset -2px -2px 0px #1c1c1c',
-            border: state === 'recording'
-              ? '4px solid rgba(239, 68, 68, 0.3)'
-              : '4px solid #090909',
           }}
           variants={prefersReducedMotion ? {} : containerVariants}
           animate={state}
@@ -197,32 +196,27 @@ export function AnimatedRecordButton({
           >
             {state === 'idle' && (
               <Mic
-                className="w-full h-full"
-                style={{ color: '#9ca3af' }}
+                className="w-full h-full text-gray-700 dark:text-gray-400"
               />
             )}
             {state === 'recording' && (
               <Mic
-                className="w-full h-full recording-icon"
-                style={{ color: 'rgb(239, 68, 68)' }}
+                className="w-full h-full recording-icon text-red-500"
               />
             )}
             {state === 'processing' && (
               <Loader2
-                className="w-full h-full animate-spin"
-                style={{ color: 'rgb(59, 130, 246)' }}
+                className="w-full h-full animate-spin text-blue-500"
               />
             )}
             {state === 'success' && (
               <Check
-                className="w-full h-full"
-                style={{ color: 'rgb(34, 197, 94)' }}
+                className="w-full h-full text-green-500"
               />
             )}
             {state === 'error' && (
               <X
-                className="w-full h-full"
-                style={{ color: 'rgb(239, 68, 68)' }}
+                className="w-full h-full text-red-500"
               />
             )}
           </motion.div>
