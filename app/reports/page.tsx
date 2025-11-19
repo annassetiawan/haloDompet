@@ -624,23 +624,16 @@ export default function ReportsPage() {
 
                 {/* Content - Chart */}
                 <div className="p-4 md:p-6 w-full">
-                  <div className="w-full h-[350px]">
+                  <div className="w-full h-[250px] md:h-[350px]">
                     <ChartContainer config={barChartConfig} className="h-full w-full aspect-auto min-w-[100%]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={barChartData} margin={{ top: 20, right: 0, left: 0, bottom: 60 }}>
+                        <BarChart data={barChartData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
                           <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                           <XAxis
                             dataKey="category"
-                            height={30}
+                            height={40}
                             className="text-xs"
                             tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                            tickFormatter={(value) => {
-                              // Truncate long category names on mobile
-                              if (typeof window !== 'undefined' && window.innerWidth < 768) {
-                                return value.length > 4 ? value.substring(0, 3) + '...' : value;
-                              }
-                              return value;
-                            }}
                           />
                           <YAxis
                             className="text-xs"
@@ -776,23 +769,16 @@ export default function ReportsPage() {
 
                 {/* Content - Chart */}
                 <div className="p-4 md:p-6 w-full">
-                  <div className="w-full h-[350px]">
+                  <div className="w-full h-[250px] md:h-[350px]">
                     <ChartContainer config={lineChartConfig} className="h-full w-full aspect-auto min-w-[100%]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={lineChartData} margin={{ top: 20, right: 0, left: 0, bottom: 20 }}>
+                        <LineChart data={lineChartData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
                           <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                           <XAxis
                             dataKey="date"
                             className="text-xs"
                             tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                            height={30}
-                            tickFormatter={(value) => {
-                              // Truncate long date labels on mobile
-                              if (typeof window !== 'undefined' && window.innerWidth < 768) {
-                                return value.length > 4 ? value.substring(0, 3) + '...' : value;
-                              }
-                              return value;
-                            }}
+                            height={40}
                           />
                           <YAxis
                             className="text-xs"
