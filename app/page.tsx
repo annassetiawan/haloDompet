@@ -8,6 +8,7 @@ import { WalletCarousel } from '@/components/WalletCarousel';
 import { WalletSelector } from '@/components/WalletSelector';
 import { AddWalletDialog } from '@/components/AddWalletDialog';
 import { EditWalletDialog } from '@/components/EditWalletDialog';
+import { ManualTransactionDialog } from '@/components/ManualTransactionDialog';
 import { TransactionCard } from '@/components/TransactionCard';
 import { TrialWarningBanner } from '@/components/trial-warning-banner';
 import { DarkModeToggle } from '@/components/DarkModeToggle';
@@ -17,7 +18,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Mic, MicOff, Settings, Loader2, LogOut, History, ArrowRight, BarChart3, Menu, Sparkles, CheckCircle2, XCircle } from 'lucide-react';
+import { Mic, MicOff, Settings, Loader2, LogOut, History, ArrowRight, BarChart3, Menu, Sparkles, CheckCircle2, XCircle, PlusCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import type { User } from '@supabase/supabase-js';
 import type { User as UserProfile, Transaction, Wallet } from '@/types';
@@ -46,6 +47,9 @@ export default function HomePage() {
   const [isEditWalletOpen, setIsEditWalletOpen] = useState(false);
   const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null);
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
+
+  // Manual transaction dialog state
+  const [isManualTransactionOpen, setIsManualTransactionOpen] = useState(false);
 
   const router = useRouter();
   const supabase = createClient();
@@ -350,6 +354,17 @@ export default function HomePage() {
               onStatusChange={handleStatusChange}
             />
 
+            {/* Manual Transaction Button */}
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => setIsManualTransactionOpen(true)}
+              className="gap-2 border-2 border-dashed hover:border-solid hover:bg-primary/10"
+            >
+              <PlusCircle className="h-5 w-5" />
+              Input Manual
+            </Button>
+
             {/* Status Card */}
             <div className="w-full max-w-md space-y-3">
               <div className="px-6 py-3 rounded-2xl bg-card border border-border shadow-sm">
@@ -501,6 +516,19 @@ export default function HomePage() {
         onOpenChange={setIsEditWalletOpen}
         wallet={selectedWallet}
         onSuccess={handleWalletSuccess}
+      />
+
+      {/* Manual Transaction Dialog */}
+      <ManualTransactionDialog
+        open={isManualTransactionOpen}
+        onOpenChange={setIsManualTransactionOpen}
+        wallets={wallets}
+        isLoadingWallets={isLoadingWallets}
+        onSuccess={() => {
+          // Reload wallets and transactions after successful manual transaction
+          loadWallets();
+          loadRecentTransactions();
+        }}
       />
     </div>
   );
