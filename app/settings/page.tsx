@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { BottomNav } from '@/components/BottomNav'
 import { AddWalletDialog } from '@/components/AddWalletDialog'
 import { EditWalletDialog } from '@/components/EditWalletDialog'
+import { DarkModeToggle } from '@/components/DarkModeToggle'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -18,7 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { ArrowLeft, Save, Loader2, Wallet, Plus, Edit, Trash2, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, Wallet, Plus, Edit, Trash2, AlertCircle, Moon } from 'lucide-react'
 import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
 import type { User as UserProfile, Wallet as WalletType } from '@/types'
@@ -221,6 +222,34 @@ export default function SettingsPage() {
                     {user?.id}
                   </p>
                 </div>
+              </div>
+            </div>
+
+            {/* App Appearance Section */}
+            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Moon className="h-5 w-5 text-primary" />
+                  <h2 className="text-lg font-normal text-foreground">
+                    Tampilan Aplikasi
+                  </h2>
+                </div>
+              </div>
+
+              {/* Theme Toggle Row */}
+              <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-background/50 hover:bg-accent/50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Moon className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-foreground">Tema Gelap</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Aktifkan mode gelap untuk kenyamanan mata
+                    </p>
+                  </div>
+                </div>
+                <DarkModeToggle />
               </div>
             </div>
 
