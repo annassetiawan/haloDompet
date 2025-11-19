@@ -613,36 +613,36 @@ export default function SettingsPage() {
               <AlertTriangle className="h-5 w-5" />
               Reset Semua Data?
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-3">
-              <p className="font-medium text-foreground">
-                Tindakan ini akan menghapus SEMUA data Anda secara permanen:
-              </p>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>Semua transaksi akan dihapus</li>
-                <li>Saldo semua dompet akan direset ke 0</li>
-                <li>Data tidak dapat dikembalikan</li>
-              </ul>
-              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                <p className="text-xs text-muted-foreground">
-                  <strong className="text-amber-600 dark:text-amber-400">Catatan:</strong> Akun Anda tidak akan dihapus. Anda tetap dapat menggunakan aplikasi setelah reset.
-                </p>
-              </div>
-              <div className="space-y-2 pt-2">
-                <label htmlFor="reset-confirm" className="text-sm font-medium text-foreground">
-                  Ketik <span className="font-bold text-red-600 dark:text-red-400">RESET</span> untuk konfirmasi:
-                </label>
-                <Input
-                  id="reset-confirm"
-                  value={resetConfirmText}
-                  onChange={(e) => setResetConfirmText(e.target.value)}
-                  placeholder="RESET"
-                  className="font-mono"
-                  disabled={isResetting}
-                  autoComplete="off"
-                />
-              </div>
+            <AlertDialogDescription>
+              Tindakan ini akan menghapus SEMUA data Anda secara permanen.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="space-y-3 py-4">
+            <ul className="list-disc list-inside space-y-1 text-sm text-foreground">
+              <li>Semua transaksi akan dihapus</li>
+              <li>Saldo semua dompet akan direset ke 0</li>
+              <li>Data tidak dapat dikembalikan</li>
+            </ul>
+            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+              <p className="text-xs text-muted-foreground">
+                <strong className="text-amber-600 dark:text-amber-400">Catatan:</strong> Akun Anda tidak akan dihapus. Anda tetap dapat menggunakan aplikasi setelah reset.
+              </p>
+            </div>
+            <div className="space-y-2 pt-2">
+              <label htmlFor="reset-confirm" className="text-sm font-medium text-foreground">
+                Ketik <span className="font-bold text-red-600 dark:text-red-400">RESET</span> untuk konfirmasi:
+              </label>
+              <Input
+                id="reset-confirm"
+                value={resetConfirmText}
+                onChange={(e) => setResetConfirmText(e.target.value)}
+                placeholder="RESET"
+                className="font-mono"
+                disabled={isResetting}
+                autoComplete="off"
+              />
+            </div>
+          </div>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isResetting}>Batal</AlertDialogCancel>
             <AlertDialogAction
