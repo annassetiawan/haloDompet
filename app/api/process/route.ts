@@ -31,6 +31,8 @@ export async function POST(request: NextRequest) {
     // Get tanggal hari ini
     const today = new Date().toISOString().split('T')[0];
 
+    console.log('Processing text:', text);
+
     const prompt = `
 Kamu adalah asisten AI yang mengekstrak data keuangan dari teks bahasa Indonesia.
 Kamu bisa menangani PEMASUKAN (Income) dan PENGELUARAN (Expense).
@@ -182,10 +184,27 @@ PENTING:
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
+
+    // Check if response was blocked
+    if (!response || !response.candidates || response.candidates.length === 0) {
+      console.error('Gemini response blocked or empty:', JSON.stringify(response));
+      return NextResponse.json(
+        {
+          error: 'AI tidak dapat memproses input. Coba dengan kalimat yang lebih sederhana.',
+          details: 'Response was blocked or empty'
+        },
+        { status: 500 }
+      );
+    }
+
     let extractedText = response.text();
+
+    console.log('Gemini raw response:', extractedText);
 
     // Bersihkan response dari markdown code blocks jika ada
     extractedText = extractedText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
+    console.log('Cleaned response:', extractedText);
 
     // Parse JSON
     let jsonData;
@@ -251,10 +270,16 @@ PENTING:
 
   } catch (error: any) {
     console.error('API Error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     return NextResponse.json(
       {
         error: 'Internal server error',
-        details: error.message
+        details: error.message,
+        errorType: error.name
       },
       { status: 500 }
     );
