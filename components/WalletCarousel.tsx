@@ -45,10 +45,12 @@ export function WalletCarousel({
     return (
       <div className="space-y-3">
         <div className="h-10 w-32 bg-muted/20 rounded-xl animate-pulse" />
-        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-          {[1, 2].map((i) => (
-            <div key={i} className="min-w-[300px] h-48 bg-muted/20 rounded-3xl animate-pulse" />
-          ))}
+        <div className="w-full overflow-x-auto pb-3 scrollbar-hide">
+          <div className="flex gap-4 px-1">
+            {[1, 2].map((i) => (
+              <div key={i} className="w-80 flex-shrink-0 h-48 bg-muted/20 rounded-3xl animate-pulse" />
+            ))}
+          </div>
         </div>
       </div>
     )
@@ -88,16 +90,17 @@ export function WalletCarousel({
       </div>
 
       {/* Horizontal Scrollable Wallet Cards */}
-      <div className="flex gap-4 overflow-x-auto pb-3 pr-4 -mr-4 scrollbar-hide snap-x snap-mandatory">
+      <div className="w-full overflow-x-auto pb-3 scrollbar-hide">
+        <div className="flex gap-4 snap-x snap-mandatory px-1">
         {/* Total Balance Card - Enhanced with Glassmorphism */}
-        <div className="min-w-[300px] md:min-w-[340px] snap-start">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[2px] shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]">
+        <div className="w-80 flex-shrink-0 snap-start">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[2px] shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] h-48">
             {/* Decorative Blur Circles */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-3xl" />
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
 
-            <div className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-6 backdrop-blur-xl">
-              <div className="flex items-start justify-between mb-6">
+            <div className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-6 backdrop-blur-xl h-full flex flex-col justify-between">
+              <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xl flex items-center justify-center shadow-lg">
                     <WalletIcon className="h-6 w-6 text-white" />
@@ -113,8 +116,8 @@ export function WalletCarousel({
                 </div>
               </div>
 
-              <div className="mt-4">
-                <p className="text-4xl md:text-5xl font-bold text-white tracking-tight">
+              <div>
+                <p className="text-3xl font-bold text-white tracking-tight">
                   {isVisible ? formatCurrency(totalBalance) : maskedAmount(totalBalance)}
                 </p>
               </div>
@@ -127,9 +130,9 @@ export function WalletCarousel({
 
         {/* Individual Wallet Cards - Full Gradient Style */}
         {wallets.map((wallet) => (
-          <div key={wallet.id} className="min-w-[300px] md:min-w-[340px] snap-start">
+          <div key={wallet.id} className="w-80 flex-shrink-0 snap-start">
             <div
-              className="relative overflow-hidden rounded-2xl h-48 p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer group"
+              className="relative overflow-hidden rounded-2xl h-48 p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer group"
               style={{
                 background: `linear-gradient(135deg, ${wallet.color || '#10b981'} 0%, ${wallet.color || '#10b981'}dd 100%)`
               }}
@@ -194,12 +197,12 @@ export function WalletCarousel({
 
         {/* Add Wallet Card - Modern Placeholder */}
         {onAddWallet && wallets.length < 5 && (
-          <div className="min-w-[300px] md:min-w-[340px] snap-start">
+          <div className="w-80 flex-shrink-0 snap-start">
             <Card
-              className="h-full border-2 border-dashed border-border/50 rounded-3xl bg-gradient-to-br from-muted/30 to-muted/10 hover:from-muted/40 hover:to-muted/20 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:border-primary/30 group"
+              className="h-48 border-2 border-dashed border-border/50 rounded-3xl bg-gradient-to-br from-muted/30 to-muted/10 hover:from-muted/40 hover:to-muted/20 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:border-primary/30 group"
               onClick={onAddWallet}
             >
-              <div className="p-6 h-full min-h-[180px] flex flex-col items-center justify-center gap-4 text-muted-foreground">
+              <div className="p-6 h-full flex flex-col items-center justify-center gap-4 text-muted-foreground">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-muted/60 to-muted/40 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Plus className="h-7 w-7 text-muted-foreground" />
                 </div>
@@ -211,6 +214,7 @@ export function WalletCarousel({
             </Card>
           </div>
         )}
+        </div>
       </div>
 
       {/* Scroll Indicators - Subtle Dots */}
