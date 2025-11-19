@@ -219,8 +219,14 @@ export default function HomePage() {
       const processData = await processResponse.json();
 
       if (!processResponse.ok) {
-        throw new Error(processData.error || 'Gagal memproses suara');
+        console.error('Process API error response:', processData);
+        console.error('Status:', processResponse.status);
+        const errorMsg = processData.error || 'Gagal memproses suara';
+        const errorDetails = processData.details ? ` - ${processData.details}` : '';
+        throw new Error(errorMsg + errorDetails);
       }
+
+      console.log('Process API success response:', processData);
 
       // Step 2: Save to database
       const transactionResponse = await fetch('/api/transaction', {
@@ -232,6 +238,7 @@ export default function HomePage() {
           item: processData.data.item,
           amount: processData.data.amount,
           category: processData.data.category,
+          type: processData.data.type || 'expense', // Use AI-detected type or default to expense
           date: processData.data.date,
           voice_text: transcript,
           location: processData.data.location || null,
@@ -389,11 +396,11 @@ export default function HomePage() {
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border border-border/50">
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                 <p className="text-xs font-medium text-muted-foreground">
-                  Tekan tombol dan ucapkan pengeluaran Anda
+                  Tekan tombol dan ucapkan pemasukan atau pengeluaran Anda
                 </p>
               </div>
               <p className="text-xs text-muted-foreground/70">
-                Contoh: &quot;Beli kopi 25000 di fore dengan gopay&quot;
+                Contoh: &quot;Beli kopi 25000&quot; atau &quot;Dapat gaji 5 juta&quot;
               </p>
             </div>
           </div>
