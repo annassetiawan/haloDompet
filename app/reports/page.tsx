@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, TrendingDown, Calendar, Tag, Download, BarChart3, TrendingUp, ArrowUp, ArrowDown, Minus, Sparkles, AlertCircle } from 'lucide-react'
+import { ArrowLeft, TrendingDown, Calendar, Tag, Download, BarChart3, TrendingUp, ArrowUp, ArrowDown, Minus, Sparkles, AlertCircle, Wallet } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 import type { Transaction } from '@/types'
 import { format, startOfMonth, endOfMonth } from 'date-fns'
@@ -84,7 +84,7 @@ export default function ReportsPage() {
     }
   }
 
-  // Calculate statistics - ONLY for EXPENSE transactions
+  // Calculate statistics - EXPENSE transactions
   const expenseTransactions = transactions.filter(t => t.type !== 'income')
   const previousExpenseTransactions = previousMonthTransactions.filter(t => t.type !== 'income')
 
@@ -97,7 +97,7 @@ export default function ReportsPage() {
     ? totalSpent / expenseTransactions.length
     : 0
 
-  // Calculate previous month statistics
+  // Calculate previous month expense statistics
   const previousTotalSpent = previousExpenseTransactions.reduce(
     (sum, t) => sum + parseFloat(t.amount.toString()),
     0
@@ -107,9 +107,36 @@ export default function ReportsPage() {
     ? previousTotalSpent / previousExpenseTransactions.length
     : 0
 
+  // Calculate statistics - INCOME transactions
+  const incomeTransactions = transactions.filter(t => t.type === 'income')
+  const previousIncomeTransactions = previousMonthTransactions.filter(t => t.type === 'income')
+
+  const totalIncome = incomeTransactions.reduce(
+    (sum, t) => sum + parseFloat(t.amount.toString()),
+    0
+  )
+
+  // Calculate previous month income statistics
+  const previousTotalIncome = previousIncomeTransactions.reduce(
+    (sum, t) => sum + parseFloat(t.amount.toString()),
+    0
+  )
+
+  // Calculate NET BALANCE (Cash Flow)
+  const netBalance = totalIncome - totalSpent
+  const previousNetBalance = previousTotalIncome - previousTotalSpent
+
   // Calculate month-over-month changes
   const totalSpentChange = previousTotalSpent > 0
     ? ((totalSpent - previousTotalSpent) / previousTotalSpent) * 100
+    : 0
+
+  const totalIncomeChange = previousTotalIncome > 0
+    ? ((totalIncome - previousTotalIncome) / previousTotalIncome) * 100
+    : 0
+
+  const netBalanceChange = previousNetBalance !== 0
+    ? ((netBalance - previousNetBalance) / Math.abs(previousNetBalance)) * 100
     : 0
 
   const transactionCountChange = previousExpenseTransactions.length > 0
@@ -176,7 +203,26 @@ export default function ReportsPage() {
     lainnya: chartColors[4],
   }
 
-  // Prepare data for bar chart (top 5 categories)
+  // Prepare data for bar chart - Income vs Expense Overview
+  const incomeVsExpenseData = [
+    {
+      name: 'Pemasukan',
+      amount: totalIncome,
+      fill: 'hsl(142 76% 36%)', // green
+    },
+    {
+      name: 'Pengeluaran',
+      amount: totalSpent,
+      fill: 'hsl(0 84% 60%)', // red
+    },
+    {
+      name: 'Sisa Uang',
+      amount: Math.abs(netBalance),
+      fill: netBalance >= 0 ? 'hsl(221 83% 53%)' : 'hsl(25 95% 53%)', // blue if positive, orange if negative
+    },
+  ]
+
+  // Prepare data for category bar chart (top 5 categories)
   const barChartData = sortedCategories.slice(0, 5).map((item) => ({
     category: item.category.charAt(0).toUpperCase() + item.category.slice(1),
     amount: item.total,
@@ -213,10 +259,50 @@ export default function ReportsPage() {
   const generateInsights = () => {
     const insights: { type: 'info' | 'warning' | 'success'; text: string }[] = []
 
-    if (expenseTransactions.length === 0) return insights
+    if (transactions.length === 0) return insights
 
-    // Insight 1: Top spending category
-    if (sortedCategories.length > 0) {
+    // Insight 1: Financial Health - Net Balance Analysis
+    if (totalIncome > 0 || totalSpent > 0) {
+      if (netBalance > 0) {
+        const savingsRate = (netBalance / totalIncome) * 100
+        if (savingsRate > 20) {
+          insights.push({
+            type: 'success',
+            text: `Hebat! Anda berhasil menyisihkan ${savingsRate.toFixed(1)}% dari pemasukan bulan ini (${new Intl.NumberFormat('id-ID', {
+              style: 'currency',
+              currency: 'IDR',
+              minimumFractionDigits: 0,
+            }).format(netBalance)}).`
+          })
+        } else if (savingsRate > 0) {
+          insights.push({
+            type: 'success',
+            text: `Bagus! Anda masih memiliki surplus ${new Intl.NumberFormat('id-ID', {
+              style: 'currency',
+              currency: 'IDR',
+              minimumFractionDigits: 0,
+            }).format(netBalance)} bulan ini.`
+          })
+        }
+      } else if (netBalance < 0) {
+        insights.push({
+          type: 'warning',
+          text: `Awas! Pengeluaran Anda melebihi pemasukan sebesar ${new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+          }).format(Math.abs(netBalance))}. Pertimbangkan untuk mengurangi pengeluaran.`
+        })
+      } else {
+        insights.push({
+          type: 'info',
+          text: 'Pemasukan dan pengeluaran Anda seimbang bulan ini. Coba tingkatkan tabungan di bulan depan.'
+        })
+      }
+    }
+
+    // Insight 2: Top spending category (only if there are expenses)
+    if (expenseTransactions.length > 0 && sortedCategories.length > 0) {
       const topCategory = sortedCategories[0]
       insights.push({
         type: 'info',
@@ -224,7 +310,22 @@ export default function ReportsPage() {
       })
     }
 
-    // Insight 2: Month-over-month trend
+    // Insight 3: Month-over-month income trend
+    if (previousTotalIncome > 0 && totalIncomeChange !== 0) {
+      if (totalIncomeChange > 10) {
+        insights.push({
+          type: 'success',
+          text: `Pemasukan Anda meningkat ${totalIncomeChange.toFixed(1)}% dibanding bulan lalu. Pertahankan!`
+        })
+      } else if (totalIncomeChange < -10) {
+        insights.push({
+          type: 'warning',
+          text: `Pemasukan Anda turun ${Math.abs(totalIncomeChange).toFixed(1)}% dibanding bulan lalu.`
+        })
+      }
+    }
+
+    // Insight 4: Month-over-month expense trend
     if (previousTotalSpent > 0) {
       if (totalSpentChange > 20) {
         insights.push({
@@ -239,44 +340,23 @@ export default function ReportsPage() {
       }
     }
 
-    // Insight 3: Most expensive transaction (EXPENSE only)
-    const mostExpensive = expenseTransactions.reduce((max, t) =>
-      parseFloat(t.amount.toString()) > parseFloat(max.amount.toString()) ? t : max
-      , expenseTransactions[0])
+    // Insight 5: Most expensive transaction (EXPENSE only)
+    if (expenseTransactions.length > 0) {
+      const mostExpensive = expenseTransactions.reduce((max, t) =>
+        parseFloat(t.amount.toString()) > parseFloat(max.amount.toString()) ? t : max
+        , expenseTransactions[0])
 
-    if (mostExpensive) {
-      const mostExpensiveAmount = parseFloat(mostExpensive.amount.toString())
-      const percentageOfTotal = (mostExpensiveAmount / totalSpent) * 100
+      if (mostExpensive && totalSpent > 0) {
+        const mostExpensiveAmount = parseFloat(mostExpensive.amount.toString())
+        const percentageOfTotal = (mostExpensiveAmount / totalSpent) * 100
 
-      if (percentageOfTotal > 30) {
-        insights.push({
-          type: 'warning',
-          text: `Transaksi terbesar Anda (${mostExpensive.item}) mencapai ${percentageOfTotal.toFixed(1)}% dari total pengeluaran bulan ini.`
-        })
+        if (percentageOfTotal > 30) {
+          insights.push({
+            type: 'warning',
+            text: `Transaksi terbesar Anda (${mostExpensive.item}) mencapai ${percentageOfTotal.toFixed(1)}% dari total pengeluaran bulan ini.`
+          })
+        }
       }
-    }
-
-    // Insight 4: Average daily spending
-    const daysWithTransactions = Object.keys(dailySpending).length
-    if (daysWithTransactions > 0) {
-      const avgDailySpending = totalSpent / daysWithTransactions
-      insights.push({
-        type: 'info',
-        text: `Rata-rata pengeluaran harian Anda adalah ${new Intl.NumberFormat('id-ID', {
-          style: 'currency',
-          currency: 'IDR',
-          minimumFractionDigits: 0,
-        }).format(avgDailySpending)} (${daysWithTransactions} hari dengan transaksi).`
-      })
-    }
-
-    // Insight 5: Transaction frequency (EXPENSE only)
-    if (expenseTransactions.length > previousExpenseTransactions.length && previousExpenseTransactions.length > 0) {
-      const freqChange = transactionCountChange.toFixed(1)
-      insights.push({
-        type: 'info',
-        text: `Frekuensi transaksi pengeluaran Anda meningkat ${freqChange}% bulan ini. Pertimbangkan untuk menggabungkan pembelian.`
-      })
     }
 
     return insights
@@ -285,6 +365,22 @@ export default function ReportsPage() {
   const insights = generateInsights()
 
   // Chart configurations using Shadcn pattern
+
+  // Income vs Expense Chart Config
+  const incomeVsExpenseConfig = {
+    pemasukan: {
+      label: 'Pemasukan',
+      color: 'hsl(142 76% 36%)',
+    },
+    pengeluaran: {
+      label: 'Pengeluaran',
+      color: 'hsl(0 84% 60%)',
+    },
+    sisa_uang: {
+      label: 'Sisa Uang',
+      color: netBalance >= 0 ? 'hsl(221 83% 53%)' : 'hsl(25 95% 53%)',
+    },
+  } satisfies ChartConfig;
 
   // Bar Chart Config - Top 5 Categories
   const barChartConfig = barChartData.reduce((acc, item, index) => {
@@ -430,6 +526,49 @@ export default function ReportsPage() {
             <TabsContent value="overview" className="space-y-4">
               {/* Summary Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+                {/* Total Income */}
+                <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 rounded-lg bg-green-500/10 dark:bg-green-500/20">
+                      <TrendingUp className="h-5 w-5 text-green-500" />
+                    </div>
+                    <h3 className="text-sm text-muted-foreground">Total Pemasukan</h3>
+                  </div>
+                  <p className="text-2xl md:text-3xl font-normal text-foreground">
+                    {new Intl.NumberFormat('id-ID', {
+                      style: 'currency',
+                      currency: 'IDR',
+                      minimumFractionDigits: 0,
+                    }).format(totalIncome)}
+                  </p>
+                  {previousTotalIncome > 0 && (
+                    <div className="flex items-center gap-1 mt-2">
+                      {totalIncomeChange > 0 ? (
+                        <>
+                          <ArrowUp className="h-3 w-3 text-green-500" />
+                          <span className="text-xs text-green-500">
+                            +{totalIncomeChange.toFixed(1)}% dari bulan lalu
+                          </span>
+                        </>
+                      ) : totalIncomeChange < 0 ? (
+                        <>
+                          <ArrowDown className="h-3 w-3 text-red-500" />
+                          <span className="text-xs text-red-500">
+                            {totalIncomeChange.toFixed(1)}% dari bulan lalu
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Minus className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">
+                            Sama dengan bulan lalu
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 {/* Total Spent */}
                 <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
                   <div className="flex items-center gap-3 mb-2">
@@ -473,78 +612,35 @@ export default function ReportsPage() {
                   )}
                 </div>
 
-                {/* Transaction Count */}
+                {/* Net Balance / Cash Flow */}
                 <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 rounded-lg bg-blue-500/10 dark:bg-blue-500/20">
-                      <Calendar className="h-5 w-5 text-blue-500" />
+                    <div className={`p-2 rounded-lg ${netBalance >= 0 ? 'bg-blue-500/10 dark:bg-blue-500/20' : 'bg-orange-500/10 dark:bg-orange-500/20'}`}>
+                      <Wallet className={`h-5 w-5 ${netBalance >= 0 ? 'text-blue-500' : 'text-orange-500'}`} />
                     </div>
-                    <h3 className="text-sm text-muted-foreground">Jumlah Transaksi</h3>
+                    <h3 className="text-sm text-muted-foreground">Sisa Uang</h3>
                   </div>
-                  <p className="text-2xl md:text-3xl font-normal text-foreground">
-                    {expenseTransactions.length}
-                  </p>
-                  {previousExpenseTransactions.length > 0 ? (
-                    <div className="flex items-center gap-1 mt-1">
-                      {transactionCountChange > 0 ? (
-                        <>
-                          <ArrowUp className="h-3 w-3 text-blue-500" />
-                          <span className="text-xs text-blue-500">
-                            +{transactionCountChange.toFixed(1)}% dari bulan lalu
-                          </span>
-                        </>
-                      ) : transactionCountChange < 0 ? (
-                        <>
-                          <ArrowDown className="h-3 w-3 text-blue-500" />
-                          <span className="text-xs text-blue-500">
-                            {transactionCountChange.toFixed(1)}% dari bulan lalu
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <Minus className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">
-                            Sama dengan bulan lalu
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      transaksi bulan ini
-                    </p>
-                  )}
-                </div>
-
-                {/* Average per Transaction */}
-                <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 rounded-lg bg-green-500/10 dark:bg-green-500/20">
-                      <Tag className="h-5 w-5 text-green-500" />
-                    </div>
-                    <h3 className="text-sm text-muted-foreground">Rata-rata</h3>
-                  </div>
-                  <p className="text-2xl md:text-3xl font-normal text-foreground">
+                  <p className={`text-2xl md:text-3xl font-normal ${netBalance >= 0 ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'}`}>
                     {new Intl.NumberFormat('id-ID', {
                       style: 'currency',
                       currency: 'IDR',
                       minimumFractionDigits: 0,
-                    }).format(averagePerTransaction)}
+                    }).format(netBalance)}
                   </p>
-                  {previousAveragePerTransaction > 0 ? (
-                    <div className="flex items-center gap-1 mt-1">
-                      {averageChange > 0 ? (
+                  {previousNetBalance !== 0 && (
+                    <div className="flex items-center gap-1 mt-2">
+                      {netBalanceChange > 0 ? (
                         <>
-                          <ArrowUp className="h-3 w-3 text-orange-500" />
-                          <span className="text-xs text-orange-500">
-                            +{averageChange.toFixed(1)}% dari bulan lalu
+                          <ArrowUp className="h-3 w-3 text-green-500" />
+                          <span className="text-xs text-green-500">
+                            +{netBalanceChange.toFixed(1)}% dari bulan lalu
                           </span>
                         </>
-                      ) : averageChange < 0 ? (
+                      ) : netBalanceChange < 0 ? (
                         <>
-                          <ArrowDown className="h-3 w-3 text-green-500" />
-                          <span className="text-xs text-green-500">
-                            {averageChange.toFixed(1)}% dari bulan lalu
+                          <ArrowDown className="h-3 w-3 text-red-500" />
+                          <span className="text-xs text-red-500">
+                            {netBalanceChange.toFixed(1)}% dari bulan lalu
                           </span>
                         </>
                       ) : (
@@ -556,9 +652,14 @@ export default function ReportsPage() {
                         </>
                       )}
                     </div>
+                  )}
+                  {netBalance >= 0 ? (
+                    <p className="text-xs text-green-600 dark:text-green-500 mt-1 font-medium">
+                      ✓ Surplus
+                    </p>
                   ) : (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      per transaksi
+                    <p className="text-xs text-red-600 dark:text-red-500 mt-1 font-medium">
+                      ⚠ Defisit
                     </p>
                   )}
                 </div>
@@ -606,6 +707,87 @@ export default function ReportsPage() {
 
             {/* Tab 2: Charts - All Visualizations */}
             <TabsContent value="charts" className="w-full space-y-3 md:space-y-4">
+              {/* Income vs Expense Overview Chart */}
+              <div className="w-full bg-card border border-border rounded-xl shadow-sm">
+                {/* Header */}
+                <div className="p-4 md:p-6 border-b border-border w-full">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
+                      <Wallet className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-base md:text-lg font-semibold text-foreground">
+                        Ringkasan Keuangan Bulanan
+                      </h3>
+                      <p className="text-xs md:text-sm text-muted-foreground">
+                        Perbandingan pemasukan, pengeluaran, dan sisa uang
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Content - Chart */}
+                <div className="p-4 md:p-6 w-full">
+                  <div className="w-full h-[250px] md:h-[350px]">
+                    <ChartContainer config={incomeVsExpenseConfig} className="h-full w-full aspect-auto min-w-[100%]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={incomeVsExpenseData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
+                          <XAxis
+                            dataKey="name"
+                            height={30}
+                            tickMargin={10}
+                            className="text-xs"
+                            tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                          />
+                          <YAxis
+                            className="text-xs"
+                            tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                            tickFormatter={(value) =>
+                              new Intl.NumberFormat('id-ID', {
+                                notation: 'compact',
+                                compactDisplay: 'short',
+                              }).format(value)
+                            }
+                          />
+                          <ChartTooltip
+                            content={
+                              <ChartTooltipContent
+                                labelFormatter={(value: any) => value}
+                                formatter={(value: any, name: any) => [
+                                  new Intl.NumberFormat('id-ID', {
+                                    style: 'currency',
+                                    currency: 'IDR',
+                                    minimumFractionDigits: 0,
+                                  }).format(value as number),
+                                  'Total'
+                                ]}
+                              />
+                            }
+                          />
+                          <Bar dataKey="amount" radius={[8, 8, 0, 0]}>
+                            {incomeVsExpenseData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="p-4 border-t border-border flex items-center gap-2 text-xs text-muted-foreground">
+                    <Wallet className="h-4 w-4" />
+                    <span>
+                      {netBalance >= 0
+                        ? `Surplus ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(netBalance)} - Keuangan sehat!`
+                        : `Defisit ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(Math.abs(netBalance))} - Kurangi pengeluaran!`
+                      }
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               {/* Bar Chart - Top Categories */}
               <div className="w-full bg-card border border-border rounded-xl shadow-sm">
                 {/* Header */}
