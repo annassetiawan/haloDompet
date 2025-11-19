@@ -2,7 +2,7 @@
 -- CREATE RESET USER DATA FUNCTION
 -- ============================================
 -- This function safely resets all user data without trigger conflicts
--- It disables the auto_update_wallet_balance trigger temporarily
+-- Using a different approach: batch delete with proper ordering
 
 -- Drop function if exists
 DROP FUNCTION IF EXISTS reset_user_data(UUID);
@@ -29,22 +29,24 @@ BEGIN
   FROM public.wallets
   WHERE user_id = p_user_id;
 
-  -- Disable trigger temporarily to avoid conflicts
-  ALTER TABLE public.transactions DISABLE TRIGGER auto_update_wallet_balance;
+  -- APPROACH: Set wallet_id to NULL first, then delete transactions
+  -- This prevents the trigger from trying to update wallet balances
 
-  -- Delete all transactions for the user
+  -- Step 1: Unlink transactions from wallets
+  UPDATE public.transactions
+  SET wallet_id = NULL
+  WHERE user_id = p_user_id;
+
+  -- Step 2: Delete all transactions (trigger won't update wallets since wallet_id is NULL)
   DELETE FROM public.transactions
   WHERE user_id = p_user_id;
 
-  -- Re-enable trigger
-  ALTER TABLE public.transactions ENABLE TRIGGER auto_update_wallet_balance;
-
-  -- Reset all wallet balances to 0
+  -- Step 3: Reset all wallet balances to 0
   UPDATE public.wallets
   SET balance = 0
   WHERE user_id = p_user_id;
 
-  -- Reset user's current_balance to 0 for backward compatibility
+  -- Step 4: Reset user's current_balance to 0 for backward compatibility
   UPDATE public.users
   SET current_balance = 0
   WHERE id = p_user_id;
@@ -60,9 +62,8 @@ BEGIN
   RETURN v_result;
 EXCEPTION
   WHEN OTHERS THEN
-    -- Re-enable trigger in case of error
-    ALTER TABLE public.transactions ENABLE TRIGGER auto_update_wallet_balance;
-    RAISE;
+    -- Re-raise the exception with details
+    RAISE EXCEPTION 'Reset failed: %', SQLERRM;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -71,7 +72,7 @@ GRANT EXECUTE ON FUNCTION reset_user_data(UUID) TO authenticated;
 
 -- Add comment
 COMMENT ON FUNCTION reset_user_data(UUID) IS
-'Safely resets all user data (transactions and wallet balances) by temporarily disabling triggers to avoid update conflicts';
+'Safely resets all user data (transactions and wallet balances) by unlinking transactions from wallets before deletion';
 
 -- ============================================
 -- USAGE EXAMPLE
