@@ -275,6 +275,35 @@ PENTING:
       stack: error.stack,
       name: error.name
     });
+
+    // Check for specific Gemini API errors
+    const errorMessage = error.message || '';
+
+    // Rate limit / quota exceeded
+    if (errorMessage.includes('429') || errorMessage.includes('quota') || errorMessage.includes('Too Many Requests')) {
+      return NextResponse.json(
+        {
+          error: 'Gemini API quota terlampaui',
+          details: 'API key Anda telah mencapai batas gratis. Silakan cek https://ai.google.dev/gemini-api/docs/quota atau ganti dengan API key baru.',
+          errorType: 'QuotaExceeded'
+        },
+        { status: 429 }
+      );
+    }
+
+    // API key invalid
+    if (errorMessage.includes('API key') || errorMessage.includes('401') || errorMessage.includes('403')) {
+      return NextResponse.json(
+        {
+          error: 'Gemini API key tidak valid',
+          details: 'Periksa GEMINI_API_KEY di file .env.local Anda. Dapatkan API key baru di https://aistudio.google.com/apikey',
+          errorType: 'InvalidAPIKey'
+        },
+        { status: 401 }
+      );
+    }
+
+    // Generic error
     return NextResponse.json(
       {
         error: 'Internal server error',
