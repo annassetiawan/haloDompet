@@ -125,52 +125,32 @@ export function WalletCarousel({
           </div>
         </div>
 
-        {/* Individual Wallet Cards - Enhanced with Modern Fintech Style */}
+        {/* Individual Wallet Cards - Full Gradient Style */}
         {wallets.map((wallet) => (
           <div key={wallet.id} className="min-w-[300px] md:min-w-[340px] snap-start">
             <div
-              className="relative overflow-hidden rounded-3xl p-[2px] shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] group"
+              className="relative overflow-hidden rounded-2xl h-48 p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer group"
               style={{
-                background: `linear-gradient(135deg, ${wallet.color || '#10b981'}40 0%, ${wallet.color || '#10b981'}20 100%)`
+                background: `linear-gradient(135deg, ${wallet.color || '#10b981'} 0%, ${wallet.color || '#10b981'}dd 100%)`
               }}
             >
-              {/* Decorative Elements */}
-              <div
-                className="absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl opacity-30"
-                style={{ backgroundColor: wallet.color || '#10b981' }}
-              />
-              <div
-                className="absolute bottom-0 left-0 w-32 h-32 rounded-full blur-2xl opacity-20"
-                style={{ backgroundColor: wallet.color || '#10b981' }}
-              />
+              {/* Decorative blur circles */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10" />
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full blur-xl" />
 
-              <Card className="relative border-none bg-background/95 backdrop-blur-xl rounded-3xl shadow-none">
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-lg ring-2 ring-white/10 backdrop-blur-sm transition-transform group-hover:scale-110"
-                        style={{
-                          backgroundColor: `${wallet.color || '#10b981'}25`,
-                          boxShadow: `0 4px 20px ${wallet.color || '#10b981'}30`
-                        }}
-                      >
-                        {wallet.icon || '💰'}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground text-base">{wallet.name}</h3>
-                        {wallet.is_default && (
-                          <div className="flex items-center gap-1 mt-1">
-                            <div
-                              className="w-1.5 h-1.5 rounded-full"
-                              style={{ backgroundColor: wallet.color || '#10b981' }}
-                            />
-                            <span className="text-xs text-muted-foreground font-medium">Dompet Utama</span>
-                          </div>
-                        )}
-                      </div>
+              <div className="relative z-10 flex flex-col justify-between h-full">
+                {/* Header: Category + Name + Icon */}
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs font-medium text-white/80 uppercase tracking-wider mb-1">
+                      {wallet.is_default ? 'Utama' : 'Dompet'}
+                    </p>
+                    <h3 className="text-lg font-bold text-white">{wallet.name}</h3>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                      <span className="text-xl">{wallet.icon || '💰'}</span>
                     </div>
-
                     {/* More Options Menu */}
                     {onEditWallet && (
                       <DropdownMenu>
@@ -178,7 +158,7 @@ export function WalletCarousel({
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+                            className="h-8 w-8 rounded-lg text-white/80 hover:text-white hover:bg-white/20 transition-all backdrop-blur-sm"
                           >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
@@ -198,23 +178,16 @@ export function WalletCarousel({
                       </DropdownMenu>
                     )}
                   </div>
-
-                  <div className="mt-4">
-                    <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wide font-medium">Saldo Tersedia</p>
-                    <p className="text-3xl md:text-4xl font-bold text-foreground tracking-tight">
-                      {isVisible ? formatCurrency(wallet.balance) : maskedAmount(wallet.balance)}
-                    </p>
-                  </div>
-
-                  {/* Bottom Accent Line */}
-                  <div
-                    className="absolute bottom-0 left-0 right-0 h-1 rounded-b-3xl opacity-60"
-                    style={{
-                      background: `linear-gradient(90deg, ${wallet.color || '#10b981'} 0%, transparent 100%)`
-                    }}
-                  />
                 </div>
-              </Card>
+
+                {/* Footer: Balance */}
+                <div>
+                  <p className="text-xs text-white/70 mb-1">Saldo Aktif</p>
+                  <p className="text-3xl font-bold text-white">
+                    {isVisible ? formatCurrency(wallet.balance) : maskedAmount(wallet.balance)}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         ))}
