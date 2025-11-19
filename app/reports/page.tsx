@@ -631,11 +631,16 @@ export default function ReportsPage() {
                           <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                           <XAxis
                             dataKey="category"
-                            angle={-45}
-                            textAnchor="end"
-                            height={80}
+                            height={30}
                             className="text-xs"
                             tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                            tickFormatter={(value) => {
+                              // Truncate long category names on mobile
+                              if (typeof window !== 'undefined' && window.innerWidth < 768) {
+                                return value.length > 4 ? value.substring(0, 3) + '...' : value;
+                              }
+                              return value;
+                            }}
                           />
                           <YAxis
                             className="text-xs"
@@ -780,9 +785,14 @@ export default function ReportsPage() {
                             dataKey="date"
                             className="text-xs"
                             tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                            angle={-45}
-                            textAnchor="end"
-                            height={60}
+                            height={30}
+                            tickFormatter={(value) => {
+                              // Truncate long date labels on mobile
+                              if (typeof window !== 'undefined' && window.innerWidth < 768) {
+                                return value.length > 4 ? value.substring(0, 3) + '...' : value;
+                              }
+                              return value;
+                            }}
                           />
                           <YAxis
                             className="text-xs"
