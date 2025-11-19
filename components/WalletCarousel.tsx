@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from 'react'
-import { Eye, EyeOff, Plus, Wallet as WalletIcon, MoreVertical, Edit, Star, TrendingUp } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Eye, EyeOff, Plus, Wallet as WalletIcon, MoreVertical, Edit, Star, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -28,6 +28,9 @@ export function WalletCarousel({
   onEditWallet
 }: WalletCarouselProps) {
   const [isVisible, setIsVisible] = useState(true)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -66,6 +69,42 @@ export function WalletCarousel({
   const getSecondaryColor = (primaryColor: string): string => {
     return colorGradients[primaryColor] || primaryColor
   }
+
+  // Check scroll position to show/hide navigation buttons
+  const checkScrollPosition = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current
+      setCanScrollLeft(scrollLeft > 0)
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10) // -10 for threshold
+    }
+  }
+
+  // Scroll navigation functions
+  const scrollLeftHandler = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -300, behavior: 'smooth' })
+    }
+  }
+
+  const scrollRightHandler = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 300, behavior: 'smooth' })
+    }
+  }
+
+  // Set up scroll position tracking
+  useEffect(() => {
+    checkScrollPosition()
+    const scrollContainer = scrollContainerRef.current
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', checkScrollPosition)
+      window.addEventListener('resize', checkScrollPosition)
+      return () => {
+        scrollContainer.removeEventListener('scroll', checkScrollPosition)
+        window.removeEventListener('resize', checkScrollPosition)
+      }
+    }
+  }, [wallets])
 
   if (isLoading) {
     return (
@@ -116,8 +155,35 @@ export function WalletCarousel({
       </div>
 
       {/* Horizontal Scrollable Wallet Cards */}
-      <div className="w-full overflow-x-auto pb-3 scrollbar-hide">
-        <div className="flex gap-4 snap-x snap-mandatory px-1">
+      <div className="relative group">
+        {/* Left Navigation Button */}
+        {canScrollLeft && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={scrollLeftHandler}
+            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-background/80 backdrop-blur-sm shadow-lg hover:bg-background hover:scale-110 transition-all border border-border/50"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+        )}
+
+        {/* Right Navigation Button */}
+        {canScrollRight && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={scrollRightHandler}
+            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-background/80 backdrop-blur-sm shadow-lg hover:bg-background hover:scale-110 transition-all border border-border/50"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </Button>
+        )}
+
+        <div ref={scrollContainerRef} className="w-full overflow-x-auto pb-3 scrollbar-hide">
+          <div className="flex gap-4 snap-x snap-mandatory px-1">
         {/* Total Balance Card - Enhanced with Glassmorphism */}
         <div className="w-80 flex-shrink-0 snap-start">
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[2px] shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] h-48">
@@ -240,6 +306,7 @@ export function WalletCarousel({
             </Card>
           </div>
         )}
+        </div>
         </div>
       </div>
 
