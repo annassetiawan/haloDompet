@@ -17,9 +17,9 @@ interface AnimatedRecordButtonProps {
 }
 
 const sizeMap = {
-  small: { container: 80, icon: 32, outerRing: 100 },
-  medium: { container: 120, icon: 48, outerRing: 150 },
-  large: { container: 160, icon: 64, outerRing: 200 },
+  small: { container: 80, icon: 32 },
+  medium: { container: 120, icon: 48 },
+  large: { container: 160, icon: 64 },
 }
 
 export function AnimatedRecordButton({
@@ -156,92 +156,77 @@ export function AnimatedRecordButton({
       `}</style>
 
       <div className={`flex flex-col items-center gap-4 ${className}`}>
-        {/* Outer Ring Container */}
-        <div
-          className="relative flex items-center justify-center"
-          style={{ width: sizes.outerRing, height: sizes.outerRing }}
+        {/* Main Button (Neumorphism Style) */}
+        <motion.button
+          ref={buttonRef}
+          type="button"
+          onClick={handleClick}
+          disabled={disabled || state === 'processing'}
+          className={`
+            relative rounded-full flex items-center justify-center
+            transition-all duration-300 ease-out
+            disabled:opacity-50 disabled:cursor-not-allowed
+            focus:outline-none
+            ${state === 'recording' ? 'recording-active' : ''}
+          `}
+          style={{
+            width: sizes.container,
+            height: sizes.container,
+            background: 'linear-gradient(145deg, #171717, #444245)',
+            boxShadow: state === 'recording'
+              ? 'inset -2px -2px 0 #5e5e5e, inset 2px 2px 0 #1c1c1c'
+              : 'inset 2px 2px 0 #7d7c7e, inset -2px -2px 0px #1c1c1c',
+            border: state === 'recording'
+              ? '4px solid rgba(77, 124, 255, 0.281)'
+              : '4px solid #090909',
+          }}
+          variants={prefersReducedMotion ? {} : containerVariants}
+          animate={state}
+          whileHover={disabled ? {} : { scale: 1.05 }}
+          whileTap={disabled ? {} : { scale: 0.95 }}
+          aria-label={getLabel()}
+          aria-live="polite"
         >
-          {/* Outer Ring (Efek Timbul) */}
-          <div
-            className="absolute inset-0 rounded-full"
-            style={{
-              background: 'linear-gradient(145deg, #262626, #606060)',
-              boxShadow: '11px 11px 22px #141414, -11px -11px 22px #525252',
-            }}
-          />
-
-          {/* Main Button Container */}
-          <motion.button
-            ref={buttonRef}
-            type="button"
-            onClick={handleClick}
-            disabled={disabled || state === 'processing'}
-            className={`
-              relative rounded-full flex items-center justify-center
-              transition-all duration-300 ease-out
-              disabled:opacity-50 disabled:cursor-not-allowed
-              focus:outline-none
-              ${state === 'recording' ? 'recording-active' : ''}
-            `}
-            style={{
-              width: sizes.container,
-              height: sizes.container,
-              background: 'linear-gradient(145deg, #171717, #444245)',
-              boxShadow: state === 'recording'
-                ? 'inset -2px -2px 0 #5e5e5e, inset 2px 2px 0 #1c1c1c'
-                : 'inset 2px 2px 0 #7d7c7e, inset -2px -2px 0px #1c1c1c',
-              border: state === 'recording'
-                ? '4px solid rgba(77, 124, 255, 0.281)'
-                : '4px solid #090909',
-            }}
-            variants={prefersReducedMotion ? {} : containerVariants}
-            animate={state}
-            whileHover={disabled ? {} : { scale: 1.05 }}
-            whileTap={disabled ? {} : { scale: 0.95 }}
-            aria-label={getLabel()}
-            aria-live="polite"
+          {/* Icon with conditional animation */}
+          <motion.div
+            className="relative z-20"
+            style={{ width: sizes.icon, height: sizes.icon }}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            key={state}
           >
-            {/* Icon with conditional animation */}
-            <motion.div
-              className="relative z-20"
-              style={{ width: sizes.icon, height: sizes.icon }}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              key={state}
-            >
-              {state === 'idle' && (
-                <Mic
-                  className="w-full h-full"
-                  style={{ color: '#9ca3af' }}
-                />
-              )}
-              {state === 'recording' && (
-                <Mic
-                  className="w-full h-full recording-icon"
-                  style={{ color: 'rgb(77, 124, 255)' }}
-                />
-              )}
-              {state === 'processing' && (
-                <Loader2
-                  className="w-full h-full animate-spin"
-                  style={{ color: 'rgb(59, 130, 246)' }}
-                />
-              )}
-              {state === 'success' && (
-                <Check
-                  className="w-full h-full"
-                  style={{ color: 'rgb(34, 197, 94)' }}
-                />
-              )}
-              {state === 'error' && (
-                <X
-                  className="w-full h-full"
-                  style={{ color: 'rgb(239, 68, 68)' }}
-                />
-              )}
-            </motion.div>
-          </motion.button>
-        </div>
+            {state === 'idle' && (
+              <Mic
+                className="w-full h-full"
+                style={{ color: '#9ca3af' }}
+              />
+            )}
+            {state === 'recording' && (
+              <Mic
+                className="w-full h-full recording-icon"
+                style={{ color: 'rgb(77, 124, 255)' }}
+              />
+            )}
+            {state === 'processing' && (
+              <Loader2
+                className="w-full h-full animate-spin"
+                style={{ color: 'rgb(59, 130, 246)' }}
+              />
+            )}
+            {state === 'success' && (
+              <Check
+                className="w-full h-full"
+                style={{ color: 'rgb(34, 197, 94)' }}
+              />
+            )}
+            {state === 'error' && (
+              <X
+                className="w-full h-full"
+                style={{ color: 'rgb(239, 68, 68)' }}
+              />
+            )}
+          </motion.div>
+        </motion.button>
 
         {/* Status Label */}
         <motion.p
