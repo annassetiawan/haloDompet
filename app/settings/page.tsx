@@ -193,16 +193,24 @@ export default function SettingsPage() {
     try {
       setIsResetting(true)
 
+      console.log('🗑️ Starting reset data process...')
+
       const response = await fetch('/api/user/reset', {
         method: 'DELETE',
       })
 
+      console.log('Response status:', response.status)
+
       const data = await response.json()
+      console.log('Response data:', data)
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to reset data')
+        const errorMsg = data.details ? `${data.error}: ${data.details}` : data.error
+        console.error('Reset failed:', errorMsg)
+        throw new Error(errorMsg || 'Failed to reset data')
       }
 
+      console.log('✅ Reset successful!')
       toast.success('Semua data berhasil direset!')
       setIsResetDialogOpen(false)
       setResetConfirmText('')
@@ -216,7 +224,10 @@ export default function SettingsPage() {
       }, 1000)
     } catch (error) {
       console.error('Error resetting data:', error)
-      toast.error(error instanceof Error ? error.message : 'Gagal mereset data')
+      const errorMessage = error instanceof Error ? error.message : 'Gagal mereset data'
+      toast.error(errorMessage, {
+        duration: 5000,
+      })
     } finally {
       setIsResetting(false)
     }
