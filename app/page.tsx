@@ -219,8 +219,14 @@ export default function HomePage() {
       const processData = await processResponse.json();
 
       if (!processResponse.ok) {
-        throw new Error(processData.error || 'Gagal memproses suara');
+        console.error('Process API error response:', processData);
+        console.error('Status:', processResponse.status);
+        const errorMsg = processData.error || 'Gagal memproses suara';
+        const errorDetails = processData.details ? ` - ${processData.details}` : '';
+        throw new Error(errorMsg + errorDetails);
       }
+
+      console.log('Process API success response:', processData);
 
       // Step 2: Save to database
       const transactionResponse = await fetch('/api/transaction', {
