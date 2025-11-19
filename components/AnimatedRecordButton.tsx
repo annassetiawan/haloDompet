@@ -120,29 +120,29 @@ export function AnimatedRecordButton({
       <style jsx>{`
         @keyframes animeFill {
           0%, 100% {
-            fill: rgb(77, 124, 255);
-            filter: drop-shadow(0 0 8px rgba(77, 124, 255, 0.6));
+            fill: rgb(239, 68, 68);
+            filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.6));
           }
           50% {
-            fill: rgb(110, 150, 255);
-            filter: drop-shadow(0 0 16px rgba(77, 124, 255, 0.9));
+            fill: rgb(248, 113, 113);
+            filter: drop-shadow(0 0 16px rgba(239, 68, 68, 0.9));
           }
         }
 
         @keyframes animeBorder {
           0%, 100% {
-            border-color: rgba(77, 124, 255, 0.281);
+            border-color: rgba(239, 68, 68, 0.3);
             box-shadow:
               inset -2px -2px 0 #5e5e5e,
               inset 2px 2px 0 #1c1c1c,
-              0 0 20px rgba(77, 124, 255, 0.3);
+              0 0 20px rgba(239, 68, 68, 0.3);
           }
           50% {
-            border-color: rgba(77, 124, 255, 0.5);
+            border-color: rgba(239, 68, 68, 0.5);
             box-shadow:
               inset -2px -2px 0 #5e5e5e,
               inset 2px 2px 0 #1c1c1c,
-              0 0 30px rgba(77, 124, 255, 0.5);
+              0 0 30px rgba(239, 68, 68, 0.5);
           }
         }
 
@@ -177,7 +177,7 @@ export function AnimatedRecordButton({
               ? 'inset -2px -2px 0 #5e5e5e, inset 2px 2px 0 #1c1c1c'
               : 'inset 2px 2px 0 #7d7c7e, inset -2px -2px 0px #1c1c1c',
             border: state === 'recording'
-              ? '4px solid rgba(77, 124, 255, 0.281)'
+              ? '4px solid rgba(239, 68, 68, 0.3)'
               : '4px solid #090909',
           }}
           variants={prefersReducedMotion ? {} : containerVariants}
@@ -204,7 +204,7 @@ export function AnimatedRecordButton({
             {state === 'recording' && (
               <Mic
                 className="w-full h-full recording-icon"
-                style={{ color: 'rgb(77, 124, 255)' }}
+                style={{ color: 'rgb(239, 68, 68)' }}
               />
             )}
             {state === 'processing' && (
