@@ -627,11 +627,12 @@ export default function ReportsPage() {
                   <div className="w-full h-[250px] md:h-[350px]">
                     <ChartContainer config={barChartConfig} className="h-full w-full aspect-auto min-w-[100%]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={barChartData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
-                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <BarChart data={barChartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
                           <XAxis
                             dataKey="category"
-                            height={40}
+                            height={30}
+                            tickMargin={10}
                             className="text-xs"
                             tick={{ fill: 'hsl(var(--muted-foreground))' }}
                           />
@@ -772,13 +773,14 @@ export default function ReportsPage() {
                   <div className="w-full h-[250px] md:h-[350px]">
                     <ChartContainer config={lineChartConfig} className="h-full w-full aspect-auto min-w-[100%]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={lineChartData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
-                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <LineChart data={lineChartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
                           <XAxis
                             dataKey="date"
+                            height={30}
+                            tickMargin={10}
                             className="text-xs"
                             tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                            height={40}
                           />
                           <YAxis
                             className="text-xs"
