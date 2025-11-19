@@ -25,6 +25,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Settings,
   LogOut,
@@ -94,6 +95,28 @@ export default function HomePage() {
       loadWallets()
       loadRecentTransactions()
     }
+  }
+
+  // Helper function to get user's first name for greeting
+  const getUserFirstName = (): string => {
+    if (!user) return ''
+
+    // Try to get full_name or name from user metadata (Google login)
+    const fullName = user.user_metadata?.full_name || user.user_metadata?.name
+
+    if (fullName && typeof fullName === 'string') {
+      // Get first word only
+      const firstName = fullName.trim().split(' ')[0]
+      return firstName
+    }
+
+    // Fallback: get username from email (before @)
+    if (user.email) {
+      const username = user.email.split('@')[0]
+      return username
+    }
+
+    return 'User'
   }
 
   const loadUserProfile = async () => {
@@ -439,11 +462,22 @@ export default function HomePage() {
       <main className="md:pt-16 pb-20 md:pb-0">
         <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
           {/* Header Section */}
-          <div className="space">
-            <h1 className="text-2xl font-bold tracking-tight">HaloDompet</h1>
-            <p className="text-sm text-muted-foreground">
-              {user?.email || 'Voice-powered expense tracker'}
-            </p>
+          <div className="flex flex-row justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">HaloDompet</h1>
+              <p className="text-sm text-muted-foreground">
+                Hai, {getUserFirstName()} 👋
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <DarkModeToggle />
+              {user?.user_metadata?.avatar_url && (
+                <Avatar className="h-9 w-9">
+                  <AvatarImage src={user.user_metadata.avatar_url} alt={getUserFirstName()} />
+                  <AvatarFallback>{getUserFirstName().charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+              )}
+            </div>
           </div>
 
           {/* Trial Warning Banner */}
