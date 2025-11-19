@@ -38,7 +38,7 @@ const INCOME_CATEGORIES = [
   'Bonus',
   'Investasi',
   'Hadiah',
-  'Pendapatan',
+  'Penjualan',
   'Lainnya'
 ]
 
