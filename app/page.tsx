@@ -1,211 +1,234 @@
-"use client";
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
-import { WalletCarousel } from '@/components/WalletCarousel';
-import { WalletSelector } from '@/components/WalletSelector';
-import { AddWalletDialog } from '@/components/AddWalletDialog';
-import { EditWalletDialog } from '@/components/EditWalletDialog';
-import { ManualTransactionDialog } from '@/components/ManualTransactionDialog';
-import { TransactionCard } from '@/components/TransactionCard';
-import { TrialWarningBanner } from '@/components/trial-warning-banner';
-import { DarkModeToggle } from '@/components/DarkModeToggle';
-import { TransactionListSkeleton } from '@/components/TransactionSkeleton';
-import { RecordButton } from '@/components/RecordButton';
-import { BottomNav } from '@/components/BottomNav';
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Mic, MicOff, Settings, Loader2, LogOut, History, ArrowRight, BarChart3, Menu, Sparkles, CheckCircle2, XCircle, PlusCircle } from 'lucide-react';
-import { toast } from 'sonner';
-import type { User } from '@supabase/supabase-js';
-import type { User as UserProfile, Transaction, Wallet } from '@/types';
-import { isTrialExpired } from '@/lib/trial';
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
+import { WalletCarousel } from '@/components/WalletCarousel'
+import { WalletSelector } from '@/components/WalletSelector'
+import { AddWalletDialog } from '@/components/AddWalletDialog'
+import { EditWalletDialog } from '@/components/EditWalletDialog'
+import { ManualTransactionDialog } from '@/components/ManualTransactionDialog'
+import { TransactionCard } from '@/components/TransactionCard'
+import { TrialWarningBanner } from '@/components/trial-warning-banner'
+import { DarkModeToggle } from '@/components/DarkModeToggle'
+import { TransactionListSkeleton } from '@/components/TransactionSkeleton'
+import { RecordButton } from '@/components/RecordButton'
+import { BottomNav } from '@/components/BottomNav'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import {
+  Settings,
+  LogOut,
+  History,
+  ArrowRight,
+  BarChart3,
+  Sparkles,
+  CheckCircle2,
+  XCircle,
+  PlusCircle,
+} from 'lucide-react'
+import { toast } from 'sonner'
+import type { User } from '@supabase/supabase-js'
+import type { User as UserProfile, Transaction, Wallet } from '@/types'
+import { isTrialExpired } from '@/lib/trial'
+
+// Konstanta untuk status default agar konsisten
+const IDLE_STATUS = 'Coba: "Beli Kopi 25 ribu di Fore atau Dapat gaji 5 juta"'
 
 export default function HomePage() {
   // State Management
-  const [user, setUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [wallets, setWallets] = useState<Wallet[]>([]);
-  const [totalBalance, setTotalBalance] = useState<number>(0);
-  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
-  const [status, setStatus] = useState("Siap merekam");
-  const [webhookUrl, setWebhookUrl] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
-  const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
-  const [isLoadingWallets, setIsLoadingWallets] = useState(true);
+  const [user, setUser] = useState<User | null>(null)
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
+  const [wallets, setWallets] = useState<Wallet[]>([])
+  const [totalBalance, setTotalBalance] = useState<number>(0)
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>(
+    [],
+  )
+  // Ubah initial state menggunakan IDLE_STATUS
+  const [status, setStatus] = useState(IDLE_STATUS)
+  const [webhookUrl, setWebhookUrl] = useState('')
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true)
+  const [isLoadingTransactions, setIsLoadingTransactions] = useState(true)
+  const [isLoadingWallets, setIsLoadingWallets] = useState(true)
 
   // Review dialog state
-  const [isReviewOpen, setIsReviewOpen] = useState(false);
-  const [editedTranscript, setEditedTranscript] = useState("");
+  const [isReviewOpen, setIsReviewOpen] = useState(false)
+  const [editedTranscript, setEditedTranscript] = useState('')
 
   // Wallet management state
-  const [isAddWalletOpen, setIsAddWalletOpen] = useState(false);
-  const [isEditWalletOpen, setIsEditWalletOpen] = useState(false);
-  const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null);
-  const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
+  const [isAddWalletOpen, setIsAddWalletOpen] = useState(false)
+  const [isEditWalletOpen, setIsEditWalletOpen] = useState(false)
+  const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null)
+  const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null)
 
   // Manual transaction dialog state
-  const [isManualTransactionOpen, setIsManualTransactionOpen] = useState(false);
+  const [isManualTransactionOpen, setIsManualTransactionOpen] = useState(false)
 
-  const router = useRouter();
-  const supabase = createClient();
+  const router = useRouter()
+  const supabase = createClient()
 
   // Check authentication on mount
   useEffect(() => {
-    checkUser();
-  }, []);
+    checkUser()
+  }, [])
 
   const checkUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
     if (!user) {
-      router.push('/login');
+      router.push('/login')
     } else {
-      setUser(user);
-      loadUserProfile();
-      loadWallets();
-      loadRecentTransactions();
+      setUser(user)
+      loadUserProfile()
+      loadWallets()
+      loadRecentTransactions()
     }
-  };
+  }
 
   const loadUserProfile = async () => {
     try {
-      setIsLoadingProfile(true);
-      const response = await fetch('/api/user');
-      const data = await response.json();
+      setIsLoadingProfile(true)
+      const response = await fetch('/api/user')
+      const data = await response.json()
 
       if (response.ok) {
-        // Check if user hasn't completed onboarding
-        // Use is_onboarded flag instead of checking balance
-        // This prevents users from being redirected to onboarding after resetting their data
         if (!data.user.is_onboarded) {
-          router.push("/onboarding");
-          return;
+          router.push('/onboarding')
+          return
         }
 
-        // Check if trial has expired
         if (isTrialExpired(data.user)) {
-          router.push("/trial-expired");
-          return;
+          router.push('/trial-expired')
+          return
         }
-        setUserProfile(data.user);
-        // Load webhook URL jika mode webhook
+        setUserProfile(data.user)
         if (data.user.mode === 'webhook' && data.user.webhook_url) {
-          setWebhookUrl(data.user.webhook_url);
+          setWebhookUrl(data.user.webhook_url)
         }
       }
     } catch (error) {
-      console.error('Error loading profile:', error);
+      console.error('Error loading profile:', error)
     } finally {
-      setIsLoadingProfile(false);
+      setIsLoadingProfile(false)
     }
-  };
+  }
 
   const loadWallets = async () => {
     try {
-      setIsLoadingWallets(true);
-      const response = await fetch('/api/wallet');
-      const data = await response.json();
+      setIsLoadingWallets(true)
+      const response = await fetch('/api/wallet')
+      const data = await response.json()
 
       if (response.ok) {
-        setWallets(data.wallets);
-        setTotalBalance(data.totalBalance);
+        setWallets(data.wallets)
+        setTotalBalance(data.totalBalance)
       }
     } catch (error) {
-      console.error('Error loading wallets:', error);
+      console.error('Error loading wallets:', error)
     } finally {
-      setIsLoadingWallets(false);
+      setIsLoadingWallets(false)
     }
-  };
+  }
 
   const loadRecentTransactions = async () => {
     try {
-      setIsLoadingTransactions(true);
-      const response = await fetch('/api/transaction?limit=5');
-      const data = await response.json();
+      setIsLoadingTransactions(true)
+      const response = await fetch('/api/transaction?limit=5')
+      const data = await response.json()
 
       if (response.ok) {
-        setRecentTransactions(data.transactions);
+        setRecentTransactions(data.transactions)
       }
     } catch (error) {
-      console.error('Error loading transactions:', error);
+      console.error('Error loading transactions:', error)
     } finally {
-      setIsLoadingTransactions(false);
+      setIsLoadingTransactions(false)
     }
-  };
+  }
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/login');
-  };
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
 
-  // Handle transcript from recorder
   const handleTranscript = async (transcript: string) => {
-    // Show processing state briefly
-    setIsProcessing(true);
-    setStatus("Memproses hasil rekaman...");
+    setIsProcessing(true)
+    setStatus('Memproses hasil rekaman...')
 
-    // Small delay to show processing state
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500))
 
-    setIsProcessing(false);
+    setIsProcessing(false)
+    setEditedTranscript(transcript)
+    setIsReviewOpen(true)
+    // Kembali ke IDLE_STATUS saat dialog terbuka (di background)
+    setStatus(IDLE_STATUS)
+  }
 
-    // Open review dialog with transcript
-    setEditedTranscript(transcript);
-    setIsReviewOpen(true);
-    setStatus("Siap merekam");
-  };
-
-  // Handle status change from recorder
   const handleStatusChange = (newStatus: string) => {
-    setStatus(newStatus);
-  };
+    // Jika component recorder mengirim 'Siap merekam' atau string kosong,
+    // kita paksa gunakan IDLE_STATUS kita yang baru.
+    if (
+      newStatus === 'Siap merekam' ||
+      newStatus === '' ||
+      newStatus === 'Stop'
+    ) {
+      setStatus(IDLE_STATUS)
+    } else {
+      setStatus(newStatus)
+    }
+  }
 
-  // Handle confirm from review dialog
   const handleConfirmTranscript = async () => {
-    setIsReviewOpen(false);
-    await processTranscript(editedTranscript, selectedWalletId);
-  };
+    setIsReviewOpen(false)
+    await processTranscript(editedTranscript, selectedWalletId)
+  }
 
-  // Handle cancel from review dialog
   const handleCancelTranscript = () => {
-    setIsReviewOpen(false);
-    setEditedTranscript("");
-    setSelectedWalletId(null);
-    setStatus("Siap merekam");
-  };
+    setIsReviewOpen(false)
+    setEditedTranscript('')
+    setSelectedWalletId(null)
+    setStatus(IDLE_STATUS)
+  }
 
-  // Handle wallet management
   const handleAddWallet = () => {
-    setIsAddWalletOpen(true);
-  };
+    setIsAddWalletOpen(true)
+  }
 
   const handleEditWallet = (wallet: Wallet) => {
-    setSelectedWallet(wallet);
-    setIsEditWalletOpen(true);
-  };
+    setSelectedWallet(wallet)
+    setIsEditWalletOpen(true)
+  }
 
   const handleWalletSuccess = () => {
-    loadWallets();
-  };
+    loadWallets()
+  }
 
-  // Process transcript (called after user confirms in dialog)
-  const processTranscript = async (transcript: string, walletId: string | null = null) => {
-    setIsProcessing(true);
-    setStatus(`Memproses: "${transcript}"`);
+  const processTranscript = async (
+    transcript: string,
+    walletId: string | null = null,
+  ) => {
+    setIsProcessing(true)
+    // Saat memproses teks user, ini masuk akal dilabeli "Anda"
+    setStatus(`Memproses: "${transcript}"`)
 
     try {
-      // Step 1: Extract JSON from voice using Gemini
       const processPayload: { text: string; webhookUrl?: string } = {
         text: transcript,
-      };
+      }
 
-      // Only include webhookUrl for webhook mode
       if (userProfile?.mode === 'webhook' && webhookUrl) {
-        processPayload.webhookUrl = webhookUrl;
+        processPayload.webhookUrl = webhookUrl
       }
 
       const processResponse = await fetch('/api/process', {
@@ -214,21 +237,19 @@ export default function HomePage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(processPayload),
-      });
+      })
 
-      const processData = await processResponse.json();
+      const processData = await processResponse.json()
 
       if (!processResponse.ok) {
-        console.error('Process API error response:', processData);
-        console.error('Status:', processResponse.status);
-        const errorMsg = processData.error || 'Gagal memproses suara';
-        const errorDetails = processData.details ? ` - ${processData.details}` : '';
-        throw new Error(errorMsg + errorDetails);
+        console.error('Process API error response:', processData)
+        const errorMsg = processData.error || 'Gagal memproses suara'
+        const errorDetails = processData.details
+          ? ` - ${processData.details}`
+          : ''
+        throw new Error(errorMsg + errorDetails)
       }
 
-      console.log('Process API success response:', processData);
-
-      // Step 2: Save to database
       const transactionResponse = await fetch('/api/transaction', {
         method: 'POST',
         headers: {
@@ -238,48 +259,64 @@ export default function HomePage() {
           item: processData.data.item,
           amount: processData.data.amount,
           category: processData.data.category,
-          type: processData.data.type || 'expense', // Use AI-detected type or default to expense
+          type: processData.data.type || 'expense',
           date: processData.data.date,
           voice_text: transcript,
           location: processData.data.location || null,
           payment_method: processData.data.payment_method || null,
-          wallet_id: walletId, // Use selected wallet or default
+          wallet_id: walletId,
         }),
-      });
+      })
 
-      const transactionData = await transactionResponse.json();
+      const transactionData = await transactionResponse.json()
 
       if (!transactionResponse.ok) {
-        throw new Error(transactionData.error || 'Gagal menyimpan transaksi');
+        throw new Error(transactionData.error || 'Gagal menyimpan transaksi')
       }
 
-      // Reload profile, wallets, and transactions after successful save
-      loadUserProfile();
-      loadWallets();
-      loadRecentTransactions();
+      loadUserProfile()
+      loadWallets()
+      loadRecentTransactions()
 
-      // Show success state with confetti
-      setStatus("Berhasil! Transaksi tersimpan");
+      setStatus('Berhasil! Transaksi tersimpan')
+      toast.success(
+        `${processData.data.item} - Rp ${processData.data.amount.toLocaleString('id-ID')} tercatat!`,
+      )
 
-      // Show success toast
-      toast.success(`${processData.data.item} - Rp ${processData.data.amount.toLocaleString('id-ID')} tercatat!`);
-
-      // Wait a bit to show success state, then reset
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setStatus("Siap merekam");
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      setStatus(IDLE_STATUS)
     } catch (error) {
-      console.error('Error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Gagal memproses';
-      toast.error(errorMessage);
-      setStatus("Gagal memproses");
-
-      // Reset after showing error
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setStatus("Siap merekam");
+      console.error('Error:', error)
+      const errorMessage =
+        error instanceof Error ? error.message : 'Gagal memproses'
+      toast.error(errorMessage)
+      setStatus('Gagal memproses')
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      setStatus(IDLE_STATUS)
     } finally {
-      setIsProcessing(false);
+      setIsProcessing(false)
     }
-  };
+  }
+
+  // Logic Bubble Active
+  const isBubbleActive =
+    status !== IDLE_STATUS && // Jika bukan idle, berarti aktif
+    (status === 'Mendengarkan...' ||
+      status.toLowerCase().includes('memproses') ||
+      status.toLowerCase().includes('berhasil') ||
+      status.toLowerCase().includes('gagal') ||
+      status.toLowerCase().includes('merekam'))
+
+  // Helper untuk menentukan Label Bubble
+  const getBubbleLabel = () => {
+    if (status === IDLE_STATUS) return 'Saran'
+    // Jika status mengandung kutip (misal: Memproses: "Beli kopi"), itu kata-kata user -> "Anda"
+    if (status.includes('"') || status.includes("'")) return 'Anda'
+    // Sisanya status sistem
+    return 'Status'
+  }
+
+  const bubbleLabel = getBubbleLabel()
 
   return (
     <div className="min-h-screen bg-background">
@@ -287,31 +324,49 @@ export default function HomePage() {
       <nav className="hidden md:block fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Left side - Menu items */}
             <div className="flex items-center gap-1">
               <Link href="/advisor">
-                <Button variant="ghost" size="icon" className="h-9 w-9" title="AI Advisor">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9"
+                  title="AI Advisor"
+                >
                   <Sparkles className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/history">
-                <Button variant="ghost" size="icon" className="h-9 w-9" title="Riwayat">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9"
+                  title="Riwayat"
+                >
                   <History className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/reports">
-                <Button variant="ghost" size="icon" className="h-9 w-9" title="Laporan">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9"
+                  title="Laporan"
+                >
                   <BarChart3 className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/settings">
-                <Button variant="ghost" size="icon" className="h-9 w-9" title="Pengaturan">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9"
+                  title="Pengaturan"
+                >
                   <Settings className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
 
-            {/* Right side - Dark mode & Logout */}
             <div className="flex items-center gap-1">
               <DarkModeToggle />
               <Button
@@ -335,9 +390,7 @@ export default function HomePage() {
         <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
           {/* Header Section */}
           <div className="space">
-            <h1 className="text-2xl font-bold tracking-tight">
-              HaloDompet
-            </h1>
+            <h1 className="text-2xl font-bold tracking-tight">HaloDompet</h1>
             <p className="text-sm text-muted-foreground">
               {user?.email || 'Voice-powered expense tracker'}
             </p>
@@ -354,6 +407,39 @@ export default function HomePage() {
             onAddWallet={handleAddWallet}
             onEditWallet={handleEditWallet}
           />
+
+          {/* Area Chat Bubble */}
+          <div className="relative w-full max-w-[400px] mx-auto mb-4 min-h-[60px] flex flex-col justify-end items-center transition-all duration-300">
+            <div
+              className={`relative px-4 py-2.5 rounded-2xl shadow-sm border transition-all duration-300 ${
+                isBubbleActive
+                  ? 'bg-gradient-to-br from-indigo-50 to-white border-indigo-100 text-indigo-900 scale-100 opacity-100'
+                  : 'bg-gray-50 border-gray-100 text-gray-400 scale-95 opacity-80'
+              }`}
+            >
+              {/* Label Bubble Dynamic */}
+              <span className="absolute -top-2.5 left-4 bg-white text-[9px] font-bold px-1.5 py-px rounded-full shadow-sm border border-gray-100 text-gray-400 uppercase tracking-wider">
+                {bubbleLabel}
+              </span>
+
+              <p
+                className={`text-center font-medium leading-snug ${
+                  isBubbleActive ? 'text-sm' : 'text-xs italic'
+                }`}
+              >
+                {/* Hilangkan tanda kutip jika status adalah prompt/saran */}
+                {status === IDLE_STATUS ? status : `"${status}"`}
+              </p>
+
+              <div
+                className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-b border-r ${
+                  isBubbleActive
+                    ? 'bg-indigo-50 border-indigo-100'
+                    : 'bg-gray-50 border-gray-100'
+                }`}
+              ></div>
+            </div>
+          </div>
 
           {/* Voice Recording Section */}
           <div className="flex flex-col items-center gap-4">
@@ -375,12 +461,6 @@ export default function HomePage() {
 
             {/* Status Card */}
             <div className="w-full max-w-md space-y-3">
-              <div className="px-6 py-3 rounded-2xl bg-card border border-border shadow-sm">
-                <p className="text-sm text-center font-medium text-foreground">
-                  {status}
-                </p>
-              </div>
-
               {userProfile?.mode === 'webhook' && !webhookUrl && (
                 <Link href="/settings">
                   <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 rounded-xl px-4 py-2 cursor-pointer hover:bg-amber-500/20 transition-colors">
@@ -399,9 +479,6 @@ export default function HomePage() {
                   Tekan tombol dan ucapkan pemasukan atau pengeluaran Anda
                 </p>
               </div>
-              <p className="text-xs text-muted-foreground/70">
-                Contoh: &quot;Beli kopi 25000&quot; atau &quot;Dapat gaji 5 juta&quot;
-              </p>
             </div>
           </div>
 
@@ -437,21 +514,23 @@ export default function HomePage() {
           )}
 
           {/* Empty State */}
-          {recentTransactions.length === 0 && !isLoadingTransactions && !isLoadingProfile && (
-            <div className="text-center py-12 space-y-3">
-              <div className="w-16 h-16 mx-auto rounded-full bg-muted/50 flex items-center justify-center">
-                <History className="h-8 w-8 text-muted-foreground" />
+          {recentTransactions.length === 0 &&
+            !isLoadingTransactions &&
+            !isLoadingProfile && (
+              <div className="text-center py-12 space-y-3">
+                <div className="w-16 h-16 mx-auto rounded-full bg-muted/50 flex items-center justify-center">
+                  <History className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-semibold text-foreground">
+                    Belum ada transaksi
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Mulai rekam pengeluaran Anda dengan menekan tombol di atas
+                  </p>
+                </div>
               </div>
-              <div className="space-y-1">
-                <h3 className="font-semibold text-foreground">
-                  Belum ada transaksi
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Mulai rekam pengeluaran Anda dengan menekan tombol di atas
-                </p>
-              </div>
-            </div>
-          )}
+            )}
         </div>
       </main>
 
@@ -461,12 +540,16 @@ export default function HomePage() {
           <DialogHeader>
             <DialogTitle>Review Hasil Rekaman</DialogTitle>
             <DialogDescription>
-              Periksa dan edit hasil rekaman suara Anda sebelum menyimpan transaksi.
+              Periksa dan edit hasil rekaman suara Anda sebelum menyimpan
+              transaksi.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label htmlFor="transcript-edit" className="text-sm font-medium text-foreground">
+              <label
+                htmlFor="transcript-edit"
+                className="text-sm font-medium text-foreground"
+              >
                 Teks yang terdeteksi:
               </label>
               <Input
@@ -533,11 +616,10 @@ export default function HomePage() {
         wallets={wallets}
         isLoadingWallets={isLoadingWallets}
         onSuccess={() => {
-          // Reload wallets and transactions after successful manual transaction
-          loadWallets();
-          loadRecentTransactions();
+          loadWallets()
+          loadRecentTransactions()
         }}
       />
     </div>
-  );
+  )
 }
