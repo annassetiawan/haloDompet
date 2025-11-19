@@ -46,23 +46,39 @@ export async function DELETE(request: NextRequest) {
 
     console.log('✅ Transactions deleted:', data.transactions_deleted)
 
-    // Step 2: Reset wallet balances to 0 (separate query to avoid trigger conflict)
-    const { error: walletsError } = await supabase
+    // Step 2: Get all user's wallets
+    const { data: wallets, error: fetchWalletsError } = await supabase
       .from('wallets')
-      .update({ balance: 0 })
+      .select('id')
       .eq('user_id', user.id)
 
-    if (walletsError) {
-      console.error('Error resetting wallets:', walletsError)
+    if (fetchWalletsError) {
+      console.error('Error fetching wallets:', fetchWalletsError)
       return NextResponse.json(
-        { error: 'Failed to reset wallet balances', details: walletsError.message },
+        { error: 'Failed to fetch wallets', details: fetchWalletsError.message },
         { status: 500 }
       )
     }
 
-    console.log('✅ Wallet balances reset to 0')
+    // Step 3: Reset each wallet balance to 0 one by one (avoid batch update conflict)
+    for (const wallet of wallets || []) {
+      const { error: updateError } = await supabase
+        .from('wallets')
+        .update({ balance: 0 })
+        .eq('id', wallet.id)
 
-    // Step 3: Reset user's current_balance to 0
+      if (updateError) {
+        console.error('Error resetting wallet:', wallet.id, updateError)
+        return NextResponse.json(
+          { error: 'Failed to reset wallet balance', details: updateError.message },
+          { status: 500 }
+        )
+      }
+    }
+
+    console.log(`✅ ${wallets?.length || 0} wallet balances reset to 0`)
+
+    // Step 4: Reset user's current_balance to 0
     const { error: userError } = await supabase
       .from('users')
       .update({ current_balance: 0 })
