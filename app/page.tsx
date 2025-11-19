@@ -479,7 +479,7 @@ export default function HomePage() {
               </div>
 
               {/* Right: Dark Mode Toggle */}
-              <div className="md:hidden">
+              <div>
                 <DarkModeToggle />
               </div>
             </div>
