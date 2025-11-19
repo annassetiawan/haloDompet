@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getDefaultWallet } from '@/lib/db'
 
 /**
  * POST /api/transaction/income
  * Create income transaction (gajian, transfer, etc.)
  *
- * This adds money to the current balance
+ * This adds money to the wallet balance (handled by database trigger)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { item, amount, date, notes } = body
+    const { item, amount, date, notes, wallet_id } = body
 
     // Validation
     if (!item || !amount) {
@@ -37,29 +38,43 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get current balance
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('current_balance')
-      .eq('id', user.id)
+    // If wallet_id not provided, use default wallet
+    let targetWalletId = wallet_id
+    if (!targetWalletId) {
+      const defaultWallet = await getDefaultWallet(user.id)
+      if (!defaultWallet) {
+        return NextResponse.json(
+          { error: 'No default wallet found. Please create a wallet first.' },
+          { status: 400 }
+        )
+      }
+      targetWalletId = defaultWallet.id
+    }
+
+    // Get wallet info before transaction (for response)
+    const { data: walletData, error: walletError } = await supabase
+      .from('wallets')
+      .select('balance, name')
+      .eq('id', targetWalletId)
       .single()
 
-    if (userError) {
-      console.error('Error fetching user:', userError)
+    if (walletError) {
+      console.error('Error fetching wallet:', walletError)
       return NextResponse.json(
-        { error: 'Failed to get current balance' },
+        { error: 'Failed to get wallet information' },
         { status: 500 }
       )
     }
 
-    const currentBalance = userData.current_balance
-    const newBalance = currentBalance + amount
+    const previousBalance = walletData.balance
 
     // Create income transaction
+    // The database trigger will automatically update wallet balance
     const { data: transaction, error: transactionError } = await supabase
       .from('transactions')
       .insert({
         user_id: user.id,
+        wallet_id: targetWalletId,
         item,
         amount,
         category: 'Pemasukan',
@@ -81,38 +96,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Update user balance
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({ current_balance: newBalance })
-      .eq('id', user.id)
-
-    if (updateError) {
-      console.error('Error updating balance:', updateError)
-      // Rollback transaction if balance update fails
-      await supabase
-        .from('transactions')
-        .delete()
-        .eq('id', transaction.id)
-
-      return NextResponse.json(
-        { error: 'Failed to update balance' },
-        { status: 500 }
-      )
-    }
-
     console.log('✅ Income transaction created:', {
       item,
       amount,
-      newBalance
+      wallet: walletData.name,
+      wallet_id: targetWalletId
     })
 
     return NextResponse.json({
       success: true,
       transaction,
-      balance: {
-        previous: currentBalance,
-        current: newBalance,
+      wallet: {
+        id: targetWalletId,
+        name: walletData.name,
+        previous_balance: previousBalance,
+        new_balance: previousBalance + amount,
         added: amount
       }
     })

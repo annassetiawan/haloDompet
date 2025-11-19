@@ -84,24 +84,27 @@ export default function ReportsPage() {
     }
   }
 
-  // Calculate statistics
-  const totalSpent = transactions.reduce(
+  // Calculate statistics - ONLY for EXPENSE transactions
+  const expenseTransactions = transactions.filter(t => t.type !== 'income')
+  const previousExpenseTransactions = previousMonthTransactions.filter(t => t.type !== 'income')
+
+  const totalSpent = expenseTransactions.reduce(
     (sum, t) => sum + parseFloat(t.amount.toString()),
     0
   )
 
-  const averagePerTransaction = transactions.length > 0
-    ? totalSpent / transactions.length
+  const averagePerTransaction = expenseTransactions.length > 0
+    ? totalSpent / expenseTransactions.length
     : 0
 
   // Calculate previous month statistics
-  const previousTotalSpent = previousMonthTransactions.reduce(
+  const previousTotalSpent = previousExpenseTransactions.reduce(
     (sum, t) => sum + parseFloat(t.amount.toString()),
     0
   )
 
-  const previousAveragePerTransaction = previousMonthTransactions.length > 0
-    ? previousTotalSpent / previousMonthTransactions.length
+  const previousAveragePerTransaction = previousExpenseTransactions.length > 0
+    ? previousTotalSpent / previousExpenseTransactions.length
     : 0
 
   // Calculate month-over-month changes
@@ -109,16 +112,16 @@ export default function ReportsPage() {
     ? ((totalSpent - previousTotalSpent) / previousTotalSpent) * 100
     : 0
 
-  const transactionCountChange = previousMonthTransactions.length > 0
-    ? ((transactions.length - previousMonthTransactions.length) / previousMonthTransactions.length) * 100
+  const transactionCountChange = previousExpenseTransactions.length > 0
+    ? ((expenseTransactions.length - previousExpenseTransactions.length) / previousExpenseTransactions.length) * 100
     : 0
 
   const averageChange = previousAveragePerTransaction > 0
     ? ((averagePerTransaction - previousAveragePerTransaction) / previousAveragePerTransaction) * 100
     : 0
 
-  // Group by category
-  const categoryStats = transactions.reduce((acc, transaction) => {
+  // Group by category - ONLY for EXPENSE transactions
+  const categoryStats = expenseTransactions.reduce((acc, transaction) => {
     const category = transaction.category
     if (!acc[category]) {
       acc[category] = { total: 0, count: 0 }
@@ -188,8 +191,8 @@ export default function ReportsPage() {
     percentage: item.percentage,
   }))
 
-  // Prepare data for line chart (daily spending trend)
-  const dailySpending = transactions.reduce((acc, transaction) => {
+  // Prepare data for line chart (daily spending trend) - ONLY for EXPENSE transactions
+  const dailySpending = expenseTransactions.reduce((acc, transaction) => {
     const dateKey = format(new Date(transaction.date), 'yyyy-MM-dd')
     if (!acc[dateKey]) {
       acc[dateKey] = 0
@@ -210,7 +213,7 @@ export default function ReportsPage() {
   const generateInsights = () => {
     const insights: { type: 'info' | 'warning' | 'success'; text: string }[] = []
 
-    if (transactions.length === 0) return insights
+    if (expenseTransactions.length === 0) return insights
 
     // Insight 1: Top spending category
     if (sortedCategories.length > 0) {
@@ -236,10 +239,10 @@ export default function ReportsPage() {
       }
     }
 
-    // Insight 3: Most expensive transaction
-    const mostExpensive = transactions.reduce((max, t) =>
+    // Insight 3: Most expensive transaction (EXPENSE only)
+    const mostExpensive = expenseTransactions.reduce((max, t) =>
       parseFloat(t.amount.toString()) > parseFloat(max.amount.toString()) ? t : max
-      , transactions[0])
+      , expenseTransactions[0])
 
     if (mostExpensive) {
       const mostExpensiveAmount = parseFloat(mostExpensive.amount.toString())
@@ -267,12 +270,12 @@ export default function ReportsPage() {
       })
     }
 
-    // Insight 5: Transaction frequency
-    if (transactions.length > previousMonthTransactions.length && previousMonthTransactions.length > 0) {
+    // Insight 5: Transaction frequency (EXPENSE only)
+    if (expenseTransactions.length > previousExpenseTransactions.length && previousExpenseTransactions.length > 0) {
       const freqChange = transactionCountChange.toFixed(1)
       insights.push({
         type: 'info',
-        text: `Frekuensi transaksi Anda meningkat ${freqChange}% bulan ini. Pertimbangkan untuk menggabungkan pembelian.`
+        text: `Frekuensi transaksi pengeluaran Anda meningkat ${freqChange}% bulan ini. Pertimbangkan untuk menggabungkan pembelian.`
       })
     }
 
@@ -479,9 +482,9 @@ export default function ReportsPage() {
                     <h3 className="text-sm text-muted-foreground">Jumlah Transaksi</h3>
                   </div>
                   <p className="text-2xl md:text-3xl font-normal text-foreground">
-                    {transactions.length}
+                    {expenseTransactions.length}
                   </p>
-                  {previousMonthTransactions.length > 0 ? (
+                  {previousExpenseTransactions.length > 0 ? (
                     <div className="flex items-center gap-1 mt-1">
                       {transactionCountChange > 0 ? (
                         <>
