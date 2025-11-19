@@ -192,6 +192,52 @@ export default function HomePage() {
     loadWallets();
   };
 
+  // Helper function to convert technical errors to user-friendly messages
+  const getFriendlyErrorMessage = (error: string): string => {
+    // Handle missing fields error
+    if (error.includes('Missing required fields')) {
+      return 'Maaf, sepertinya ada informasi yang kurang lengkap. Coba ucapkan lagi dengan jelas, misalnya: "Beli kopi 25 ribu"';
+    }
+
+    // Handle validation errors
+    if (error.toLowerCase().includes('validation')) {
+      return 'Ada kesalahan format data. Pastikan Anda menyebutkan item dan jumlah dengan jelas';
+    }
+
+    // Handle invalid amount
+    if (error.toLowerCase().includes('amount') || error.toLowerCase().includes('jumlah')) {
+      return 'Nominal yang diucapkan tidak valid. Coba sebutkan angka yang jelas, misalnya: "25 ribu" atau "100 ribu"';
+    }
+
+    // Handle category errors
+    if (error.toLowerCase().includes('category') || error.toLowerCase().includes('kategori')) {
+      return 'Kategori tidak terdeteksi. Coba ucapkan dengan lebih spesifik, misalnya: "Beli kopi" atau "Bayar parkir"';
+    }
+
+    // Handle date errors
+    if (error.toLowerCase().includes('date') || error.toLowerCase().includes('tanggal')) {
+      return 'Tanggal tidak valid. Sistem akan menggunakan tanggal hari ini secara otomatis';
+    }
+
+    // Handle processing errors
+    if (error.toLowerCase().includes('gagal memproses') || error.toLowerCase().includes('process')) {
+      return 'Gagal memproses rekaman. Pastikan koneksi internet stabil dan coba lagi';
+    }
+
+    // Handle API errors
+    if (error.toLowerCase().includes('503') || error.toLowerCase().includes('service unavailable')) {
+      return 'Layanan sedang sibuk. Tunggu sebentar dan coba lagi ya';
+    }
+
+    // Handle network errors
+    if (error.toLowerCase().includes('network') || error.toLowerCase().includes('fetch')) {
+      return 'Koneksi internet bermasalah. Periksa koneksi dan coba lagi';
+    }
+
+    // Default friendly message
+    return 'Ups, ada yang tidak beres. Coba ucapkan lagi dengan jelas, misalnya: "Beli kopi 25 ribu"';
+  };
+
   // Process transcript (called after user confirms in dialog)
   const processTranscript = async (transcript: string, walletId: string | null = null) => {
     setIsProcessing(true);
@@ -222,8 +268,8 @@ export default function HomePage() {
         console.error('Process API error response:', processData);
         console.error('Status:', processResponse.status);
         const errorMsg = processData.error || 'Gagal memproses suara';
-        const errorDetails = processData.details ? ` - ${processData.details}` : '';
-        throw new Error(errorMsg + errorDetails);
+        const friendlyError = getFriendlyErrorMessage(errorMsg);
+        throw new Error(friendlyError);
       }
 
       console.log('Process API success response:', processData);
@@ -250,7 +296,9 @@ export default function HomePage() {
       const transactionData = await transactionResponse.json();
 
       if (!transactionResponse.ok) {
-        throw new Error(transactionData.error || 'Gagal menyimpan transaksi');
+        const errorMsg = transactionData.error || 'Gagal menyimpan transaksi';
+        const friendlyError = getFriendlyErrorMessage(errorMsg);
+        throw new Error(friendlyError);
       }
 
       // Reload profile, wallets, and transactions after successful save
@@ -269,7 +317,12 @@ export default function HomePage() {
       setStatus("Siap merekam");
     } catch (error) {
       console.error('Error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Gagal memproses';
+      let errorMessage = 'Ups, ada yang tidak beres. Coba lagi ya';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
       toast.error(errorMessage);
       setStatus("Gagal memproses");
 
