@@ -13,6 +13,7 @@ RETURNS JSON AS $$
 DECLARE
   v_transactions_count INTEGER;
   v_wallets_count INTEGER;
+  v_transaction_id UUID;
   v_result JSON;
 BEGIN
   -- Validate user exists
@@ -29,24 +30,23 @@ BEGIN
   FROM public.wallets
   WHERE user_id = p_user_id;
 
-  -- APPROACH: Set wallet_id to NULL first, then delete transactions
-  -- This prevents the trigger from trying to update wallet balances
+  -- APPROACH: Delete transactions one by one in a loop to avoid batch conflicts
+  -- This is slower but avoids "tuple already modified" error
 
-  -- Step 1: Unlink transactions from wallets
-  UPDATE public.transactions
-  SET wallet_id = NULL
-  WHERE user_id = p_user_id;
+  -- Step 1: Delete each transaction individually
+  FOR v_transaction_id IN
+    SELECT id FROM public.transactions WHERE user_id = p_user_id
+  LOOP
+    DELETE FROM public.transactions WHERE id = v_transaction_id;
+  END LOOP;
 
-  -- Step 2: Delete all transactions (trigger won't update wallets since wallet_id is NULL)
-  DELETE FROM public.transactions
-  WHERE user_id = p_user_id;
-
-  -- Step 3: Reset all wallet balances to 0
+  -- Step 2: After all transactions deleted, manually reset wallet balances to 0
+  -- The trigger should have updated balances during deletion, but we force reset to ensure 0
   UPDATE public.wallets
   SET balance = 0
   WHERE user_id = p_user_id;
 
-  -- Step 4: Reset user's current_balance to 0 for backward compatibility
+  -- Step 3: Reset user's current_balance to 0 for backward compatibility
   UPDATE public.users
   SET current_balance = 0
   WHERE id = p_user_id;
@@ -72,7 +72,7 @@ GRANT EXECUTE ON FUNCTION reset_user_data(UUID) TO authenticated;
 
 -- Add comment
 COMMENT ON FUNCTION reset_user_data(UUID) IS
-'Safely resets all user data (transactions and wallet balances) by unlinking transactions from wallets before deletion';
+'Safely resets all user data by deleting transactions (which updates wallets via trigger) then force-resetting wallet balances to 0';
 
 -- ============================================
 -- USAGE EXAMPLE
