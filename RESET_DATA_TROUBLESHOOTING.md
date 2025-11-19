@@ -1,12 +1,12 @@
 # Reset Data Feature - Troubleshooting Guide
 
-## Error: "Failed to reset wallet balances"
+## Error: "tuple to be updated was already modified by an operation triggered by the current command"
 
-Jika Anda mendapatkan error ini, ikuti langkah-langkah berikut:
+Ini adalah error trigger conflict yang sudah diperbaiki dengan PostgreSQL function.
 
-### 1. Jalankan Migration SQL (WAJIB)
+## Setup Instructions (WAJIB)
 
-Anda **HARUS** menjalankan migration SQL terlebih dahulu:
+Anda **HARUS** menjalankan 3 migration SQL berikut:
 
 #### a. Migration untuk is_onboarded
 1. Buka Supabase Dashboard → SQL Editor
@@ -19,6 +19,14 @@ Anda **HARUS** menjalankan migration SQL terlebih dahulu:
 2. Copy isi file `supabase/fix-wallets-rls-update-policy.sql`
 3. Paste dan **Run** di SQL Editor
 4. Verifikasi: Policy "Users can update own wallets" sudah ada
+
+#### c. Create Reset User Data Function (PENTING!)
+1. Buka Supabase Dashboard → SQL Editor
+2. Copy isi file `supabase/create-reset-user-data-function.sql`
+3. Paste dan **Run** di SQL Editor
+4. Verifikasi: Function `reset_user_data` sudah dibuat
+
+**Catatan:** Function ini mengatasi trigger conflict dengan cara disable trigger sementara saat reset data.
 
 ### 2. Cek Console Browser
 
@@ -34,7 +42,17 @@ Error message detail akan muncul di console. Catat error message tersebut.
 
 ### 3. Kemungkinan Penyebab Error
 
-#### A. RLS Policy Tidak Mengizinkan Update
+#### A. Function reset_user_data Belum Dibuat
+**Gejala:** Error "function reset_user_data does not exist"
+
+**Solusi:** Jalankan migration `supabase/create-reset-user-data-function.sql`
+
+#### B. Trigger Conflict (FIXED)
+**Gejala:** Error "tuple to be updated was already modified by an operation triggered by the current command"
+
+**Solusi:** Error ini sudah diperbaiki dengan PostgreSQL function yang disable trigger sementara. Pastikan Anda sudah menjalankan `create-reset-user-data-function.sql`
+
+#### C. RLS Policy Tidak Mengizinkan Update
 **Gejala:** Error "Failed to reset wallet balances"
 
 **Solusi:**
@@ -162,10 +180,23 @@ SELECT id, email, is_onboarded, current_balance FROM public.users WHERE id = aut
 
 - [ ] Jalankan `supabase/migration-add-is-onboarded.sql`
 - [ ] Jalankan `supabase/fix-wallets-rls-update-policy.sql`
+- [ ] Jalankan `supabase/create-reset-user-data-function.sql` (PENTING!)
 - [ ] Restart development server
 - [ ] Clear browser cache dan reload page
 - [ ] Cek browser console untuk error details
 - [ ] Test reset data lagi
+
+## How Reset Data Works (Technical)
+
+The reset process uses a PostgreSQL function `reset_user_data()` that:
+
+1. **Disables trigger** `auto_update_wallet_balance` temporarily
+2. **Deletes all transactions** for the user
+3. **Re-enables trigger**
+4. **Resets wallet balances** to 0
+5. **Resets user balance** to 0
+
+This approach avoids the "tuple already modified" error that occurs when triggers try to update the same row being updated by the main query.
 
 ## Prevention
 
