@@ -218,52 +218,73 @@ export default function HomePage() {
   const getFriendlyErrorMessage = (error: string): string => {
     // Handle missing fields error
     if (error.includes('Missing required fields')) {
-      return 'Maaf, sepertinya ada informasi yang kurang lengkap. Coba ucapkan lagi dengan jelas, misalnya: "Beli kopi 25 ribu"';
+      return 'Maaf, sepertinya ada informasi yang kurang lengkap. Coba ucapkan lagi dengan jelas, misalnya: "Beli kopi 25 ribu"'
     }
 
     // Handle validation errors
     if (error.toLowerCase().includes('validation')) {
-      return 'Ada kesalahan format data. Pastikan Anda menyebutkan item dan jumlah dengan jelas';
+      return 'Ada kesalahan format data. Pastikan Anda menyebutkan item dan jumlah dengan jelas'
     }
 
     // Handle invalid amount
-    if (error.toLowerCase().includes('amount') || error.toLowerCase().includes('jumlah')) {
-      return 'Nominal yang diucapkan tidak valid. Coba sebutkan angka yang jelas, misalnya: "25 ribu" atau "100 ribu"';
+    if (
+      error.toLowerCase().includes('amount') ||
+      error.toLowerCase().includes('jumlah')
+    ) {
+      return 'Nominal yang diucapkan tidak valid. Coba sebutkan angka yang jelas, misalnya: "25 ribu" atau "100 ribu"'
     }
 
     // Handle category errors
-    if (error.toLowerCase().includes('category') || error.toLowerCase().includes('kategori')) {
-      return 'Kategori tidak terdeteksi. Coba ucapkan dengan lebih spesifik, misalnya: "Beli kopi" atau "Bayar parkir"';
+    if (
+      error.toLowerCase().includes('category') ||
+      error.toLowerCase().includes('kategori')
+    ) {
+      return 'Kategori tidak terdeteksi. Coba ucapkan dengan lebih spesifik, misalnya: "Beli kopi" atau "Bayar parkir"'
     }
 
     // Handle date errors
-    if (error.toLowerCase().includes('date') || error.toLowerCase().includes('tanggal')) {
-      return 'Tanggal tidak valid. Sistem akan menggunakan tanggal hari ini secara otomatis';
+    if (
+      error.toLowerCase().includes('date') ||
+      error.toLowerCase().includes('tanggal')
+    ) {
+      return 'Tanggal tidak valid. Sistem akan menggunakan tanggal hari ini secara otomatis'
     }
 
     // Handle processing errors
-    if (error.toLowerCase().includes('gagal memproses') || error.toLowerCase().includes('process')) {
-      return 'Gagal memproses rekaman. Pastikan koneksi internet stabil dan coba lagi';
+    if (
+      error.toLowerCase().includes('gagal memproses') ||
+      error.toLowerCase().includes('process')
+    ) {
+      return 'Gagal memproses rekaman. Pastikan koneksi internet stabil dan coba lagi'
     }
 
     // Handle API errors
-    if (error.toLowerCase().includes('503') || error.toLowerCase().includes('service unavailable')) {
-      return 'Layanan sedang sibuk. Tunggu sebentar dan coba lagi ya';
+    if (
+      error.toLowerCase().includes('503') ||
+      error.toLowerCase().includes('service unavailable')
+    ) {
+      return 'Layanan sedang sibuk. Tunggu sebentar dan coba lagi ya'
     }
 
     // Handle network errors
-    if (error.toLowerCase().includes('network') || error.toLowerCase().includes('fetch')) {
-      return 'Koneksi internet bermasalah. Periksa koneksi dan coba lagi';
+    if (
+      error.toLowerCase().includes('network') ||
+      error.toLowerCase().includes('fetch')
+    ) {
+      return 'Koneksi internet bermasalah. Periksa koneksi dan coba lagi'
     }
 
     // Default friendly message
-    return 'Ups, ada yang tidak beres. Coba ucapkan lagi dengan jelas, misalnya: "Beli kopi 25 ribu"';
-  };
+    return 'Ups, ada yang tidak beres. Coba ucapkan lagi dengan jelas, misalnya: "Beli kopi 25 ribu"'
+  }
 
   // Process transcript (called after user confirms in dialog)
-  const processTranscript = async (transcript: string, walletId: string | null = null) => {
-    setIsProcessing(true);
-    setStatus(`Memproses: "${transcript}"`);
+  const processTranscript = async (
+    transcript: string,
+    walletId: string | null = null,
+  ) => {
+    setIsProcessing(true)
+    setStatus(`Memproses: "${transcript}"`)
 
     try {
       const processPayload: { text: string; webhookUrl?: string } = {
@@ -285,11 +306,11 @@ export default function HomePage() {
       const processData = await processResponse.json()
 
       if (!processResponse.ok) {
-        console.error('Process API error response:', processData);
-        console.error('Status:', processResponse.status);
-        const errorMsg = processData.error || 'Gagal memproses suara';
-        const friendlyError = getFriendlyErrorMessage(errorMsg);
-        throw new Error(friendlyError);
+        console.error('Process API error response:', processData)
+        console.error('Status:', processResponse.status)
+        const errorMsg = processData.error || 'Gagal memproses suara'
+        const friendlyError = getFriendlyErrorMessage(errorMsg)
+        throw new Error(friendlyError)
       }
 
       const transactionResponse = await fetch('/api/transaction', {
@@ -313,9 +334,9 @@ export default function HomePage() {
       const transactionData = await transactionResponse.json()
 
       if (!transactionResponse.ok) {
-        const errorMsg = transactionData.error || 'Gagal menyimpan transaksi';
-        const friendlyError = getFriendlyErrorMessage(errorMsg);
-        throw new Error(friendlyError);
+        const errorMsg = transactionData.error || 'Gagal menyimpan transaksi'
+        const friendlyError = getFriendlyErrorMessage(errorMsg)
+        throw new Error(friendlyError)
       }
 
       loadUserProfile()
@@ -330,19 +351,19 @@ export default function HomePage() {
       await new Promise((resolve) => setTimeout(resolve, 2000))
       setStatus(IDLE_STATUS)
     } catch (error) {
-      console.error('Error:', error);
-      let errorMessage = 'Ups, ada yang tidak beres. Coba lagi ya';
+      console.error('Error:', error)
+      let errorMessage = 'Ups, ada yang tidak beres. Coba lagi ya'
 
       if (error instanceof Error) {
-        errorMessage = error.message;
+        errorMessage = error.message
       }
 
-      toast.error(errorMessage);
-      setStatus("Gagal memproses");
+      toast.error(errorMessage)
+      setStatus('Gagal memproses')
 
       // Reset after showing error
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setStatus("Siap merekam");
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      setStatus('Siap merekam')
     } finally {
       setIsProcessing(false)
     }
@@ -459,7 +480,7 @@ export default function HomePage() {
           />
 
           {/* Area Chat Bubble */}
-          <div className="relative w-full max-w-[400px] mx-auto mb-4 min-h-[60px] flex flex-col justify-end items-center transition-all duration-300">
+          <div className="relative w-full max-w-[400px] mx-auto mb-4 flex flex-col justify-end items-center transition-all duration-300">
             <div
               className={`relative px-4 py-2.5 rounded-2xl shadow-sm border transition-all duration-300 ${
                 isBubbleActive
@@ -492,7 +513,7 @@ export default function HomePage() {
           </div>
 
           {/* Voice Recording Section */}
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-2">
             <RecordButton
               onTranscript={handleTranscript}
               onStatusChange={handleStatusChange}
