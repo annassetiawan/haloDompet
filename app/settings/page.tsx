@@ -82,7 +82,7 @@ export default function SettingsPage() {
   const loadWallets = async () => {
     try {
       setIsLoadingWallets(true)
-      const response = await fetch('/api/wallets')
+      const response = await fetch('/api/wallet')
       const data = await response.json()
 
       if (response.ok) {
@@ -147,7 +147,7 @@ export default function SettingsPage() {
     try {
       setIsDeleting(true)
 
-      const response = await fetch(`/api/wallets/${walletToDelete.id}`, {
+      const response = await fetch(`/api/wallet/${walletToDelete.id}`, {
         method: 'DELETE',
       })
 
