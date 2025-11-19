@@ -334,8 +334,8 @@ export default function HomePage() {
       <main className="md:pt-16 pb-20 md:pb-0">
         <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
           {/* Header Section */}
-          <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight">
+          <div className="space">
+            <h1 className="text-2xl font-bold tracking-tight">
               HaloDompet
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -356,7 +356,7 @@ export default function HomePage() {
           />
 
           {/* Voice Recording Section */}
-          <div className="flex flex-col items-center gap-6 py-8">
+          <div className="flex flex-col items-center gap-4">
             <RecordButton
               onTranscript={handleTranscript}
               onStatusChange={handleStatusChange}
