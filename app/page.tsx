@@ -14,7 +14,6 @@ import { TrialWarningBanner } from '@/components/trial-warning-banner'
 import { DarkModeToggle } from '@/components/DarkModeToggle'
 import { TransactionListSkeleton } from '@/components/TransactionSkeleton'
 import { RecordButton } from '@/components/RecordButton'
-import { BottomNav } from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -27,12 +26,8 @@ import {
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
-  Settings,
-  LogOut,
   History,
   ArrowRight,
-  BarChart3,
-  Sparkles,
   CheckCircle2,
   XCircle,
   PlusCircle,
@@ -178,11 +173,6 @@ export default function HomePage() {
     } finally {
       setIsLoadingTransactions(false)
     }
-  }
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push('/login')
   }
 
   const handleTranscript = async (transcript: string) => {
@@ -414,78 +404,14 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top Navigation - Desktop Only */}
-      <nav className="hidden md:block fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-1">
-              <Link href="/advisor">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9"
-                  title="AI Advisor"
-                >
-                  <Sparkles className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/history">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9"
-                  title="Riwayat"
-                >
-                  <History className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/reports">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9"
-                  title="Laporan"
-                >
-                  <BarChart3 className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/settings">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9"
-                  title="Pengaturan"
-                >
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <DarkModeToggle />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleLogout}
-                className="h-9 w-9"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Bottom Navigation - Mobile Only */}
-      <BottomNav />
-
       {/* Main Content */}
-      <main className="md:pt-16 pb-20 md:pb-0">
+      <main>
         <div className="max-w-2xl mx-auto">
           {/* Header Section */}
           <div className="bg-[#f5f5f5] dark:bg-muted/20 px-6 py-4 flex border-b border-border justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">HaloDompet</h1>
+              {/* Show HaloDompet title on mobile only */}
+              <h1 className="text-2xl font-bold tracking-tight md:hidden">HaloDompet</h1>
               <p className="text-sm text-muted-foreground">
                 Hai, {getUserFirstName()} 👋
               </p>

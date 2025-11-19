@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { Sidebar } from "@/components/Sidebar";
+import { BottomNav } from "@/components/BottomNav";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -80,7 +82,19 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
       >
-        {children}
+        <div className="flex min-h-screen">
+          {/* Sidebar - Desktop Only */}
+          <Sidebar />
+
+          {/* Main Content Wrapper */}
+          <main className="flex-1 pb-20 md:pb-0 md:pl-64">
+            {children}
+          </main>
+        </div>
+
+        {/* Bottom Navigation - Mobile Only */}
+        <BottomNav />
+
         <Toaster richColors position="top-center" />
       </body>
     </html>
