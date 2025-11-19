@@ -5,7 +5,7 @@ import { updateWallet, deleteWallet } from '@/lib/db'
 // PUT /api/wallet/[id] - Update wallet
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
@@ -18,7 +18,8 @@ export async function PUT(
       )
     }
 
-    const walletId = params.id
+    const { id } = await params
+    const walletId = id
     const body = await request.json()
     const { name, icon, color, is_default } = body
 
@@ -68,7 +69,7 @@ export async function PUT(
 // DELETE /api/wallet/[id] - Delete wallet
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
@@ -81,7 +82,8 @@ export async function DELETE(
       )
     }
 
-    const walletId = params.id
+    const { id } = await params
+    const walletId = id
 
     // Check if this is the default wallet
     const { data: wallet, error: fetchError } = await supabase
