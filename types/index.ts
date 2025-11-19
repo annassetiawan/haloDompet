@@ -12,6 +12,18 @@ export interface User {
   invited_by: string | null
 }
 
+export interface Wallet {
+  id: string
+  user_id: string
+  name: string
+  balance: number
+  icon?: string
+  color?: string
+  is_default: boolean
+  created_at: string
+  updated_at: string
+}
+
 export interface Transaction {
   id: string
   user_id: string
@@ -22,6 +34,7 @@ export interface Transaction {
   voice_text?: string
   location?: string | null
   payment_method?: string | null
+  wallet_id?: string | null // Added for multi-wallet support
   type?: 'expense' | 'income' | 'adjustment' // Default: expense
   notes?: string | null // For adjustment notes
   created_at: string

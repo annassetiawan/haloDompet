@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createTransaction, getTransactions, deleteTransaction } from '@/lib/db'
+import { createTransaction, getTransactions, deleteTransaction, getDefaultWallet } from '@/lib/db'
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { item, amount, category, date, voice_text, location, payment_method } = body
+    const { item, amount, category, date, voice_text, location, payment_method, wallet_id } = body
 
     // Validation
     if (!item || !amount || !category || !date) {
@@ -32,6 +32,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // If wallet_id not provided, use default wallet
+    let targetWalletId = wallet_id
+    if (!targetWalletId) {
+      const defaultWallet = await getDefaultWallet(user.id)
+      if (!defaultWallet) {
+        return NextResponse.json(
+          { error: 'No default wallet found. Please create a wallet first.' },
+          { status: 400 }
+        )
+      }
+      targetWalletId = defaultWallet.id
+    }
+
     // Create transaction
     const transaction = await createTransaction(user.id, {
       item,
@@ -41,6 +54,7 @@ export async function POST(request: NextRequest) {
       voice_text,
       location: location || null,
       payment_method: payment_method || null,
+      wallet_id: targetWalletId,
     })
 
     if (!transaction) {

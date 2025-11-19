@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import type { User, Transaction } from '@/types'
+import type { User, Transaction, Wallet } from '@/types'
 
 // ============================================
 // USER OPERATIONS
@@ -158,6 +158,7 @@ export async function createTransaction(
     voice_text?: string
     location?: string | null
     payment_method?: string | null
+    wallet_id?: string | null
   }
 ): Promise<Transaction | null> {
   const supabase = await createClient()
@@ -286,6 +287,139 @@ export async function deleteTransaction(
   }
 
   return true
+}
+
+// ============================================
+// WALLET OPERATIONS (Multi-Wallet Support)
+// ============================================
+
+export async function getWallets(userId: string): Promise<Wallet[]> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('wallets')
+    .select('*')
+    .eq('user_id', userId)
+    .order('is_default', { ascending: false })
+    .order('created_at', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching wallets:', error)
+    return []
+  }
+
+  return data || []
+}
+
+export async function getDefaultWallet(userId: string): Promise<Wallet | null> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('wallets')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('is_default', true)
+    .single()
+
+  if (error) {
+    console.error('Error fetching default wallet:', error)
+    return null
+  }
+
+  return data
+}
+
+export async function createWallet(
+  userId: string,
+  walletData: {
+    name: string
+    balance?: number
+    icon?: string
+    color?: string
+    is_default?: boolean
+  }
+): Promise<Wallet | null> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('wallets')
+    .insert({
+      user_id: userId,
+      name: walletData.name,
+      balance: walletData.balance || 0,
+      icon: walletData.icon || '💰',
+      color: walletData.color || '#10b981',
+      is_default: walletData.is_default || false,
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error creating wallet:', error)
+    return null
+  }
+
+  return data
+}
+
+export async function updateWallet(
+  walletId: string,
+  updates: Partial<Wallet>
+): Promise<Wallet | null> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('wallets')
+    .update(updates)
+    .eq('id', walletId)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error updating wallet:', error)
+    return null
+  }
+
+  return data
+}
+
+export async function deleteWallet(
+  userId: string,
+  walletId: string
+): Promise<boolean> {
+  const supabase = await createClient()
+
+  // Delete with user verification for security
+  const { error } = await supabase
+    .from('wallets')
+    .delete()
+    .eq('id', walletId)
+    .eq('user_id', userId)
+
+  if (error) {
+    console.error('Error deleting wallet:', error)
+    return false
+  }
+
+  return true
+}
+
+export async function getTotalBalance(userId: string): Promise<number> {
+  const supabase = await createClient()
+
+  // Use the database function we created in migration
+  const { data, error } = await supabase.rpc('get_total_balance', {
+    p_user_id: userId,
+  })
+
+  if (error) {
+    console.error('Error getting total balance:', error)
+    // Fallback: manually sum wallet balances
+    const wallets = await getWallets(userId)
+    return wallets.reduce((sum, w) => sum + parseFloat(w.balance.toString()), 0)
+  }
+
+  return data || 0
 }
 
 // ============================================

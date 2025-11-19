@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { SaldoDisplay } from '@/components/SaldoDisplay';
+import { WalletCarousel } from '@/components/WalletCarousel';
 import { TransactionCard } from '@/components/TransactionCard';
 import { TrialWarningBanner } from '@/components/trial-warning-banner';
 import { DarkModeToggle } from '@/components/DarkModeToggle';
@@ -17,19 +17,22 @@ import { Input } from "@/components/ui/input";
 import { Mic, MicOff, Settings, Loader2, LogOut, History, ArrowRight, BarChart3, Menu, Sparkles, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import type { User } from '@supabase/supabase-js';
-import type { User as UserProfile, Transaction } from '@/types';
+import type { User as UserProfile, Transaction, Wallet } from '@/types';
 import { isTrialExpired } from '@/lib/trial';
 
 export default function HomePage() {
   // State Management
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [wallets, setWallets] = useState<Wallet[]>([]);
+  const [totalBalance, setTotalBalance] = useState<number>(0);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
   const [status, setStatus] = useState("Siap merekam");
   const [webhookUrl, setWebhookUrl] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
+  const [isLoadingWallets, setIsLoadingWallets] = useState(true);
 
   // Review dialog state
   const [isReviewOpen, setIsReviewOpen] = useState(false);
@@ -50,6 +53,7 @@ export default function HomePage() {
     } else {
       setUser(user);
       loadUserProfile();
+      loadWallets();
       loadRecentTransactions();
     }
   };
@@ -83,6 +87,23 @@ export default function HomePage() {
       console.error('Error loading profile:', error);
     } finally {
       setIsLoadingProfile(false);
+    }
+  };
+
+  const loadWallets = async () => {
+    try {
+      setIsLoadingWallets(true);
+      const response = await fetch('/api/wallet');
+      const data = await response.json();
+
+      if (response.ok) {
+        setWallets(data.wallets);
+        setTotalBalance(data.totalBalance);
+      }
+    } catch (error) {
+      console.error('Error loading wallets:', error);
+    } finally {
+      setIsLoadingWallets(false);
     }
   };
 
@@ -195,8 +216,9 @@ export default function HomePage() {
         throw new Error(transactionData.error || 'Gagal menyimpan transaksi');
       }
 
-      // Reload profile and transactions after successful save
+      // Reload profile, wallets, and transactions after successful save
       loadUserProfile();
+      loadWallets();
       loadRecentTransactions();
 
       // Show success state with confetti
@@ -287,12 +309,11 @@ export default function HomePage() {
           {/* Trial Warning Banner */}
           <TrialWarningBanner profile={userProfile} />
 
-          {/* Balance Card */}
-          {/* Balance Card */}
-          <SaldoDisplay
-            currentBalance={userProfile?.current_balance || 0}
-            initialBalance={userProfile?.initial_balance}
-            isLoading={isLoadingProfile}
+          {/* Wallet Carousel - Multi-Wallet Display */}
+          <WalletCarousel
+            wallets={wallets}
+            totalBalance={totalBalance}
+            isLoading={isLoadingWallets}
           />
 
           {/* Voice Recording Section */}
