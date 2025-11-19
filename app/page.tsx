@@ -459,8 +459,8 @@ export default function HomePage() {
       {/* Main Content */}
       <main className="md:pt-16 pb-20 md:pb-0">
         <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-          {/* Header Section */}
-          <div className="bg-[#f5f5f5] dark:bg-muted/20 px-6 py-4 rounded-b-2xl -mx-4">
+          {/* Header Section - Mobile Only */}
+          <div className="md:hidden bg-[#f5f5f5] dark:bg-muted/20 px-6 py-4 rounded-b-2xl -mx-4">
             <div className="flex justify-between items-center">
               {/* Left: App Title & Greeting */}
               <div>
@@ -471,7 +471,7 @@ export default function HomePage() {
               </div>
 
               {/* Right: Dark Mode Toggle */}
-              <div className="md:hidden">
+              <div>
                 <DarkModeToggle />
               </div>
             </div>
