@@ -25,9 +25,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Panggil Gemini API untuk ekstraksi JSON
-    // Menggunakan Gemini 1.5 Flash (lebih stabil daripada 2.5-flash yang sering overload)
-    // Alternative: 'gemini-2.0-flash-exp' atau 'gemini-1.5-pro'
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    // Menggunakan Gemini 2.5 Flash Lite (model terbaru yang tersedia)
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
 
     // Get tanggal hari ini
     const today = new Date().toISOString().split('T')[0];
@@ -279,6 +278,18 @@ PENTING:
 
     // Check for specific Gemini API errors
     const errorMessage = error.message || '';
+
+    // Model not found
+    if (errorMessage.includes('404') || errorMessage.includes('not found') || errorMessage.includes('is not found')) {
+      return NextResponse.json(
+        {
+          error: 'Model AI tidak tersedia',
+          details: 'Model yang digunakan tidak tersedia di API key Anda. Silakan cek model yang tersedia atau perbarui kode.',
+          errorType: 'ModelNotFound'
+        },
+        { status: 404 }
+      );
+    }
 
     // Service overloaded / unavailable
     if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('Service Unavailable')) {
