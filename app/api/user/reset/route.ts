@@ -24,14 +24,14 @@ export async function DELETE(request: NextRequest) {
 
     console.log('🗑️ Resetting all data for user:', user.id)
 
-    // Call PostgreSQL function to reset user data
-    // This function safely handles trigger conflicts by temporarily disabling them
+    // Step 1: Call PostgreSQL function to delete all transactions
+    // Function only deletes transactions to avoid trigger conflicts
     const { data, error } = await supabase.rpc('reset_user_data', {
       p_user_id: user.id,
     })
 
     if (error) {
-      console.error('Error resetting user data:', error)
+      console.error('Error deleting transactions:', error)
       console.error('Error details:', {
         code: error.code,
         message: error.message,
@@ -39,12 +39,44 @@ export async function DELETE(request: NextRequest) {
         hint: error.hint,
       })
       return NextResponse.json(
-        { error: 'Failed to reset user data', details: error.message },
+        { error: 'Failed to delete transactions', details: error.message },
         { status: 500 }
       )
     }
 
-    console.log('✅ Reset successful:', data)
+    console.log('✅ Transactions deleted:', data.transactions_deleted)
+
+    // Step 2: Reset wallet balances to 0 (separate query to avoid trigger conflict)
+    const { error: walletsError } = await supabase
+      .from('wallets')
+      .update({ balance: 0 })
+      .eq('user_id', user.id)
+
+    if (walletsError) {
+      console.error('Error resetting wallets:', walletsError)
+      return NextResponse.json(
+        { error: 'Failed to reset wallet balances', details: walletsError.message },
+        { status: 500 }
+      )
+    }
+
+    console.log('✅ Wallet balances reset to 0')
+
+    // Step 3: Reset user's current_balance to 0
+    const { error: userError } = await supabase
+      .from('users')
+      .update({ current_balance: 0 })
+      .eq('id', user.id)
+
+    if (userError) {
+      console.error('Error resetting user balance:', userError)
+      return NextResponse.json(
+        { error: 'Failed to reset user balance', details: userError.message },
+        { status: 500 }
+      )
+    }
+
+    console.log('✅ User balance reset to 0')
     console.log('🎉 Data reset complete!')
 
     return NextResponse.json({
@@ -52,7 +84,7 @@ export async function DELETE(request: NextRequest) {
       message: 'All data reset successfully',
       data: {
         transactionsDeleted: data.transactions_deleted || 0,
-        walletsReset: data.wallets_reset || 0,
+        walletsReset: data.wallets_count || 0,
         userBalanceReset: true,
       },
     })
