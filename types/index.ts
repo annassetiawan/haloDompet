@@ -22,6 +22,8 @@ export interface Transaction {
   voice_text?: string
   location?: string | null
   payment_method?: string | null
+  type?: 'expense' | 'income' | 'adjustment' // Default: expense
+  notes?: string | null // For adjustment notes
   created_at: string
 }
 

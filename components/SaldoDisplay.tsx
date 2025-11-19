@@ -60,7 +60,7 @@ export function SaldoDisplay({ currentBalance, initialBalance, isLoading = false
         <div className="pt-4 border-t border-border/30">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2 text-muted-foreground">
-              <TrendingDown className="h-4 w-4" />
+              <TrendingDown className="h-4 w-4 text-accent" />
               <span>Total Pengeluaran</span>
             </div>
             <div className="flex items-center gap-3">
