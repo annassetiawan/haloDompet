@@ -188,12 +188,19 @@ SELECT id, email, is_onboarded, current_balance FROM public.users WHERE id = aut
 
 ## How Reset Data Works (Technical)
 
-The reset process uses a PostgreSQL function `reset_user_data()` that:
+The reset process uses TWO separate PostgreSQL functions called via separate RPC calls:
 
+### Function 1: `reset_user_data()`
 1. **Loops through each transaction** and deletes one by one
 2. Each DELETE triggers `auto_update_wallet_balance` separately (no batch conflict)
-3. After all deletions, **force reset wallet balances** to 0
-4. **Resets user balance** to 0
+3. Returns count of deleted transactions
+
+### Function 2: `reset_wallet_balances()` (SEPARATE RPC CALL)
+1. **Loops through each wallet** and resets balance to 0 one by one
+2. **Resets user balance** to 0
+3. Returns count of reset wallets
+
+**Why Two Functions?** Calling them in separate RPC calls creates separate transaction contexts, avoiding the "tuple already modified" conflict error.
 
 ### Why One-by-One?
 

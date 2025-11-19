@@ -5,10 +5,14 @@ import { createClient } from '@/lib/supabase/server'
  * DELETE /api/user/reset
  * Reset all user data (transactions and wallet balances)
  * This endpoint:
- * 1. Deletes all transactions for the user
- * 2. Resets all wallet balances to 0
+ * 1. Calls reset_user_data() to delete all transactions
+ * 2. Calls reset_wallet_balances() in SEPARATE RPC to reset wallet balances
  * 3. Does NOT change is_onboarded status (user stays in dashboard)
  * 4. Does NOT delete user account
+ *
+ * IMPORTANT: Two separate RPC calls are used to avoid PostgreSQL trigger conflicts.
+ * The auto_update_wallet_balance trigger fires when transactions are deleted,
+ * so wallet balance resets must happen in a separate transaction context.
  */
 export async function DELETE(request: NextRequest) {
   try {
@@ -46,52 +50,29 @@ export async function DELETE(request: NextRequest) {
 
     console.log('✅ Transactions deleted:', data.transactions_deleted)
 
-    // Step 2: Get all user's wallets
-    const { data: wallets, error: fetchWalletsError } = await supabase
-      .from('wallets')
-      .select('id')
-      .eq('user_id', user.id)
+    // Step 2: Call separate PostgreSQL function to reset wallet balances
+    // This is in a SEPARATE RPC call to avoid trigger conflicts
+    console.log('🔄 Resetting wallet balances...')
 
-    if (fetchWalletsError) {
-      console.error('Error fetching wallets:', fetchWalletsError)
+    const { data: walletsData, error: walletsError } = await supabase.rpc('reset_wallet_balances', {
+      p_user_id: user.id,
+    })
+
+    if (walletsError) {
+      console.error('Error resetting wallet balances:', walletsError)
+      console.error('Error details:', {
+        code: walletsError.code,
+        message: walletsError.message,
+        details: walletsError.details,
+        hint: walletsError.hint,
+      })
       return NextResponse.json(
-        { error: 'Failed to fetch wallets', details: fetchWalletsError.message },
+        { error: 'Failed to reset wallet balances', details: walletsError.message },
         { status: 500 }
       )
     }
 
-    // Step 3: Reset each wallet balance to 0 one by one (avoid batch update conflict)
-    for (const wallet of wallets || []) {
-      const { error: updateError } = await supabase
-        .from('wallets')
-        .update({ balance: 0 })
-        .eq('id', wallet.id)
-
-      if (updateError) {
-        console.error('Error resetting wallet:', wallet.id, updateError)
-        return NextResponse.json(
-          { error: 'Failed to reset wallet balance', details: updateError.message },
-          { status: 500 }
-        )
-      }
-    }
-
-    console.log(`✅ ${wallets?.length || 0} wallet balances reset to 0`)
-
-    // Step 4: Reset user's current_balance to 0
-    const { error: userError } = await supabase
-      .from('users')
-      .update({ current_balance: 0 })
-      .eq('id', user.id)
-
-    if (userError) {
-      console.error('Error resetting user balance:', userError)
-      return NextResponse.json(
-        { error: 'Failed to reset user balance', details: userError.message },
-        { status: 500 }
-      )
-    }
-
+    console.log('✅ Wallet balances reset:', walletsData.wallets_reset)
     console.log('✅ User balance reset to 0')
     console.log('🎉 Data reset complete!')
 
@@ -100,7 +81,7 @@ export async function DELETE(request: NextRequest) {
       message: 'All data reset successfully',
       data: {
         transactionsDeleted: data.transactions_deleted || 0,
-        walletsReset: data.wallets_count || 0,
+        walletsReset: walletsData.wallets_reset || 0,
         userBalanceReset: true,
       },
     })

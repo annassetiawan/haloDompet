@@ -68,16 +68,85 @@ COMMENT ON FUNCTION reset_user_data(UUID) IS
 'Safely resets user data by deleting transactions one-by-one. Wallet balances are reset separately by API endpoint to avoid trigger conflicts.';
 
 -- ============================================
+-- CREATE RESET WALLET BALANCES FUNCTION
+-- ============================================
+-- Separate function to reset wallet balances
+-- Called AFTER transactions are deleted in a separate transaction context
+
+DROP FUNCTION IF EXISTS reset_wallet_balances(UUID);
+
+CREATE OR REPLACE FUNCTION reset_wallet_balances(p_user_id UUID)
+RETURNS JSON AS $$
+DECLARE
+  v_wallet_id UUID;
+  v_wallets_reset INTEGER := 0;
+  v_result JSON;
+BEGIN
+  -- Validate user exists
+  IF NOT EXISTS (SELECT 1 FROM public.users WHERE id = p_user_id) THEN
+    RAISE EXCEPTION 'User not found';
+  END IF;
+
+  -- Reset each wallet balance to 0, one by one
+  FOR v_wallet_id IN
+    SELECT id FROM public.wallets WHERE user_id = p_user_id
+  LOOP
+    UPDATE public.wallets
+    SET balance = 0
+    WHERE id = v_wallet_id;
+
+    v_wallets_reset := v_wallets_reset + 1;
+  END LOOP;
+
+  -- Also reset user's current_balance
+  UPDATE public.users
+  SET current_balance = 0
+  WHERE id = p_user_id;
+
+  -- Build result JSON
+  v_result := json_build_object(
+    'success', true,
+    'wallets_reset', v_wallets_reset,
+    'user_id', p_user_id
+  );
+
+  RETURN v_result;
+EXCEPTION
+  WHEN OTHERS THEN
+    RAISE EXCEPTION 'Reset wallets failed: %', SQLERRM;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permission
+GRANT EXECUTE ON FUNCTION reset_wallet_balances(UUID) TO authenticated;
+
+-- Add comment
+COMMENT ON FUNCTION reset_wallet_balances(UUID) IS
+'Resets all wallet balances to 0 for a user. Called after transactions are deleted.';
+
+-- ============================================
 -- USAGE EXAMPLE
 -- ============================================
--- To reset current user's data:
--- SELECT reset_user_data(auth.uid());
+-- IMPORTANT: These functions must be called in SEPARATE RPC calls
+-- to avoid trigger conflicts. Do NOT call them in the same transaction.
 --
--- Result will be JSON:
+-- Example from API endpoint (app/api/user/reset/route.ts):
+--
+-- // Step 1: Delete transactions (first RPC call)
+-- const { data, error } = await supabase.rpc('reset_user_data', {
+--   p_user_id: user.id,
+-- })
+--
+-- // Step 2: Reset wallet balances (SEPARATE RPC call)
+-- const { data: walletsData, error: walletsError } = await supabase.rpc('reset_wallet_balances', {
+--   p_user_id: user.id,
+-- })
+--
+-- Each function returns JSON:
 -- {
 --   "success": true,
---   "transactions_deleted": 10,
---   "wallets_reset": 2,
+--   "transactions_deleted": 10,  // from reset_user_data
+--   "wallets_reset": 2,           // from reset_wallet_balances
 --   "user_id": "..."
 -- }
 -- ============================================
