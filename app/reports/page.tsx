@@ -573,7 +573,7 @@ export default function ReportsPage() {
             {/* Tab 2: Charts - All Visualizations */}
             <TabsContent value="charts" className="space-y-3 md:space-y-4">
             {/* Bar Chart - Top Categories */}
-            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 md:p-6">
+            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-3 md:p-6">
               <div className="flex items-center gap-3 mb-4 md:mb-6">
                 <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
                   <BarChart3 className="h-5 w-5 text-primary" />
@@ -583,7 +583,7 @@ export default function ReportsPage() {
                 </h2>
               </div>
 
-              <div className="h-[250px] md:h-[300px] w-full">
+              <div className="h-[250px] md:h-[350px] w-full">
                 <ChartContainer config={chartConfig} className="h-full w-full">
                   <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -591,13 +591,13 @@ export default function ReportsPage() {
                       dataKey="category"
                       angle={-45}
                       textAnchor="end"
-                      height={80}
+                      height={70}
                       className="text-xs"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                     />
                     <YAxis
                       className="text-xs"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                       tickFormatter={(value) =>
                         new Intl.NumberFormat('id-ID', {
                           notation: 'compact',
@@ -625,7 +625,7 @@ export default function ReportsPage() {
             </div>
 
             {/* Pie Chart - Category Distribution */}
-            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 md:p-6">
+            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-3 md:p-6">
               <div className="flex items-center gap-3 mb-4 md:mb-6">
                 <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
                   <Tag className="h-5 w-5 text-primary" />
@@ -635,7 +635,7 @@ export default function ReportsPage() {
                 </h2>
               </div>
 
-              <div className="h-[250px] md:h-[300px] w-full">
+              <div className="h-[250px] md:h-[350px] w-full">
                 <ChartContainer config={chartConfig} className="h-full w-full">
                   <PieChart>
                     <ChartTooltip
@@ -681,7 +681,7 @@ export default function ReportsPage() {
             </div>
 
             {/* Line Chart - Daily Spending Trend */}
-            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 md:p-6">
+            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-3 md:p-6">
               <div className="flex items-center gap-3 mb-4 md:mb-6">
                 <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
                   <TrendingUp className="h-5 w-5 text-primary" />
@@ -691,21 +691,21 @@ export default function ReportsPage() {
                 </h2>
               </div>
 
-              <div className="h-[250px] md:h-[300px] w-full">
+              <div className="h-[250px] md:h-[350px] w-full">
                 <ChartContainer config={chartConfig} className="h-full w-full">
                   <LineChart data={lineChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis
                       dataKey="date"
                       className="text-xs"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                       angle={-45}
                       textAnchor="end"
                       height={60}
                     />
                     <YAxis
                       className="text-xs"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                       tickFormatter={(value) =>
                         new Intl.NumberFormat('id-ID', {
                           notation: 'compact',
