@@ -19,7 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { ArrowLeft, Save, Loader2, Wallet, Plus, Edit, Trash2, AlertCircle, Moon } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, Wallet, Plus, Edit, Trash2, AlertCircle, Moon, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
 import type { User as UserProfile, Wallet as WalletType } from '@/types'
@@ -43,6 +43,11 @@ export default function SettingsPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [walletToDelete, setWalletToDelete] = useState<WalletType | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Reset data state
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false)
+  const [resetConfirmText, setResetConfirmText] = useState('')
+  const [isResetting, setIsResetting] = useState(false)
 
   const router = useRouter()
   const supabase = createClient()
@@ -172,6 +177,60 @@ export default function SettingsPage() {
 
   const handleWalletSuccess = () => {
     loadWallets() // Reload wallets after add/edit
+  }
+
+  const handleResetData = () => {
+    setResetConfirmText('')
+    setIsResetDialogOpen(true)
+  }
+
+  const confirmResetData = async () => {
+    if (resetConfirmText !== 'RESET') {
+      toast.error('Ketik "RESET" untuk konfirmasi')
+      return
+    }
+
+    try {
+      setIsResetting(true)
+
+      console.log('🗑️ Starting reset data process...')
+
+      const response = await fetch('/api/user/reset', {
+        method: 'DELETE',
+      })
+
+      console.log('Response status:', response.status)
+
+      const data = await response.json()
+      console.log('Response data:', data)
+
+      if (!response.ok) {
+        const errorMsg = data.details ? `${data.error}: ${data.details}` : data.error
+        console.error('Reset failed:', errorMsg)
+        throw new Error(errorMsg || 'Failed to reset data')
+      }
+
+      console.log('✅ Reset successful!')
+      toast.success('Semua data berhasil direset!')
+      setIsResetDialogOpen(false)
+      setResetConfirmText('')
+
+      // Reload wallets to show 0 balances
+      loadWallets()
+
+      // Redirect to dashboard after short delay
+      setTimeout(() => {
+        router.push('/')
+      }, 1000)
+    } catch (error) {
+      console.error('Error resetting data:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Gagal mereset data'
+      toast.error(errorMessage, {
+        duration: 5000,
+      })
+    } finally {
+      setIsResetting(false)
+    }
   }
 
   const totalBalance = wallets.reduce((sum, wallet) => sum + parseFloat(wallet.balance.toString()), 0)
@@ -464,6 +523,45 @@ export default function SettingsPage() {
                 </>
               )}
             </Button>
+
+            {/* Danger Zone */}
+            <div className="bg-red-500/5 dark:bg-red-500/10 border-2 border-red-500/20 rounded-2xl p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <AlertTriangle className="h-5 w-5 text-red-500" />
+                <h2 className="text-lg font-semibold text-red-600 dark:text-red-400">
+                  Zona Bahaya
+                </h2>
+              </div>
+
+              <div className="space-y-4">
+                <div className="p-4 rounded-lg border border-red-500/20 bg-background/50">
+                  <h3 className="font-medium text-foreground mb-2">Reset Semua Data</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Menghapus semua transaksi dan mereset saldo dompet ke 0. Tindakan ini tidak dapat dibatalkan.
+                  </p>
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-4">
+                    <AlertCircle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                    <div className="text-xs text-muted-foreground">
+                      <p className="font-medium text-amber-600 dark:text-amber-400 mb-1">Perhatian:</p>
+                      <ul className="list-disc list-inside space-y-1">
+                        <li>Semua transaksi akan dihapus permanen</li>
+                        <li>Saldo semua dompet akan direset ke 0</li>
+                        <li>Akun Anda tidak akan dihapus</li>
+                        <li>Anda tetap dapat menggunakan aplikasi setelah reset</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={handleResetData}
+                    variant="destructive"
+                    className="w-full gap-2 bg-red-500 hover:bg-red-600"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Reset Semua Data
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -512,6 +610,67 @@ export default function SettingsPage() {
                 </>
               ) : (
                 'Hapus'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Reset Data Confirmation Dialog */}
+      <AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
+              <AlertTriangle className="h-5 w-5" />
+              Reset Semua Data?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Tindakan ini akan menghapus SEMUA data Anda secara permanen.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-3 py-4">
+            <ul className="list-disc list-inside space-y-1 text-sm text-foreground">
+              <li>Semua transaksi akan dihapus</li>
+              <li>Saldo semua dompet akan direset ke 0</li>
+              <li>Data tidak dapat dikembalikan</li>
+            </ul>
+            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+              <p className="text-xs text-muted-foreground">
+                <strong className="text-amber-600 dark:text-amber-400">Catatan:</strong> Akun Anda tidak akan dihapus. Anda tetap dapat menggunakan aplikasi setelah reset.
+              </p>
+            </div>
+            <div className="space-y-2 pt-2">
+              <label htmlFor="reset-confirm" className="text-sm font-medium text-foreground">
+                Ketik <span className="font-bold text-red-600 dark:text-red-400">RESET</span> untuk konfirmasi:
+              </label>
+              <Input
+                id="reset-confirm"
+                value={resetConfirmText}
+                onChange={(e) => setResetConfirmText(e.target.value)}
+                placeholder="RESET"
+                className="font-mono"
+                disabled={isResetting}
+                autoComplete="off"
+              />
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isResetting}>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmResetData}
+              disabled={isResetting || resetConfirmText !== 'RESET'}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              {isResetting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Mereset...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Reset Semua Data
+                </>
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

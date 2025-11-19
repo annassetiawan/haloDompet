@@ -10,6 +10,7 @@ export interface User {
   trial_ends_at: string | null
   trial_started_at: string | null
   invited_by: string | null
+  is_onboarded: boolean
 }
 
 export interface Wallet {
