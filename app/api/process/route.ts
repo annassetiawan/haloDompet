@@ -25,8 +25,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Panggil Gemini API untuk ekstraksi JSON
-    // Menggunakan Gemini 2.5 Flash (model terbaru yang tersedia di API key Anda)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    // Menggunakan Gemini 1.5 Flash (lebih stabil daripada 2.5-flash yang sering overload)
+    // Alternative: 'gemini-2.0-flash-exp' atau 'gemini-1.5-pro'
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     // Get tanggal hari ini
     const today = new Date().toISOString().split('T')[0];
@@ -278,6 +279,18 @@ PENTING:
 
     // Check for specific Gemini API errors
     const errorMessage = error.message || '';
+
+    // Service overloaded / unavailable
+    if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('Service Unavailable')) {
+      return NextResponse.json(
+        {
+          error: 'Server AI sedang penuh',
+          details: 'Model Gemini sedang overload. Tunggu beberapa detik lalu coba lagi, atau ganti ke model lain.',
+          errorType: 'ServiceOverloaded'
+        },
+        { status: 503 }
+      );
+    }
 
     // Rate limit / quota exceeded
     if (errorMessage.includes('429') || errorMessage.includes('quota') || errorMessage.includes('Too Many Requests')) {
