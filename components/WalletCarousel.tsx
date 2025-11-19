@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react'
-import { Eye, EyeOff, Plus, Wallet as WalletIcon, MoreVertical, Edit, Star } from 'lucide-react'
+import { Eye, EyeOff, Plus, Wallet as WalletIcon, MoreVertical, Edit, Star, TrendingUp } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -44,10 +44,10 @@ export function WalletCarousel({
   if (isLoading) {
     return (
       <div className="space-y-3">
-        <div className="h-10 w-32 bg-muted/20 rounded animate-pulse" />
+        <div className="h-10 w-32 bg-muted/20 rounded-xl animate-pulse" />
         <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
           {[1, 2].map((i) => (
-            <div key={i} className="min-w-[280px] h-40 bg-muted/20 rounded-2xl animate-pulse" />
+            <div key={i} className="min-w-[300px] h-48 bg-muted/20 rounded-3xl animate-pulse" />
           ))}
         </div>
       </div>
@@ -55,14 +55,14 @@ export function WalletCarousel({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Header with toggle visibility */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h2 className="text-lg font-medium text-foreground">Dompet Saya</h2>
+          <h2 className="text-xl font-semibold text-foreground">Dompet Saya</h2>
           <button
             onClick={() => setIsVisible(!isVisible)}
-            className="p-1.5 rounded-lg hover:bg-muted/20 transition-colors"
+            className="p-2 rounded-full hover:bg-muted/20 transition-all hover:scale-110"
             aria-label={isVisible ? 'Sembunyikan saldo' : 'Tampilkan saldo'}
           >
             {isVisible ? (
@@ -78,135 +78,177 @@ export function WalletCarousel({
             variant="ghost"
             size="sm"
             onClick={onAddWallet}
-            className="gap-1.5 text-xs"
+            className="gap-2 text-sm font-medium hover:scale-105 transition-transform"
           >
             <Plus className="h-4 w-4" />
-            Tambah
+            <span className="hidden sm:inline">Tambah Dompet</span>
+            <span className="sm:hidden">Tambah</span>
           </Button>
         )}
       </div>
 
       {/* Horizontal Scrollable Wallet Cards */}
-      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
-        {/* Total Balance Card */}
-        <Card className="min-w-[280px] md:min-w-[320px] bg-gradient-to-br from-primary/90 to-primary/70 border-none shadow-lg snap-start">
-          <div className="p-6 text-primary-foreground">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-primary-foreground/20 flex items-center justify-center">
-                  <WalletIcon className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm opacity-90">Total Aset</p>
-                  <p className="text-xs opacity-70">{wallets.length} dompet</p>
-                </div>
-              </div>
-            </div>
+      <div className="flex gap-4 overflow-x-auto pb-3 pr-4 -mr-4 scrollbar-hide snap-x snap-mandatory">
+        {/* Total Balance Card - Enhanced with Glassmorphism */}
+        <div className="min-w-[300px] md:min-w-[340px] snap-start">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[2px] shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]">
+            {/* Decorative Blur Circles */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
 
-            <div className="mt-6">
-              <p className="text-3xl md:text-4xl font-bold">
-                {isVisible ? formatCurrency(totalBalance) : maskedAmount(totalBalance)}
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        {/* Individual Wallet Cards */}
-        {wallets.map((wallet) => (
-          <Card
-            key={wallet.id}
-            className="min-w-[280px] md:min-w-[320px] border-border/50 shadow-md hover:shadow-lg transition-shadow snap-start"
-            style={{
-              background: `linear-gradient(135deg, ${wallet.color || '#10b981'}15 0%, ${wallet.color || '#10b981'}05 100%)`
-            }}
-          >
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
+            <div className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-6 backdrop-blur-xl">
+              <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-xl"
-                    style={{
-                      backgroundColor: `${wallet.color || '#10b981'}20`,
-                    }}
-                  >
-                    {wallet.icon || '💰'}
+                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xl flex items-center justify-center shadow-lg">
+                    <WalletIcon className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-foreground">{wallet.name}</h3>
-                    {wallet.is_default && (
-                      <span className="text-xs text-muted-foreground">Default</span>
-                    )}
+                    <p className="text-white/90 text-sm font-medium">Total Aset</p>
+                    <p className="text-white/60 text-xs">{wallets.length} dompet aktif</p>
                   </div>
                 </div>
-
-                {/* More Options Menu */}
-                {onEditWallet && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEditWallet(wallet)}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit Dompet
-                      </DropdownMenuItem>
-                      {!wallet.is_default && (
-                        <DropdownMenuItem onClick={() => onEditWallet(wallet)}>
-                          <Star className="mr-2 h-4 w-4" />
-                          Jadikan Default
-                        </DropdownMenuItem>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
+                <div className="flex items-center gap-1 bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">
+                  <TrendingUp className="h-3 w-3 text-white" />
+                  <span className="text-xs text-white font-medium">100%</span>
+                </div>
               </div>
 
-              <div className="mt-6">
-                <p className="text-sm text-muted-foreground mb-1">Saldo</p>
-                <p className="text-2xl md:text-3xl font-semibold text-foreground">
-                  {isVisible ? formatCurrency(wallet.balance) : maskedAmount(wallet.balance)}
+              <div className="mt-4">
+                <p className="text-4xl md:text-5xl font-bold text-white tracking-tight">
+                  {isVisible ? formatCurrency(totalBalance) : maskedAmount(totalBalance)}
                 </p>
               </div>
+
+              {/* Bottom Shine Effect */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/40 to-transparent" />
             </div>
-          </Card>
+          </div>
+        </div>
+
+        {/* Individual Wallet Cards - Enhanced with Modern Fintech Style */}
+        {wallets.map((wallet) => (
+          <div key={wallet.id} className="min-w-[300px] md:min-w-[340px] snap-start">
+            <div
+              className="relative overflow-hidden rounded-3xl p-[2px] shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] group"
+              style={{
+                background: `linear-gradient(135deg, ${wallet.color || '#10b981'}40 0%, ${wallet.color || '#10b981'}20 100%)`
+              }}
+            >
+              {/* Decorative Elements */}
+              <div
+                className="absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl opacity-30"
+                style={{ backgroundColor: wallet.color || '#10b981' }}
+              />
+              <div
+                className="absolute bottom-0 left-0 w-32 h-32 rounded-full blur-2xl opacity-20"
+                style={{ backgroundColor: wallet.color || '#10b981' }}
+              />
+
+              <Card className="relative border-none bg-background/95 backdrop-blur-xl rounded-3xl shadow-none">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-lg ring-2 ring-white/10 backdrop-blur-sm transition-transform group-hover:scale-110"
+                        style={{
+                          backgroundColor: `${wallet.color || '#10b981'}25`,
+                          boxShadow: `0 4px 20px ${wallet.color || '#10b981'}30`
+                        }}
+                      >
+                        {wallet.icon || '💰'}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-foreground text-base">{wallet.name}</h3>
+                        {wallet.is_default && (
+                          <div className="flex items-center gap-1 mt-1">
+                            <div
+                              className="w-1.5 h-1.5 rounded-full"
+                              style={{ backgroundColor: wallet.color || '#10b981' }}
+                            />
+                            <span className="text-xs text-muted-foreground font-medium">Dompet Utama</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* More Options Menu */}
+                    {onEditWallet && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem onClick={() => onEditWallet(wallet)} className="cursor-pointer">
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Dompet
+                          </DropdownMenuItem>
+                          {!wallet.is_default && (
+                            <DropdownMenuItem onClick={() => onEditWallet(wallet)} className="cursor-pointer">
+                              <Star className="mr-2 h-4 w-4" />
+                              Jadikan Utama
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </div>
+
+                  <div className="mt-4">
+                    <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wide font-medium">Saldo Tersedia</p>
+                    <p className="text-3xl md:text-4xl font-bold text-foreground tracking-tight">
+                      {isVisible ? formatCurrency(wallet.balance) : maskedAmount(wallet.balance)}
+                    </p>
+                  </div>
+
+                  {/* Bottom Accent Line */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-1 rounded-b-3xl opacity-60"
+                    style={{
+                      background: `linear-gradient(90deg, ${wallet.color || '#10b981'} 0%, transparent 100%)`
+                    }}
+                  />
+                </div>
+              </Card>
+            </div>
+          </div>
         ))}
 
-        {/* Add Wallet Card (optional placeholder) */}
+        {/* Add Wallet Card - Modern Placeholder */}
         {onAddWallet && wallets.length < 5 && (
-          <Card
-            className="min-w-[280px] md:min-w-[320px] border-2 border-dashed border-border/50 bg-muted/20 hover:bg-muted/30 cursor-pointer transition-colors snap-start"
-            onClick={onAddWallet}
-          >
-            <div className="p-6 h-full flex flex-col items-center justify-center gap-3 text-muted-foreground">
-              <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center">
-                <Plus className="h-6 w-6" />
+          <div className="min-w-[300px] md:min-w-[340px] snap-start">
+            <Card
+              className="h-full border-2 border-dashed border-border/50 rounded-3xl bg-gradient-to-br from-muted/30 to-muted/10 hover:from-muted/40 hover:to-muted/20 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:border-primary/30 group"
+              onClick={onAddWallet}
+            >
+              <div className="p-6 h-full min-h-[180px] flex flex-col items-center justify-center gap-4 text-muted-foreground">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-muted/60 to-muted/40 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Plus className="h-7 w-7 text-muted-foreground" />
+                </div>
+                <div className="text-center">
+                  <p className="font-semibold text-foreground text-base">Tambah Dompet Baru</p>
+                  <p className="text-xs mt-1 text-muted-foreground">Kelola keuangan lebih terorganisir</p>
+                </div>
               </div>
-              <div className="text-center">
-                <p className="font-medium">Tambah Dompet</p>
-                <p className="text-xs">Buat dompet baru</p>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          </div>
         )}
       </div>
 
-      {/* Scrollbar hint on mobile */}
-      {wallets.length > 1 && (
-        <div className="flex justify-center md:hidden">
-          <div className="flex gap-1">
-            {[...Array(Math.min(wallets.length + 1, 4))].map((_, i) => (
-              <div
-                key={i}
-                className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30"
-              />
-            ))}
-          </div>
+      {/* Scroll Indicators - Subtle Dots */}
+      {wallets.length > 0 && (
+        <div className="flex justify-center gap-1.5 md:hidden">
+          {[...Array(Math.min(wallets.length + 1, 5))].map((_, i) => (
+            <div
+              key={i}
+              className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 transition-all"
+            />
+          ))}
         </div>
       )}
     </div>
