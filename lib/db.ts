@@ -30,6 +30,7 @@ export async function createOrUpdateUserProfile(
     current_balance?: number
     mode?: 'simple' | 'webhook'
     webhook_url?: string
+    is_onboarded?: boolean
   }
 ): Promise<User | null> {
   const supabase = await createClient()
@@ -100,6 +101,7 @@ export async function createOrUpdateUserProfile(
         current_balance: data.current_balance || data.initial_balance || 0,
         mode: data.mode || 'simple',
         webhook_url: data.webhook_url || null,
+        is_onboarded: data.is_onboarded ?? false,
         account_status: 'trial',
         trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         trial_started_at: new Date().toISOString(),

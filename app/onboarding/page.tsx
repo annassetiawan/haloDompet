@@ -31,13 +31,13 @@ export default function OnboardingPage() {
     // Check if user already completed onboarding
     const { data: profile } = await supabase
       .from('users')
-      .select('initial_balance')
+      .select('is_onboarded')
       .eq('id', user.id)
       .single();
 
-    // If user already has initial_balance set (> 0), they've completed onboarding
-    // Balance = 0, NULL, or undefined means user hasn't completed onboarding yet
-    if (profile && profile.initial_balance !== null && profile.initial_balance !== undefined && profile.initial_balance > 0) {
+    // If user already completed onboarding, redirect to dashboard
+    // This prevents them from going through onboarding again
+    if (profile && profile.is_onboarded === true) {
       router.push('/'); // Redirect to dashboard
     }
   };
@@ -93,11 +93,11 @@ export default function OnboardingPage() {
       console.log('Verification result:', verifyData);
 
       if (verifyResponse.ok && verifyData.user) {
-        const savedBalance = verifyData.user.initial_balance;
-        console.log('✅ Data verified! Saved balance:', savedBalance);
+        const isOnboarded = verifyData.user.is_onboarded;
+        console.log('✅ Data verified! Onboarded status:', isOnboarded);
 
-        if (savedBalance === null || savedBalance === undefined) {
-          console.error('❌ CRITICAL: Data not saved! Balance is still null after save');
+        if (!isOnboarded) {
+          console.error('❌ CRITICAL: Data not saved! User is not marked as onboarded');
           toast.error('Data tidak tersimpan! Coba lagi atau hubungi admin.', {
             duration: 10000,
           });

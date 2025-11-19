@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
       current_balance: initial_balance, // Set current balance to initial balance on first setup
       mode,
       webhook_url,
+      is_onboarded: true, // Mark user as onboarded when they complete onboarding
     })
 
     if (!profile) {
