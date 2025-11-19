@@ -239,7 +239,7 @@ export default function ReportsPage() {
     // Insight 3: Most expensive transaction
     const mostExpensive = transactions.reduce((max, t) =>
       parseFloat(t.amount.toString()) > parseFloat(max.amount.toString()) ? t : max
-    , transactions[0])
+      , transactions[0])
 
     if (mostExpensive) {
       const mostExpensiveAmount = parseFloat(mostExpensive.amount.toString())
@@ -427,139 +427,139 @@ export default function ReportsPage() {
             <TabsContent value="overview" className="space-y-4">
               {/* Summary Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-              {/* Total Spent */}
-              <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-red-500/10 dark:bg-red-500/20">
-                    <TrendingDown className="h-5 w-5 text-red-500" />
+                {/* Total Spent */}
+                <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 rounded-lg bg-red-500/10 dark:bg-red-500/20">
+                      <TrendingDown className="h-5 w-5 text-red-500" />
+                    </div>
+                    <h3 className="text-sm text-muted-foreground">Total Pengeluaran</h3>
                   </div>
-                  <h3 className="text-sm text-muted-foreground">Total Pengeluaran</h3>
-                </div>
-                <p className="text-2xl md:text-3xl font-normal text-foreground">
-                  {new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 0,
-                  }).format(totalSpent)}
-                </p>
-                {previousTotalSpent > 0 && (
-                  <div className="flex items-center gap-1 mt-2">
-                    {totalSpentChange > 0 ? (
-                      <>
-                        <ArrowUp className="h-3 w-3 text-red-500" />
-                        <span className="text-xs text-red-500">
-                          +{totalSpentChange.toFixed(1)}% dari bulan lalu
-                        </span>
-                      </>
-                    ) : totalSpentChange < 0 ? (
-                      <>
-                        <ArrowDown className="h-3 w-3 text-green-500" />
-                        <span className="text-xs text-green-500">
-                          {totalSpentChange.toFixed(1)}% dari bulan lalu
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <Minus className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">
-                          Sama dengan bulan lalu
-                        </span>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Transaction Count */}
-              <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-blue-500/10 dark:bg-blue-500/20">
-                    <Calendar className="h-5 w-5 text-blue-500" />
-                  </div>
-                  <h3 className="text-sm text-muted-foreground">Jumlah Transaksi</h3>
-                </div>
-                <p className="text-2xl md:text-3xl font-normal text-foreground">
-                  {transactions.length}
-                </p>
-                {previousMonthTransactions.length > 0 ? (
-                  <div className="flex items-center gap-1 mt-1">
-                    {transactionCountChange > 0 ? (
-                      <>
-                        <ArrowUp className="h-3 w-3 text-blue-500" />
-                        <span className="text-xs text-blue-500">
-                          +{transactionCountChange.toFixed(1)}% dari bulan lalu
-                        </span>
-                      </>
-                    ) : transactionCountChange < 0 ? (
-                      <>
-                        <ArrowDown className="h-3 w-3 text-blue-500" />
-                        <span className="text-xs text-blue-500">
-                          {transactionCountChange.toFixed(1)}% dari bulan lalu
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <Minus className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">
-                          Sama dengan bulan lalu
-                        </span>
-                      </>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    transaksi bulan ini
+                  <p className="text-2xl md:text-3xl font-normal text-foreground">
+                    {new Intl.NumberFormat('id-ID', {
+                      style: 'currency',
+                      currency: 'IDR',
+                      minimumFractionDigits: 0,
+                    }).format(totalSpent)}
                   </p>
-                )}
-              </div>
-
-              {/* Average per Transaction */}
-              <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-green-500/10 dark:bg-green-500/20">
-                    <Tag className="h-5 w-5 text-green-500" />
-                  </div>
-                  <h3 className="text-sm text-muted-foreground">Rata-rata</h3>
+                  {previousTotalSpent > 0 && (
+                    <div className="flex items-center gap-1 mt-2">
+                      {totalSpentChange > 0 ? (
+                        <>
+                          <ArrowUp className="h-3 w-3 text-red-500" />
+                          <span className="text-xs text-red-500">
+                            +{totalSpentChange.toFixed(1)}% dari bulan lalu
+                          </span>
+                        </>
+                      ) : totalSpentChange < 0 ? (
+                        <>
+                          <ArrowDown className="h-3 w-3 text-green-500" />
+                          <span className="text-xs text-green-500">
+                            {totalSpentChange.toFixed(1)}% dari bulan lalu
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Minus className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">
+                            Sama dengan bulan lalu
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <p className="text-2xl md:text-3xl font-normal text-foreground">
-                  {new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 0,
-                  }).format(averagePerTransaction)}
-                </p>
-                {previousAveragePerTransaction > 0 ? (
-                  <div className="flex items-center gap-1 mt-1">
-                    {averageChange > 0 ? (
-                      <>
-                        <ArrowUp className="h-3 w-3 text-orange-500" />
-                        <span className="text-xs text-orange-500">
-                          +{averageChange.toFixed(1)}% dari bulan lalu
-                        </span>
-                      </>
-                    ) : averageChange < 0 ? (
-                      <>
-                        <ArrowDown className="h-3 w-3 text-green-500" />
-                        <span className="text-xs text-green-500">
-                          {averageChange.toFixed(1)}% dari bulan lalu
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <Minus className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">
-                          Sama dengan bulan lalu
-                        </span>
-                      </>
-                    )}
+
+                {/* Transaction Count */}
+                <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 rounded-lg bg-blue-500/10 dark:bg-blue-500/20">
+                      <Calendar className="h-5 w-5 text-blue-500" />
+                    </div>
+                    <h3 className="text-sm text-muted-foreground">Jumlah Transaksi</h3>
                   </div>
-                ) : (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    per transaksi
+                  <p className="text-2xl md:text-3xl font-normal text-foreground">
+                    {transactions.length}
                   </p>
-                )}
+                  {previousMonthTransactions.length > 0 ? (
+                    <div className="flex items-center gap-1 mt-1">
+                      {transactionCountChange > 0 ? (
+                        <>
+                          <ArrowUp className="h-3 w-3 text-blue-500" />
+                          <span className="text-xs text-blue-500">
+                            +{transactionCountChange.toFixed(1)}% dari bulan lalu
+                          </span>
+                        </>
+                      ) : transactionCountChange < 0 ? (
+                        <>
+                          <ArrowDown className="h-3 w-3 text-blue-500" />
+                          <span className="text-xs text-blue-500">
+                            {transactionCountChange.toFixed(1)}% dari bulan lalu
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Minus className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">
+                            Sama dengan bulan lalu
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      transaksi bulan ini
+                    </p>
+                  )}
+                </div>
+
+                {/* Average per Transaction */}
+                <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 rounded-lg bg-green-500/10 dark:bg-green-500/20">
+                      <Tag className="h-5 w-5 text-green-500" />
+                    </div>
+                    <h3 className="text-sm text-muted-foreground">Rata-rata</h3>
+                  </div>
+                  <p className="text-2xl md:text-3xl font-normal text-foreground">
+                    {new Intl.NumberFormat('id-ID', {
+                      style: 'currency',
+                      currency: 'IDR',
+                      minimumFractionDigits: 0,
+                    }).format(averagePerTransaction)}
+                  </p>
+                  {previousAveragePerTransaction > 0 ? (
+                    <div className="flex items-center gap-1 mt-1">
+                      {averageChange > 0 ? (
+                        <>
+                          <ArrowUp className="h-3 w-3 text-orange-500" />
+                          <span className="text-xs text-orange-500">
+                            +{averageChange.toFixed(1)}% dari bulan lalu
+                          </span>
+                        </>
+                      ) : averageChange < 0 ? (
+                        <>
+                          <ArrowDown className="h-3 w-3 text-green-500" />
+                          <span className="text-xs text-green-500">
+                            {averageChange.toFixed(1)}% dari bulan lalu
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Minus className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">
+                            Sama dengan bulan lalu
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      per transaksi
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
 
               {/* Key Insights - Top 3 */}
               {insights.length > 0 && (
@@ -577,13 +577,12 @@ export default function ReportsPage() {
                     {insights.slice(0, 3).map((insight, index) => (
                       <div
                         key={index}
-                        className={`flex items-start gap-3 p-3 rounded-xl border ${
-                          insight.type === 'warning'
-                            ? 'bg-amber-500/5 border-amber-500/20 dark:bg-amber-500/10'
-                            : insight.type === 'success'
+                        className={`flex items-start gap-3 p-3 rounded-xl border ${insight.type === 'warning'
+                          ? 'bg-amber-500/5 border-amber-500/20 dark:bg-amber-500/10'
+                          : insight.type === 'success'
                             ? 'bg-green-500/5 border-green-500/20 dark:bg-green-500/10'
                             : 'bg-blue-500/5 border-blue-500/20 dark:bg-blue-500/10'
-                        }`}
+                          }`}
                       >
                         {insight.type === 'warning' ? (
                           <AlertCircle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
@@ -604,281 +603,282 @@ export default function ReportsPage() {
 
             {/* Tab 2: Charts - All Visualizations */}
             <TabsContent value="charts" className="w-full space-y-3 md:space-y-4">
-            {/* Bar Chart - Top Categories */}
-            <div className="w-full bg-card border border-border rounded-xl shadow-sm">
-              {/* Header */}
-              <div className="p-4 md:p-6 border-b border-border w-full">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
-                    <BarChart3 className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-base md:text-lg font-semibold text-foreground">
-                      Top 5 Kategori Pengeluaran
-                    </h3>
-                    <p className="text-xs md:text-sm text-muted-foreground">
-                      Kategori dengan pengeluaran tertinggi bulan ini
-                    </p>
+              {/* Bar Chart - Top Categories */}
+              <div className="w-full bg-card border border-border rounded-xl shadow-sm">
+                {/* Header */}
+                <div className="p-4 md:p-6 border-b border-border w-full">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
+                      <BarChart3 className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-base md:text-lg font-semibold text-foreground">
+                        Top 5 Kategori Pengeluaran
+                      </h3>
+                      <p className="text-xs md:text-sm text-muted-foreground">
+                        Kategori dengan pengeluaran tertinggi bulan ini
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Content - Chart */}
-              <div className="p-4 md:p-6 w-full">
-                <div className="w-full h-[350px]">
-                  <ChartContainer config={barChartConfig} className="h-full w-full aspect-auto min-w-[100%]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={barChartData} margin={{ top: 20, right: 0, left: 0, bottom: 60 }}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis
-                        dataKey="category"
-                        angle={-45}
-                        textAnchor="end"
-                        height={80}
-                        className="text-xs"
-                        tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                      />
-                      <YAxis
-                        className="text-xs"
-                        tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                        tickFormatter={(value) =>
-                          new Intl.NumberFormat('id-ID', {
-                            notation: 'compact',
-                            compactDisplay: 'short',
-                          }).format(value)
-                        }
-                      />
-                      <ChartTooltip
-                        content={
-                          <ChartTooltipContent
-                            labelFormatter={(value: any) => value}
-                            formatter={(value: any, name: any) => [
-                              new Intl.NumberFormat('id-ID', {
-                                style: 'currency',
-                                currency: 'IDR',
-                                minimumFractionDigits: 0,
-                              }).format(value as number),
-                              'Total'
-                            ]}
+                {/* Content - Chart */}
+                <div className="p-4 md:p-6 w-full">
+                  <div className="w-full h-[350px]">
+                    <ChartContainer config={barChartConfig} className="h-full w-full aspect-auto min-w-[100%]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={barChartData} margin={{ top: 20, right: 0, left: 0, bottom: 60 }}>
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                          <XAxis
+                            dataKey="category"
+                            angle={-45}
+                            textAnchor="end"
+                            height={80}
+                            className="text-xs"
+                            tick={{ fill: 'hsl(var(--muted-foreground))' }}
                           />
-                        }
-                      />
-                      <Bar dataKey="amount" radius={[8, 8, 0, 0]}>
-                        {barChartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-              </div>
-
-              {/* Footer */}
-              <div className="p-4 border-t border-border flex items-center gap-2 text-xs text-muted-foreground">
-                <TrendingUp className="h-4 w-4" />
-                <span>Showing top 5 spending categories this month</span>
-              </div>
-            </div>
-
-            {/* Pie Chart - Category Distribution */}
-            <div className="w-full bg-card border border-border rounded-xl shadow-sm">
-              {/* Header */}
-              <div className="p-4 md:p-6 border-b border-border w-full">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
-                    <Tag className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-base md:text-lg font-semibold text-foreground">
-                      Distribusi Kategori
-                    </h3>
-                    <p className="text-xs md:text-sm text-muted-foreground">
-                      Perbandingan pengeluaran antar kategori
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Content - Chart */}
-              <div className="p-4 md:p-6 w-full">
-                <div className="w-full h-[350px]">
-                  <ChartContainer config={pieChartConfig} className="h-full w-full aspect-auto min-w-[100%]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                      <ChartTooltip
-                        content={
-                          <ChartTooltipContent
-                            labelFormatter={(value: any) => value}
-                            formatter={(value: any, name: any) => [
+                          <YAxis
+                            className="text-xs"
+                            tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                            tickFormatter={(value) =>
                               new Intl.NumberFormat('id-ID', {
-                                style: 'currency',
-                                currency: 'IDR',
-                                minimumFractionDigits: 0,
-                              }).format(value as number),
-                              name
-                            ]}
+                                notation: 'compact',
+                                compactDisplay: 'short',
+                              }).format(value)
+                            }
                           />
-                        }
-                      />
-                      <Pie
-                        data={pieChartData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={80}
-                        label={(props: any) => {
-                          const entry = pieChartData.find(e => e.name === props.name)
-                          return entry ? `${props.name} (${entry.percentage.toFixed(1)}%)` : props.name
-                        }}
-                        labelLine={true}
-                      >
-                        {pieChartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
-                        ))}
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="p-4 border-t border-border flex items-center gap-2 text-xs text-muted-foreground">
-                <BarChart3 className="h-4 w-4" />
-                <span>Total spending breakdown by category</span>
-              </div>
-            </div>
-
-            {/* Line Chart - Daily Spending Trend */}
-            <div className="w-full bg-card border border-border rounded-xl shadow-sm">
-              {/* Header */}
-              <div className="p-4 md:p-6 border-b border-border w-full">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
-                    <TrendingUp className="h-5 w-5 text-primary" />
+                          <ChartTooltip
+                            content={
+                              <ChartTooltipContent
+                                labelFormatter={(value: any) => value}
+                                formatter={(value: any, name: any) => [
+                                  new Intl.NumberFormat('id-ID', {
+                                    style: 'currency',
+                                    currency: 'IDR',
+                                    minimumFractionDigits: 0,
+                                  }).format(value as number),
+                                  'Total'
+                                ]}
+                              />
+                            }
+                          />
+                          <Bar dataKey="amount" radius={[8, 8, 0, 0]}>
+                            {barChartData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
                   </div>
-                  <div>
-                    <h3 className="text-base md:text-lg font-semibold text-foreground">
-                      Tren Pengeluaran Harian
-                    </h3>
-                    <p className="text-xs md:text-sm text-muted-foreground">
-                      Grafik pengeluaran per hari bulan ini
-                    </p>
+
+                  {/* Footer */}
+                  <div className="p-4 border-t border-border flex items-center gap-2 text-xs text-muted-foreground">
+                    <TrendingUp className="h-4 w-4" />
+                    <span>Showing top 5 spending categories this month</span>
                   </div>
                 </div>
               </div>
 
-              {/* Content - Chart */}
-              <div className="p-4 md:p-6 w-full">
-                <div className="w-full h-[350px]">
-                  <ChartContainer config={lineChartConfig} className="h-full w-full aspect-auto min-w-[100%]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={lineChartData} margin={{ top: 20, right: 0, left: 0, bottom: 20 }}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis
-                        dataKey="date"
-                        className="text-xs"
-                        tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                        angle={-45}
-                        textAnchor="end"
-                        height={60}
-                      />
-                      <YAxis
-                        className="text-xs"
-                        tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                        tickFormatter={(value) =>
-                          new Intl.NumberFormat('id-ID', {
-                            notation: 'compact',
-                            compactDisplay: 'short',
-                          }).format(value)
-                        }
-                      />
-                      <ChartTooltip
-                        content={
-                          <ChartTooltipContent
-                            labelFormatter={(value: any) => value}
-                            formatter={(value: any, name: any) => [
+              {/* Pie Chart - Category Distribution */}
+              <div className="w-full bg-card border border-border rounded-xl shadow-sm">
+                {/* Header */}
+                <div className="p-4 md:p-6 border-b border-border w-full">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
+                      <Tag className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-base md:text-lg font-semibold text-foreground">
+                        Distribusi Kategori
+                      </h3>
+                      <p className="text-xs md:text-sm text-muted-foreground">
+                        Perbandingan pengeluaran antar kategori
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Content - Chart */}
+                <div className="p-4 md:p-6 w-full">
+                  <div className="w-full h-[350px]">
+                    <ChartContainer config={pieChartConfig} className="h-full w-full aspect-auto min-w-[100%]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <ChartTooltip
+                            content={
+                              <ChartTooltipContent
+                                labelFormatter={(value: any) => value}
+                                formatter={(value: any, name: any) => [
+                                  new Intl.NumberFormat('id-ID', {
+                                    style: 'currency',
+                                    currency: 'IDR',
+                                    minimumFractionDigits: 0,
+                                  }).format(value as number),
+                                  name
+                                ]}
+                              />
+                            }
+                          />
+                          <Pie
+                            data={pieChartData}
+                            dataKey="value"
+                            nameKey="name"
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={80}
+                            label={(props: any) => {
+                              const entry = pieChartData.find(e => e.name === props.name)
+                              return entry ? `${props.name} (${entry.percentage.toFixed(1)}%)` : props.name
+                            }}
+                            labelLine={true}
+                          >
+                            {pieChartData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                          </Pie>
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="p-4 border-t border-border flex items-center gap-2 text-xs text-muted-foreground">
+                  <BarChart3 className="h-4 w-4" />
+                  <span>Total spending breakdown by category</span>
+                </div>
+              </div>
+
+              {/* Line Chart - Daily Spending Trend */}
+              <div className="w-full bg-card border border-border rounded-xl shadow-sm">
+                {/* Header */}
+                <div className="p-4 md:p-6 border-b border-border w-full">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
+                      <TrendingUp className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-base md:text-lg font-semibold text-foreground">
+                        Tren Pengeluaran Harian
+                      </h3>
+                      <p className="text-xs md:text-sm text-muted-foreground">
+                        Grafik pengeluaran per hari bulan ini
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Content - Chart */}
+                <div className="p-4 md:p-6 w-full">
+                  <div className="w-full h-[350px]">
+                    <ChartContainer config={lineChartConfig} className="h-full w-full aspect-auto min-w-[100%]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={lineChartData} margin={{ top: 20, right: 0, left: 0, bottom: 20 }}>
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                          <XAxis
+                            dataKey="date"
+                            className="text-xs"
+                            tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                            angle={-45}
+                            textAnchor="end"
+                            height={60}
+                          />
+                          <YAxis
+                            className="text-xs"
+                            tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                            tickFormatter={(value) =>
                               new Intl.NumberFormat('id-ID', {
-                                style: 'currency',
-                                currency: 'IDR',
-                                minimumFractionDigits: 0,
-                              }).format(value as number),
-                              'Pengeluaran'
-                            ]}
+                                notation: 'compact',
+                                compactDisplay: 'short',
+                              }).format(value)
+                            }
                           />
-                        }
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="amount"
-                        stroke={chartColors[1]}
-                        strokeWidth={2}
-                        dot={{ fill: chartColors[1], r: 4 }}
-                        activeDot={{ r: 6 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
+                          <ChartTooltip
+                            content={
+                              <ChartTooltipContent
+                                labelFormatter={(value: any) => value}
+                                formatter={(value: any, name: any) => [
+                                  new Intl.NumberFormat('id-ID', {
+                                    style: 'currency',
+                                    currency: 'IDR',
+                                    minimumFractionDigits: 0,
+                                  }).format(value as number),
+                                  'Pengeluaran'
+                                ]}
+                              />
+                            }
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="amount"
+                            stroke={chartColors[1]}
+                            strokeWidth={2}
+                            dot={{ fill: chartColors[1], r: 4 }}
+                            activeDot={{ r: 6 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="p-4 border-t border-border flex items-center gap-2 text-xs text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  <span>Daily spending pattern for current month</span>
                 </div>
               </div>
-
-              {/* Footer */}
-              <div className="p-4 border-t border-border flex items-center gap-2 text-xs text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                <span>Daily spending pattern for current month</span>
-              </div>
-            </div>
             </TabsContent>
 
             {/* Tab 3: Details - Category Breakdown */}
             <TabsContent value="details" className="space-y-3 md:space-y-4">
-            {/* Category Breakdown */}
-            <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
-              <h2 className="text-base md:text-lg font-normal text-foreground mb-4 md:mb-6">
-                Pengeluaran per Kategori
-              </h2>
+              {/* Category Breakdown */}
+              <div className="bg-card dark:bg-card backdrop-blur-sm border-2 border-border rounded-2xl p-4 md:p-6 shadow-sm">
+                <h2 className="text-base md:text-lg font-normal text-foreground mb-4 md:mb-6">
+                  Pengeluaran per Kategori
+                </h2>
 
-              <div className="space-y-3 md:space-y-4">
-                {sortedCategories.map(({ category, total, count, percentage }) => (
-                  <div key={category} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-2xl">
-                          {categoryEmoji[category.toLowerCase()] || '📦'}
-                        </span>
-                        <span className="text-sm font-normal text-foreground capitalize">
-                          {category}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          ({count} transaksi)
-                        </span>
+                <div className="space-y-3 md:space-y-4">
+                  {sortedCategories.map(({ category, total, count, percentage }) => (
+                    <div key={category} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">
+                            {categoryEmoji[category.toLowerCase()] || '📦'}
+                          </span>
+                          <span className="text-sm font-normal text-foreground capitalize">
+                            {category}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            ({count} transaksi)
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-normal text-foreground">
+                            {new Intl.NumberFormat('id-ID', {
+                              style: 'currency',
+                              currency: 'IDR',
+                              minimumFractionDigits: 0,
+                            }).format(total)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {percentage.toFixed(1)}%
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-normal text-foreground">
-                          {new Intl.NumberFormat('id-ID', {
-                            style: 'currency',
-                            currency: 'IDR',
-                            minimumFractionDigits: 0,
-                          }).format(total)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {percentage.toFixed(1)}%
-                        </p>
+
+                      {/* Progress Bar */}
+                      <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-primary/70 rounded-full transition-all duration-500"
+                          style={{ width: `${percentage}%` }}
+                        />
                       </div>
                     </div>
-
-                    {/* Progress Bar */}
-                    <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary/70 rounded-full transition-all duration-500"
-                        style={{ width: `${percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
             </TabsContent>
           </Tabs>
         )}
