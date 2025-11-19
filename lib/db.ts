@@ -159,6 +159,8 @@ export async function createTransaction(
     location?: string | null
     payment_method?: string | null
     wallet_id?: string | null
+    type?: 'income' | 'expense' | 'adjustment'
+    notes?: string | null
   }
 ): Promise<Transaction | null> {
   const supabase = await createClient()

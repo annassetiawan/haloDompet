@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { item, amount, category, date, voice_text, location, payment_method, wallet_id } = body
+    const { item, amount, category, date, voice_text, location, payment_method, wallet_id, type } = body
 
     // Validation
     if (!item || !amount || !category || !date) {
@@ -28,6 +28,15 @@ export async function POST(request: NextRequest) {
     if (typeof amount !== 'number' || amount <= 0) {
       return NextResponse.json(
         { error: 'Amount must be a positive number' },
+        { status: 400 }
+      )
+    }
+
+    // Validate transaction type
+    const transactionType = type || 'expense' // Default to expense if not provided
+    if (!['income', 'expense', 'adjustment'].includes(transactionType)) {
+      return NextResponse.json(
+        { error: 'Invalid type. Must be: income, expense, or adjustment' },
         { status: 400 }
       )
     }
@@ -55,6 +64,7 @@ export async function POST(request: NextRequest) {
       location: location || null,
       payment_method: payment_method || null,
       wallet_id: targetWalletId,
+      type: transactionType,
     })
 
     if (!transaction) {
