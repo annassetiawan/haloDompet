@@ -499,35 +499,42 @@ export default function HomePage() {
 
           {/* Area Chat Bubble */}
           <div className="relative w-full max-w-[400px] mx-auto mb-4 flex flex-col justify-end items-center transition-all duration-300">
-            <div
-              className={`relative px-4 py-2.5 rounded-2xl shadow-sm border transition-all duration-300 ${
-                isBubbleActive
-                  ? 'bg-gradient-to-br from-indigo-50 to-white border-indigo-100 text-indigo-900 scale-100 opacity-100'
-                  : 'bg-gray-50 border-gray-100 text-gray-400 scale-95 opacity-80'
-              }`}
-            >
-              {/* Label Bubble Dynamic */}
-              <span className="absolute -top-2.5 left-4 bg-white text-[9px] font-bold px-1.5 py-px rounded-full shadow-sm border border-gray-100 text-gray-400 uppercase tracking-wider">
-                {bubbleLabel}
-              </span>
-
-              <p
-                className={`text-center font-medium leading-snug ${
-                  isBubbleActive ? 'text-sm' : 'text-xs italic'
+            {isLoadingWallets ? (
+              /* Skeleton Bubble */
+              <div className="relative w-full px-4">
+                <div className="w-full h-16 rounded-2xl bg-muted animate-pulse" />
+              </div>
+            ) : (
+              <div
+                className={`relative px-4 py-2.5 rounded-2xl shadow-sm border transition-all duration-300 ${
+                  isBubbleActive
+                    ? 'bg-gradient-to-br from-indigo-50 to-white border-indigo-100 text-indigo-900 scale-100 opacity-100'
+                    : 'bg-gray-50 border-gray-100 text-gray-400 scale-95 opacity-80'
                 }`}
               >
-                {/* Hilangkan tanda kutip jika status adalah prompt/saran */}
-                {status === IDLE_STATUS ? status : `"${status}"`}
-              </p>
+                {/* Label Bubble Dynamic */}
+                <span className="absolute -top-2.5 left-4 bg-white text-[9px] font-bold px-1.5 py-px rounded-full shadow-sm border border-gray-100 text-gray-400 uppercase tracking-wider">
+                  {bubbleLabel}
+                </span>
 
-              <div
-                className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-b border-r ${
-                  isBubbleActive
-                    ? 'bg-indigo-50 border-indigo-100'
-                    : 'bg-gray-50 border-gray-100'
-                }`}
-              ></div>
-            </div>
+                <p
+                  className={`text-center font-medium leading-snug ${
+                    isBubbleActive ? 'text-sm' : 'text-xs italic'
+                  }`}
+                >
+                  {/* Hilangkan tanda kutip jika status adalah prompt/saran */}
+                  {status === IDLE_STATUS ? status : `"${status}"`}
+                </p>
+
+                <div
+                  className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-b border-r ${
+                    isBubbleActive
+                      ? 'bg-indigo-50 border-indigo-100'
+                      : 'bg-gray-50 border-gray-100'
+                  }`}
+                ></div>
+              </div>
+            )}
           </div>
 
           {/* Voice Recording Section */}
@@ -535,18 +542,23 @@ export default function HomePage() {
             <RecordButton
               onTranscript={handleTranscript}
               onStatusChange={handleStatusChange}
+              isLoading={isLoadingWallets}
             />
 
             {/* Manual Transaction Button */}
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => setIsManualTransactionOpen(true)}
-              className="gap-2 border-2 border-dashed hover:border-solid hover:bg-primary/10"
-            >
-              <PlusCircle className="h-5 w-5" />
-              Input Manual
-            </Button>
+            {isLoadingWallets ? (
+              <div className="w-40 h-11 rounded-lg bg-muted animate-pulse" />
+            ) : (
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => setIsManualTransactionOpen(true)}
+                className="gap-2 border-2 border-dashed hover:border-solid hover:bg-primary/10"
+              >
+                <PlusCircle className="h-5 w-5" />
+                Input Manual
+              </Button>
+            )}
 
             {/* Status Card */}
             <div className="w-full max-w-md space-y-3">
@@ -561,14 +573,18 @@ export default function HomePage() {
             </div>
 
             {/* Instruction */}
-            <div className="text-center space-y-2">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border border-border/50">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                <p className="text-xs font-medium text-muted-foreground">
-                  Tekan tombol dan ucapkan pemasukan atau pengeluaran Anda
-                </p>
+            {isLoadingWallets ? (
+              <div className="w-72 h-9 rounded-full bg-muted/50 animate-pulse" />
+            ) : (
+              <div className="text-center space-y-2">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border border-border/50">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <p className="text-xs font-medium text-muted-foreground">
+                    Tekan tombol dan ucapkan pemasukan atau pengeluaran Anda
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Recent Transactions */}
