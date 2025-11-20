@@ -499,35 +499,42 @@ export default function HomePage() {
 
           {/* Area Chat Bubble */}
           <div className="relative w-full max-w-[400px] mx-auto mb-4 flex flex-col justify-end items-center transition-all duration-300">
-            <div
-              className={`relative px-4 py-2.5 rounded-2xl shadow-sm border transition-all duration-300 ${
-                isBubbleActive
-                  ? 'bg-gradient-to-br from-indigo-50 to-white border-indigo-100 text-indigo-900 scale-100 opacity-100'
-                  : 'bg-gray-50 border-gray-100 text-gray-400 scale-95 opacity-80'
-              }`}
-            >
-              {/* Label Bubble Dynamic */}
-              <span className="absolute -top-2.5 left-4 bg-white text-[9px] font-bold px-1.5 py-px rounded-full shadow-sm border border-gray-100 text-gray-400 uppercase tracking-wider">
-                {bubbleLabel}
-              </span>
-
-              <p
-                className={`text-center font-medium leading-snug ${
-                  isBubbleActive ? 'text-sm' : 'text-xs italic'
+            {isLoadingWallets ? (
+              /* Skeleton Bubble */
+              <div className="relative w-full px-4">
+                <div className="w-full h-16 rounded-2xl bg-muted animate-pulse" />
+              </div>
+            ) : (
+              <div
+                className={`relative px-4 py-2.5 rounded-2xl shadow-sm border transition-all duration-300 ${
+                  isBubbleActive
+                    ? 'bg-gradient-to-br from-indigo-50 to-white border-indigo-100 text-indigo-900 scale-100 opacity-100'
+                    : 'bg-gray-50 border-gray-100 text-gray-400 scale-95 opacity-80'
                 }`}
               >
-                {/* Hilangkan tanda kutip jika status adalah prompt/saran */}
-                {status === IDLE_STATUS ? status : `"${status}"`}
-              </p>
+                {/* Label Bubble Dynamic */}
+                <span className="absolute -top-2.5 left-4 bg-white text-[9px] font-bold px-1.5 py-px rounded-full shadow-sm border border-gray-100 text-gray-400 uppercase tracking-wider">
+                  {bubbleLabel}
+                </span>
 
-              <div
-                className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-b border-r ${
-                  isBubbleActive
-                    ? 'bg-indigo-50 border-indigo-100'
-                    : 'bg-gray-50 border-gray-100'
-                }`}
-              ></div>
-            </div>
+                <p
+                  className={`text-center font-medium leading-snug ${
+                    isBubbleActive ? 'text-sm' : 'text-xs italic'
+                  }`}
+                >
+                  {/* Hilangkan tanda kutip jika status adalah prompt/saran */}
+                  {status === IDLE_STATUS ? status : `"${status}"`}
+                </p>
+
+                <div
+                  className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-b border-r ${
+                    isBubbleActive
+                      ? 'bg-indigo-50 border-indigo-100'
+                      : 'bg-gray-50 border-gray-100'
+                  }`}
+                ></div>
+              </div>
+            )}
           </div>
 
           {/* Voice Recording Section */}
