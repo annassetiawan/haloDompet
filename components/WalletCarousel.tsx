@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react'
-import { Eye, EyeOff, Plus, Wallet as WalletIcon, MoreVertical, Edit, Star, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Eye, EyeOff, Plus, Wallet as WalletIcon, MoreVertical, Edit, Star, TrendingUp, TrendingDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -15,6 +15,7 @@ import type { Wallet } from '@/types'
 interface WalletCarouselProps {
   wallets: Wallet[]
   totalBalance: number
+  growthPercentage?: number
   isLoading?: boolean
   onAddWallet?: () => void
   onEditWallet?: (wallet: Wallet) => void
@@ -23,6 +24,7 @@ interface WalletCarouselProps {
 export function WalletCarousel({
   wallets,
   totalBalance,
+  growthPercentage = 0,
   isLoading = false,
   onAddWallet,
   onEditWallet
@@ -162,10 +164,25 @@ export function WalletCarousel({
                         <p className="text-white/60 text-[10px]">{wallets.length} dompet aktif</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">
-                      <TrendingUp className="h-3 w-3 text-white" />
-                      <span className="text-[10px] text-white font-medium">100%</span>
-                    </div>
+                    {growthPercentage === 0 ? (
+                      <div className="flex items-center gap-1 bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">
+                        <span className="text-[10px] text-white font-medium">-</span>
+                      </div>
+                    ) : growthPercentage > 0 ? (
+                      <div className="flex items-center gap-1 bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">
+                        <TrendingUp className="h-3 w-3 text-white" />
+                        <span className="text-[10px] text-white font-medium">
+                          +{growthPercentage.toFixed(1)}%
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 bg-rose-500/30 px-2 py-1 rounded-full backdrop-blur-sm">
+                        <TrendingDown className="h-3 w-3 text-white" />
+                        <span className="text-[10px] text-white font-medium">
+                          {growthPercentage.toFixed(1)}%
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div>
