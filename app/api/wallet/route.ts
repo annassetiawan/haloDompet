@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getWallets, createWallet, getTotalBalance } from '@/lib/db'
+import { getWallets, createWallet, getTotalBalance, getAssetGrowth } from '@/lib/db'
 
 // GET /api/wallet - Get all wallets for the authenticated user
 export async function GET(request: NextRequest) {
@@ -21,10 +21,14 @@ export async function GET(request: NextRequest) {
     // Get total balance across all wallets
     const totalBalance = await getTotalBalance(user.id)
 
+    // Get asset growth percentage for current month
+    const growthPercentage = await getAssetGrowth(user.id)
+
     return NextResponse.json({
       success: true,
       wallets,
       totalBalance,
+      growthPercentage,
     })
   } catch (error) {
     console.error('Wallet GET API error:', error)
