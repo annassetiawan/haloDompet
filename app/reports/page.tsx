@@ -181,30 +181,34 @@ export default function ReportsPage() {
     lainnya: '📦',
   }
 
-  // Modern chart colors - optimized for dark mode
+  // Modern chart colors - optimized for dark mode (9 unique colors)
   const chartColors = {
     1: 'hsl(217 91% 60%)',   // Blue - #3b82f6
     2: 'hsl(270 95% 60%)',   // Violet - #8b5cf6
     3: 'hsl(45 93% 47%)',    // Amber - #f59e0b
     4: 'hsl(330 81% 60%)',   // Pink - #ec4899
     5: 'hsl(175 80% 40%)',   // Teal - #14b8a6
+    6: 'hsl(189 94% 43%)',   // Cyan - #06b6d4
+    7: 'hsl(24 94% 53%)',    // Orange - #f97316
+    8: 'hsl(84 81% 44%)',    // Lime - #84cc16
+    9: 'hsl(243 75% 59%)',   // Indigo - #6366f1
   }
 
-  // Income & Expense colors
+  // Income & Expense colors (separate from category colors)
   const incomeColor = 'hsl(150 80% 40%)'   // Emerald - #10b981
   const expenseColor = 'hsl(350 80% 60%)'  // Rose - #f43f5e
 
-  // Category color mapping (Shadcn pattern) - consistent across all charts
+  // Category color mapping - each category has unique color
   const categoryColors: Record<string, string> = {
     makanan: chartColors[1],      // Blue
-    minuman: chartColors[5],      // Teal
+    minuman: chartColors[6],      // Cyan (water-like)
     transport: chartColors[2],    // Violet
-    belanja: chartColors[3],      // Amber
-    hiburan: chartColors[4],      // Pink
-    kesehatan: chartColors[1],    // Blue
-    pendidikan: chartColors[2],   // Violet
-    tagihan: chartColors[3],      // Amber
-    lainnya: chartColors[4],      // Pink
+    belanja: chartColors[4],      // Pink
+    hiburan: chartColors[7],      // Orange (fun)
+    kesehatan: chartColors[5],    // Teal (medical)
+    pendidikan: chartColors[9],   // Indigo
+    tagihan: chartColors[3],      // Amber (warning)
+    lainnya: chartColors[8],      // Lime
   }
 
   // Prepare data for bar chart - Monthly Income vs Expense (Grouped)
