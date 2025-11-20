@@ -181,27 +181,30 @@ export default function ReportsPage() {
     lainnya: '📦',
   }
 
-  // Chart colors - actual HSL values from CSS variables
-  // Light mode colors from globals.css
+  // Modern chart colors - optimized for dark mode
   const chartColors = {
-    1: 'hsl(12 76% 61%)',   // --chart-1
-    2: 'hsl(173 58% 39%)',  // --chart-2
-    3: 'hsl(197 37% 24%)',  // --chart-3
-    4: 'hsl(43 74% 66%)',   // --chart-4
-    5: 'hsl(27 87% 67%)',   // --chart-5
+    1: 'hsl(217 91% 60%)',   // Blue - #3b82f6
+    2: 'hsl(270 95% 60%)',   // Violet - #8b5cf6
+    3: 'hsl(45 93% 47%)',    // Amber - #f59e0b
+    4: 'hsl(330 81% 60%)',   // Pink - #ec4899
+    5: 'hsl(175 80% 40%)',   // Teal - #14b8a6
   }
 
-  // Category color mapping (Shadcn pattern)
+  // Income & Expense colors
+  const incomeColor = 'hsl(150 80% 40%)'   // Emerald - #10b981
+  const expenseColor = 'hsl(350 80% 60%)'  // Rose - #f43f5e
+
+  // Category color mapping (Shadcn pattern) - consistent across all charts
   const categoryColors: Record<string, string> = {
-    makanan: chartColors[1],
-    minuman: chartColors[2],
-    transport: chartColors[3],
-    belanja: chartColors[4],
-    hiburan: chartColors[5],
-    kesehatan: chartColors[1],
-    pendidikan: chartColors[2],
-    tagihan: chartColors[3],
-    lainnya: chartColors[4],
+    makanan: chartColors[1],      // Blue
+    minuman: chartColors[5],      // Teal
+    transport: chartColors[2],    // Violet
+    belanja: chartColors[3],      // Amber
+    hiburan: chartColors[4],      // Pink
+    kesehatan: chartColors[1],    // Blue
+    pendidikan: chartColors[2],   // Violet
+    tagihan: chartColors[3],      // Amber
+    lainnya: chartColors[4],      // Pink
   }
 
   // Prepare data for bar chart - Monthly Income vs Expense (Grouped)
@@ -369,11 +372,11 @@ export default function ReportsPage() {
   const monthlyComparisonConfig = {
     pemasukan: {
       label: 'Pemasukan',
-      color: 'hsl(142 76% 36%)', // green
+      color: incomeColor, // Emerald
     },
     pengeluaran: {
       label: 'Pengeluaran',
-      color: 'hsl(0 84% 60%)', // red
+      color: expenseColor, // Rose
     },
   } satisfies ChartConfig;
 
@@ -401,7 +404,7 @@ export default function ReportsPage() {
   const lineChartConfig = {
     amount: {
       label: 'Pengeluaran',
-      color: chartColors[1],
+      color: expenseColor, // Rose for consistency
     },
   } satisfies ChartConfig;
 
@@ -753,12 +756,12 @@ export default function ReportsPage() {
                           <ChartLegend content={<ChartLegendContent />} />
                           <Bar
                             dataKey="pemasukan"
-                            fill="hsl(142 76% 36%)"
+                            fill={incomeColor}
                             radius={[8, 8, 0, 0]}
                           />
                           <Bar
                             dataKey="pengeluaran"
-                            fill="hsl(0 84% 60%)"
+                            fill={expenseColor}
                             radius={[8, 8, 0, 0]}
                           />
                         </BarChart>
@@ -977,8 +980,8 @@ export default function ReportsPage() {
                         <AreaChart data={lineChartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                           <defs>
                             <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor={chartColors[1]} stopOpacity={0.8}/>
-                              <stop offset="95%" stopColor={chartColors[1]} stopOpacity={0}/>
+                              <stop offset="5%" stopColor={expenseColor} stopOpacity={0.8}/>
+                              <stop offset="95%" stopColor={expenseColor} stopOpacity={0}/>
                             </linearGradient>
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
@@ -1009,11 +1012,11 @@ export default function ReportsPage() {
                           <Area
                             type="monotone"
                             dataKey="amount"
-                            stroke={chartColors[1]}
+                            stroke={expenseColor}
                             strokeWidth={2}
                             fill="url(#colorAmount)"
-                            fillOpacity={1}
-                            dot={{ fill: chartColors[1], r: 4 }}
+                            fillOpacity={0.9}
+                            dot={{ fill: expenseColor, r: 4 }}
                             activeDot={{ r: 6 }} />
                         </AreaChart>
                       </ResponsiveContainer>
