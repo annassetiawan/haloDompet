@@ -18,7 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { ArrowLeft, Save, Loader2, Wallet, Plus, Edit, Trash2, AlertCircle, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, Wallet, Plus, Edit, Trash2, AlertCircle, AlertTriangle, LogOut } from 'lucide-react'
 import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
 import type { User as UserProfile, Wallet as WalletType } from '@/types'
@@ -230,6 +230,12 @@ export default function SettingsPage() {
     } finally {
       setIsResetting(false)
     }
+  }
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.push('/login')
+    router.refresh()
   }
 
   const totalBalance = wallets.reduce((sum, wallet) => sum + parseFloat(wallet.balance.toString()), 0)
@@ -532,6 +538,18 @@ export default function SettingsPage() {
                   </Button>
                 </div>
               </div>
+            </div>
+
+            {/* Logout Button - Mobile */}
+            <div className="mt-8">
+              <Button
+                onClick={handleLogout}
+                variant="destructive"
+                className="w-full h-12 gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                Keluar dari Aplikasi
+              </Button>
             </div>
           </div>
         )}
