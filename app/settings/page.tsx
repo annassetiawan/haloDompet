@@ -18,8 +18,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { ArrowLeft, Save, Loader2, Wallet, Plus, Edit, Trash2, AlertCircle, AlertTriangle, LogOut, Tag } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, Wallet, Plus, Edit, Trash2, AlertCircle, AlertTriangle, LogOut, Tag, Crown } from 'lucide-react'
 import { toast } from 'sonner'
+import confetti from 'canvas-confetti'
 import type { User } from '@supabase/supabase-js'
 import type { User as UserProfile, Wallet as WalletType, Category } from '@/types'
 
@@ -58,6 +59,10 @@ export default function SettingsPage() {
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false)
   const [resetConfirmText, setResetConfirmText] = useState('')
   const [isResetting, setIsResetting] = useState(false)
+
+  // Prank upgrade state
+  const [isUpgrading, setIsUpgrading] = useState(false)
+  const [isPrankDialogOpen, setIsPrankDialogOpen] = useState(false)
 
   const router = useRouter()
   const supabase = createClient()
@@ -346,6 +351,50 @@ export default function SettingsPage() {
     router.refresh()
   }
 
+  const handleUpgradePrank = async () => {
+    try {
+      setIsUpgrading(true)
+
+      // Call the upgrade API
+      const response = await fetch('/api/user/claim-free-premium', {
+        method: 'POST',
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to upgrade account')
+      }
+
+      // Trigger confetti celebration!
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#FFD700', '#FFA500', '#FF6347', '#FF69B4', '#00CED1'],
+      })
+
+      // Show success dialog
+      setIsPrankDialogOpen(true)
+
+      // Reload user profile to show updated status
+      setTimeout(() => {
+        loadUserProfile()
+      }, 500)
+    } catch (error) {
+      console.error('Error upgrading account:', error)
+      toast.error('Gagal upgrade akun. Silakan coba lagi.')
+    } finally {
+      setIsUpgrading(false)
+    }
+  }
+
+  const handlePrankDialogClose = () => {
+    setIsPrankDialogOpen(false)
+    // Refresh the page to show the new badge
+    router.refresh()
+  }
+
   const totalBalance = wallets.reduce((sum, wallet) => sum + parseFloat(wallet.balance.toString()), 0)
 
   return (
@@ -395,6 +444,72 @@ export default function SettingsPage() {
                   </p>
                 </div>
               </div>
+            </div>
+
+            {/* Subscription Status & Upgrade (Prank Easter Egg) */}
+            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-6">
+              <h2 className="text-lg font-normal text-foreground mb-4">
+                Status Langganan
+              </h2>
+
+              {userProfile?.account_status === 'active' && userProfile?.trial_ends_at === null ? (
+                // Show Premium Badge for premium users
+                <div className="flex items-center justify-center p-6 rounded-xl bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border-2 border-amber-500/30">
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <Crown className="h-6 w-6 text-amber-500" />
+                      <h3 className="text-xl font-semibold text-foreground">Premium Lifetime Member</h3>
+                      <Crown className="h-6 w-6 text-amber-500" />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Selamat! Akun Anda sudah Premium tanpa batas waktu
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                // Show Upgrade Button for trial users (The Prank!)
+                <div className="space-y-4">
+                  <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                    <div className="flex items-start gap-2 mb-3">
+                      <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground mb-1">
+                          Akun Trial - Upgrade Sekarang!
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {userProfile?.trial_ends_at
+                            ? `Trial berakhir: ${new Date(userProfile.trial_ends_at).toLocaleDateString('id-ID')}`
+                            : 'Status: Trial Active'
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={handleUpgradePrank}
+                    disabled={isUpgrading}
+                    variant="destructive"
+                    className="w-full h-14 text-base font-semibold gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                  >
+                    {isUpgrading ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        Memproses...
+                      </>
+                    ) : (
+                      <>
+                        <Crown className="h-5 w-5" />
+                        Upgrade ke Premium (Rp 15.000/bln)
+                      </>
+                    )}
+                  </Button>
+
+                  <p className="text-xs text-center text-muted-foreground">
+                    Dapatkan akses unlimited dan fitur premium lainnya
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Wallet Management Section */}
@@ -994,6 +1109,46 @@ export default function SettingsPage() {
                   Reset Semua Data
                 </>
               )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Prank Upgrade Success Dialog (Easter Egg) */}
+      <AlertDialog open={isPrankDialogOpen} onOpenChange={setIsPrankDialogOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-center text-2xl flex items-center justify-center gap-2">
+              Yailah santai Bro/Sis! 🤣
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center pt-4">
+              <div className="space-y-4">
+                <div className="text-6xl animate-bounce">
+                  👑
+                </div>
+                <p className="text-base text-foreground font-medium">
+                  Udah di upgrade jadi <span className="text-amber-500 font-bold">PREMIUM GRATIS</span> kok!
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Anggep aja fasilitas &quot;Orang Dalem&quot;, hehe 😄
+                </p>
+                <div className="p-4 rounded-lg bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border-2 border-amber-500/30">
+                  <p className="text-sm font-medium text-foreground">
+                    ✨ Sekarang akun kamu sudah Premium Lifetime!
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Unlimited access, tanpa batas waktu
+                  </p>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-center">
+            <AlertDialogAction
+              onClick={handlePrankDialogClose}
+              className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-semibold"
+            >
+              Wih, Makasih Admin! 🙏
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
