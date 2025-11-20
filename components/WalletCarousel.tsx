@@ -94,11 +94,11 @@ export function WalletCarousel({
   if (isLoading) {
     return (
       <div className="space-y-3">
-        <div className="h-10 w-32 bg-muted/20 rounded-xl animate-pulse" />
+        <div className="h-10 w-32 bg-muted rounded-xl animate-pulse" />
         <div className="w-full overflow-x-auto pb-3 scrollbar-hide">
           <div className="flex gap-4 px-1">
             {[1, 2].map((i) => (
-              <div key={i} className="w-80 flex-shrink-0 h-40 bg-muted/20 rounded-3xl animate-pulse" />
+              <div key={i} className="w-80 flex-shrink-0 h-40 bg-muted rounded-3xl animate-pulse" />
             ))}
           </div>
         </div>
