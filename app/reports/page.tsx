@@ -11,7 +11,7 @@ import type { Transaction } from '@/types'
 import { format, startOfMonth, endOfMonth } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@/components/ui/chart'
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell, Legend, Line, LineChart, ResponsiveContainer } from 'recharts'
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell, Legend, Line, LineChart, Area, AreaChart, Label, ResponsiveContainer } from 'recharts'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function ReportsPage() {
@@ -181,45 +181,50 @@ export default function ReportsPage() {
     lainnya: '📦',
   }
 
-  // Chart colors - actual HSL values from CSS variables
-  // Light mode colors from globals.css
+  // Modern chart colors - optimized for dark mode (9 unique colors)
   const chartColors = {
-    1: 'hsl(12 76% 61%)',   // --chart-1
-    2: 'hsl(173 58% 39%)',  // --chart-2
-    3: 'hsl(197 37% 24%)',  // --chart-3
-    4: 'hsl(43 74% 66%)',   // --chart-4
-    5: 'hsl(27 87% 67%)',   // --chart-5
+    1: 'hsl(217 91% 60%)',   // Blue - #3b82f6
+    2: 'hsl(270 95% 60%)',   // Violet - #8b5cf6
+    3: 'hsl(45 93% 47%)',    // Amber - #f59e0b
+    4: 'hsl(330 81% 60%)',   // Pink - #ec4899
+    5: 'hsl(175 80% 40%)',   // Teal - #14b8a6
+    6: 'hsl(189 94% 43%)',   // Cyan - #06b6d4
+    7: 'hsl(24 94% 53%)',    // Orange - #f97316
+    8: 'hsl(84 81% 44%)',    // Lime - #84cc16
+    9: 'hsl(243 75% 59%)',   // Indigo - #6366f1
   }
 
-  // Category color mapping (Shadcn pattern)
+  // Income & Expense colors (separate from category colors)
+  const incomeColor = 'hsl(150 80% 40%)'   // Emerald - #10b981
+  const expenseColor = 'hsl(350 80% 60%)'  // Rose - #f43f5e
+
+  // Category color mapping - each category has unique color
   const categoryColors: Record<string, string> = {
-    makanan: chartColors[1],
-    minuman: chartColors[2],
-    transport: chartColors[3],
-    belanja: chartColors[4],
-    hiburan: chartColors[5],
-    kesehatan: chartColors[1],
-    pendidikan: chartColors[2],
-    tagihan: chartColors[3],
-    lainnya: chartColors[4],
+    makanan: chartColors[1],      // Blue
+    minuman: chartColors[6],      // Cyan (water-like)
+    transport: chartColors[2],    // Violet
+    belanja: chartColors[4],      // Pink
+    hiburan: chartColors[7],      // Orange (fun)
+    kesehatan: chartColors[5],    // Teal (medical)
+    pendidikan: chartColors[9],   // Indigo
+    tagihan: chartColors[3],      // Amber (warning)
+    lainnya: chartColors[8],      // Lime
   }
 
-  // Prepare data for bar chart - Income vs Expense Overview
-  const incomeVsExpenseData = [
+  // Prepare data for bar chart - Monthly Income vs Expense (Grouped)
+  const prevMonth = new Date(selectedMonth)
+  prevMonth.setMonth(prevMonth.getMonth() - 1)
+
+  const monthlyComparisonData = [
     {
-      name: 'Pemasukan',
-      amount: totalIncome,
-      fill: 'hsl(142 76% 36%)', // green
+      month: format(prevMonth, 'MMM yyyy', { locale: idLocale }),
+      pemasukan: previousTotalIncome,
+      pengeluaran: previousTotalSpent,
     },
     {
-      name: 'Pengeluaran',
-      amount: totalSpent,
-      fill: 'hsl(0 84% 60%)', // red
-    },
-    {
-      name: 'Sisa Uang',
-      amount: Math.abs(netBalance),
-      fill: netBalance >= 0 ? 'hsl(221 83% 53%)' : 'hsl(25 95% 53%)', // blue if positive, orange if negative
+      month: format(selectedMonth, 'MMM yyyy', { locale: idLocale }),
+      pemasukan: totalIncome,
+      pengeluaran: totalSpent,
     },
   ]
 
@@ -367,19 +372,15 @@ export default function ReportsPage() {
 
   // Chart configurations using Shadcn pattern
 
-  // Income vs Expense Chart Config
-  const incomeVsExpenseConfig = {
+  // Monthly Comparison Chart Config (Income vs Expense Grouped)
+  const monthlyComparisonConfig = {
     pemasukan: {
       label: 'Pemasukan',
-      color: 'hsl(142 76% 36%)',
+      color: incomeColor, // Emerald
     },
     pengeluaran: {
       label: 'Pengeluaran',
-      color: 'hsl(0 84% 60%)',
-    },
-    sisa_uang: {
-      label: 'Sisa Uang',
-      color: netBalance >= 0 ? 'hsl(221 83% 53%)' : 'hsl(25 95% 53%)',
+      color: expenseColor, // Rose
     },
   } satisfies ChartConfig;
 
@@ -407,7 +408,7 @@ export default function ReportsPage() {
   const lineChartConfig = {
     amount: {
       label: 'Pengeluaran',
-      color: chartColors[1],
+      color: expenseColor, // Rose for consistency
     },
   } satisfies ChartConfig;
 
@@ -707,7 +708,7 @@ export default function ReportsPage() {
 
             {/* Tab 2: Charts - All Visualizations */}
             <TabsContent value="charts" className="w-full space-y-3 md:space-y-4">
-              {/* Income vs Expense Overview Chart */}
+              {/* Monthly Comparison Chart - Grouped Bar (Income vs Expense) */}
               <div className="w-full bg-card border border-border rounded-xl shadow-sm">
                 {/* Header */}
                 <div className="p-4 md:p-6 border-b border-border w-full">
@@ -717,10 +718,10 @@ export default function ReportsPage() {
                     </div>
                     <div>
                       <h3 className="text-base md:text-lg font-semibold text-foreground">
-                        Ringkasan Keuangan Bulanan
+                        Ringkasan Bulanan
                       </h3>
                       <p className="text-xs md:text-sm text-muted-foreground">
-                        Perbandingan pemasukan, pengeluaran, dan sisa uang
+                        Perbandingan pemasukan vs pengeluaran per bulan
                       </p>
                     </div>
                   </div>
@@ -729,12 +730,12 @@ export default function ReportsPage() {
                 {/* Content - Chart */}
                 <div className="p-4 md:p-6 w-full">
                   <div className="w-full h-[250px] md:h-[350px]">
-                    <ChartContainer config={incomeVsExpenseConfig} className="h-full w-full aspect-auto min-w-[100%]">
+                    <ChartContainer config={monthlyComparisonConfig} className="h-full w-full aspect-auto min-w-[100%]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={incomeVsExpenseData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                        <BarChart data={monthlyComparisonData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                           <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
                           <XAxis
-                            dataKey="name"
+                            dataKey="month"
                             height={30}
                             tickMargin={10}
                             className="text-xs"
@@ -748,20 +749,25 @@ export default function ReportsPage() {
                             }).format(value)} />
                           <ChartTooltip
                             content={<ChartTooltipContent
-                              labelFormatter={(value: any) => value}
                               formatter={(value: any, name: any) => [
                                 new Intl.NumberFormat('id-ID', {
                                   style: 'currency',
                                   currency: 'IDR',
                                   minimumFractionDigits: 0,
                                 }).format(value as number),
-                                'Total'
+                                name === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran'
                               ]} />} />
-                          <Bar dataKey="amount" radius={[8, 8, 0, 0]}>
-                            {incomeVsExpenseData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.fill} />
-                            ))}
-                          </Bar>
+                          <ChartLegend content={<ChartLegendContent />} />
+                          <Bar
+                            dataKey="pemasukan"
+                            fill={incomeColor}
+                            radius={[8, 8, 0, 0]}
+                          />
+                          <Bar
+                            dataKey="pengeluaran"
+                            fill={expenseColor}
+                            radius={[8, 8, 0, 0]}
+                          />
                         </BarChart>
                       </ResponsiveContainer>
                     </ChartContainer>
@@ -772,14 +778,14 @@ export default function ReportsPage() {
                     <Wallet className="h-4 w-4" />
                     <span>
                       {netBalance >= 0
-                        ? `Surplus ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(netBalance)} - Keuangan sehat!`
-                        : `Defisit ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(Math.abs(netBalance))} - Kurangi pengeluaran!`}
+                        ? `Bulan ini surplus ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(netBalance)} - Keuangan sehat!`
+                        : `Bulan ini defisit ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(Math.abs(netBalance))} - Kurangi pengeluaran!`}
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Bar Chart - Top Categories */}
+              {/* Bar Chart - Top Categories (Horizontal) */}
               <div className="w-full bg-card border border-border rounded-xl shadow-sm">
                 {/* Header */}
                 <div className="p-4 md:p-6 border-b border-border w-full">
@@ -803,21 +809,26 @@ export default function ReportsPage() {
                   <div className="w-full h-[250px] md:h-[350px]">
                     <ChartContainer config={barChartConfig} className="h-full w-full aspect-auto min-w-[100%]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={barChartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
+                        <BarChart
+                          data={barChartData}
+                          layout="vertical"
+                          margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
                           <XAxis
-                            dataKey="category"
-                            height={30}
-                            tickMargin={10}
-                            className="text-xs"
-                            tick={{ fill: 'hsl(var(--muted-foreground))' }} />
-                          <YAxis
+                            type="number"
                             className="text-xs"
                             tick={{ fill: 'hsl(var(--muted-foreground))' }}
                             tickFormatter={(value) => new Intl.NumberFormat('id-ID', {
                               notation: 'compact',
                               compactDisplay: 'short',
                             }).format(value)} />
+                          <YAxis
+                            type="category"
+                            dataKey="category"
+                            width={100}
+                            className="text-xs"
+                            tick={{ fill: 'hsl(var(--muted-foreground))' }} />
                           <ChartTooltip
                             content={<ChartTooltipContent
                               labelFormatter={(value: any) => value}
@@ -829,7 +840,7 @@ export default function ReportsPage() {
                                 }).format(value as number),
                                 'Total'
                               ]} />} />
-                          <Bar dataKey="amount" radius={[8, 8, 0, 0]}>
+                          <Bar dataKey="amount" radius={[0, 8, 8, 0]}>
                             {barChartData.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={entry.fill} />
                             ))}
@@ -889,7 +900,8 @@ export default function ReportsPage() {
                             nameKey="name"
                             cx="50%"
                             cy="50%"
-                            outerRadius={80}
+                            innerRadius={60}
+                            outerRadius={100}
                             label={(props: any) => {
                               const entry = pieChartData.find(e => e.name === props.name);
                               return entry ? `${props.name} (${entry.percentage.toFixed(1)}%)` : props.name;
@@ -899,6 +911,38 @@ export default function ReportsPage() {
                             {pieChartData.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={entry.fill} />
                             ))}
+                            <Label
+                              content={({ viewBox }) => {
+                                if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                                  return (
+                                    <text
+                                      x={viewBox.cx}
+                                      y={viewBox.cy}
+                                      textAnchor="middle"
+                                      dominantBaseline="middle"
+                                    >
+                                      <tspan
+                                        x={viewBox.cx}
+                                        y={(viewBox.cy || 0) - 10}
+                                        className="fill-muted-foreground text-sm"
+                                      >
+                                        Total
+                                      </tspan>
+                                      <tspan
+                                        x={viewBox.cx}
+                                        y={(viewBox.cy || 0) + 15}
+                                        className="fill-foreground text-xl font-semibold"
+                                      >
+                                        {new Intl.NumberFormat('id-ID', {
+                                          notation: 'compact',
+                                          compactDisplay: 'short',
+                                        }).format(totalSpent)}
+                                      </tspan>
+                                    </text>
+                                  )
+                                }
+                              }}
+                            />
                           </Pie>
                         </PieChart>
                       </ResponsiveContainer>
@@ -937,7 +981,13 @@ export default function ReportsPage() {
                   <div className="w-full h-[250px] md:h-[350px]">
                     <ChartContainer config={lineChartConfig} className="h-full w-full aspect-auto min-w-[100%]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={lineChartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                        <AreaChart data={lineChartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor={expenseColor} stopOpacity={0.8}/>
+                              <stop offset="95%" stopColor={expenseColor} stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
                           <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
                           <XAxis
                             dataKey="date"
@@ -963,14 +1013,16 @@ export default function ReportsPage() {
                                 }).format(value as number),
                                 'Pengeluaran'
                               ]} />} />
-                          <Line
+                          <Area
                             type="monotone"
                             dataKey="amount"
-                            stroke={chartColors[1]}
+                            stroke={expenseColor}
                             strokeWidth={2}
-                            dot={{ fill: chartColors[1], r: 4 }}
+                            fill="url(#colorAmount)"
+                            fillOpacity={0.9}
+                            dot={{ fill: expenseColor, r: 4 }}
                             activeDot={{ r: 6 }} />
-                        </LineChart>
+                        </AreaChart>
                       </ResponsiveContainer>
                     </ChartContainer>
                   </div>
