@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import type { User, Transaction, Wallet } from '@/types'
+import type { User, Transaction, Wallet, Category } from '@/types'
 
 // ============================================
 // USER OPERATIONS
@@ -424,6 +424,131 @@ export async function getTotalBalance(userId: string): Promise<number> {
   }
 
   return data || 0
+}
+
+// ============================================
+// CATEGORY OPERATIONS
+// ============================================
+
+/**
+ * Get categories for a user (includes default categories + user's custom categories)
+ * @param userId - The user ID
+ * @param type - Optional filter by type ('income' or 'expense')
+ * @returns Array of categories
+ */
+export async function getCategories(
+  userId: string,
+  type?: 'income' | 'expense'
+): Promise<Category[]> {
+  const supabase = await createClient()
+
+  let query = supabase
+    .from('categories')
+    .select('*')
+    .or(`user_id.is.null,user_id.eq.${userId}`)
+    .order('user_id', { ascending: true, nullsFirst: true }) // Default categories first
+    .order('name', { ascending: true })
+
+  // Apply type filter if provided
+  if (type) {
+    query = query.eq('type', type)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    console.error('Error fetching categories:', error)
+    return []
+  }
+
+  return data || []
+}
+
+/**
+ * Create a new custom category for a user
+ * @param userId - The user ID
+ * @param name - Category name
+ * @param type - Category type ('income' or 'expense')
+ * @returns Created category or null if error
+ */
+export async function createCategory(
+  userId: string,
+  name: string,
+  type: 'income' | 'expense'
+): Promise<Category | null> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('categories')
+    .insert({
+      user_id: userId,
+      name: name.trim(),
+      type,
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error creating category:', error)
+    return null
+  }
+
+  return data
+}
+
+/**
+ * Update a custom category (only user's own categories can be updated)
+ * @param categoryId - The category ID
+ * @param name - New category name
+ * @returns Updated category or null if error
+ */
+export async function updateCategory(
+  categoryId: string,
+  name: string
+): Promise<Category | null> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('categories')
+    .update({ name: name.trim() })
+    .eq('id', categoryId)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error updating category:', error)
+    return null
+  }
+
+  return data
+}
+
+/**
+ * Delete a custom category (only user's own categories can be deleted)
+ * @param userId - The user ID (for security verification)
+ * @param categoryId - The category ID to delete
+ * @returns True if successful, false otherwise
+ */
+export async function deleteCategory(
+  userId: string,
+  categoryId: string
+): Promise<boolean> {
+  const supabase = await createClient()
+
+  // Delete with user verification for security
+  // RLS policy will ensure only user's own categories can be deleted (not default ones)
+  const { error } = await supabase
+    .from('categories')
+    .delete()
+    .eq('id', categoryId)
+    .eq('user_id', userId)
+
+  if (error) {
+    console.error('Error deleting category:', error)
+    return false
+  }
+
+  return true
 }
 
 // ============================================

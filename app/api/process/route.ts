@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { createClient } from '@/lib/supabase/server';
+import { getCategories } from '@/lib/db';
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
@@ -24,6 +26,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get authenticated user
+    const supabase = await createClient();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+
+    if (!authUser) {
+      return NextResponse.json(
+        { error: 'Unauthorized. Please login first.' },
+        { status: 401 }
+      );
+    }
+
+    // Fetch dynamic categories from database
+    const expenseCategories = await getCategories(authUser.id, 'expense');
+    const incomeCategories = await getCategories(authUser.id, 'income');
+
+    // Build category lists for prompt
+    const expenseCategoryList = expenseCategories.map(c => c.name).join(', ');
+    const incomeCategoryList = incomeCategories.map(c => c.name).join(', ');
+
     // Panggil Gemini API untuk ekstraksi JSON
     // Menggunakan Gemini 2.5 Flash Lite (model terbaru yang tersedia)
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
@@ -32,6 +53,8 @@ export async function POST(request: NextRequest) {
     const today = new Date().toISOString().split('T')[0];
 
     console.log('Processing text:', text);
+    console.log('Expense categories:', expenseCategoryList);
+    console.log('Income categories:', incomeCategoryList);
 
     const prompt = `
 Kamu adalah asisten AI yang mengekstrak data keuangan dari teks bahasa Indonesia.
@@ -69,51 +92,19 @@ B. INCOME (Pemasukan) - jika mengandung kata:
    - "komisi", "hadiah", "untung", "profit", "dividen"
    Set: "type": "income"
 
+KATEGORI YANG TERSEDIA:
+
 KATEGORI PEMASUKAN (untuk type: "income"):
-1. "Gaji" - untuk gaji bulanan, gaji pokok, take home pay
-   Contoh: gaji bulanan, gaji bulan ini, THR, slip gaji
+${incomeCategories.map((cat, idx) => `${idx + 1}. "${cat.name}"`).join('\n')}
 
-2. "Bonus" - untuk bonus tahunan, bonus kinerja, insentif
-   Contoh: bonus tahunan, bonus kinerja, insentif sales, komisi
-
-3. "Investasi" - untuk hasil investasi, dividen, bunga, profit trading
-   Contoh: dividen saham, bunga deposito, profit forex, hasil reksadana
-
-4. "Hadiah" - untuk hadiah, doorprize, undian, transfer dari teman/keluarga
-   Contoh: hadiah ulang tahun, transfer dari orangtua, angpao
-
-5. "Penjualan" - untuk hasil jual barang, freelance, jasa
-   Contoh: jual laptop, freelance design, jasa konsultasi, jualan online
-
-6. "Lainnya" - untuk pemasukan yang tidak masuk kategori di atas
-   Contoh: cashback, refund, pengembalian dana
+Pilih salah satu kategori pemasukan di atas yang paling sesuai dengan transaksi.
+Jika tidak ada yang sesuai dan ada kategori "Lainnya", pilih "Lainnya".
 
 KATEGORI PENGELUARAN (untuk type: "expense"):
-1. "Makanan" - untuk makanan, minuman, kopi, snack, makan siang, sarapan, makan malam
-   Contoh: kopi, nasi goreng, burger, pizza, teh, jus, cemilan, makan siang
+${expenseCategories.map((cat, idx) => `${idx + 1}. "${cat.name}"`).join('\n')}
 
-2. "Transportasi" - untuk bensin, parkir, tol, ojek online, taksi, grab, gojek, KRL, bus
-   Contoh: bensin, parkir, tol, grab, gojek, ojol, tiket kereta, isi bensin
-
-3. "Belanja" - untuk pakaian, baju, sepatu, aksesoris, gadget, elektronik, alat tulis
-   Contoh: baju, celana, sepatu, tas, charger, headphone, mouse, pulpen
-
-4. "Hiburan" - untuk bioskop, game, konser, streaming, spotify, netflix, youtube premium
-   Contoh: tiket bioskop, langganan spotify, netflix, game, topup mobile legends
-
-5. "Kesehatan" - untuk obat, dokter, rumah sakit, vitamin, masker, hand sanitizer
-   Contoh: paracetamol, vitamin C, periksa dokter, rapid test, masker
-
-6. "Tagihan" - untuk listrik, air, internet, wifi, pulsa, token listrik, BPJS
-   Contoh: bayar listrik, token PLN, wifi, pulsa, paket data, BPJS
-
-7. "Pendidikan" - untuk buku, kursus, les, seminar, workshop, udemy, coursera
-   Contoh: beli buku, kursus online, les privat, workshop
-
-8. "Olahraga" - untuk gym, fitness, sepeda, yoga, membership gym, jersey
-   Contoh: membership gym, sepatu lari, yoga class, jersey
-
-9. "Lainnya" - untuk yang tidak masuk kategori di atas
+Pilih salah satu kategori pengeluaran di atas yang paling sesuai dengan transaksi.
+Jika tidak ada yang sesuai dan ada kategori "Lainnya", pilih "Lainnya"
 
 DETEKSI WALLET/DOMPET (Opsional):
 - Jika user menyebut nama bank/e-wallet, ekstrak sebagai "wallet_name"
