@@ -535,18 +535,23 @@ export default function HomePage() {
             <RecordButton
               onTranscript={handleTranscript}
               onStatusChange={handleStatusChange}
+              isLoading={isLoadingWallets}
             />
 
             {/* Manual Transaction Button */}
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => setIsManualTransactionOpen(true)}
-              className="gap-2 border-2 border-dashed hover:border-solid hover:bg-primary/10"
-            >
-              <PlusCircle className="h-5 w-5" />
-              Input Manual
-            </Button>
+            {isLoadingWallets ? (
+              <div className="w-40 h-11 rounded-lg bg-muted animate-pulse" />
+            ) : (
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => setIsManualTransactionOpen(true)}
+                className="gap-2 border-2 border-dashed hover:border-solid hover:bg-primary/10"
+              >
+                <PlusCircle className="h-5 w-5" />
+                Input Manual
+              </Button>
+            )}
 
             {/* Status Card */}
             <div className="w-full max-w-md space-y-3">
@@ -561,14 +566,18 @@ export default function HomePage() {
             </div>
 
             {/* Instruction */}
-            <div className="text-center space-y-2">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border border-border/50">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                <p className="text-xs font-medium text-muted-foreground">
-                  Tekan tombol dan ucapkan pemasukan atau pengeluaran Anda
-                </p>
+            {isLoadingWallets ? (
+              <div className="w-72 h-9 rounded-full bg-muted/50 animate-pulse" />
+            ) : (
+              <div className="text-center space-y-2">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border border-border/50">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <p className="text-xs font-medium text-muted-foreground">
+                    Tekan tombol dan ucapkan pemasukan atau pengeluaran Anda
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Recent Transactions */}

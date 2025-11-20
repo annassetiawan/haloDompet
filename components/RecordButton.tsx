@@ -12,12 +12,14 @@ interface RecordButtonProps {
   onTranscript: (text: string) => void
   onError?: (error: string) => void
   onStatusChange?: (status: string) => void
+  isLoading?: boolean
 }
 
 export function RecordButton({
   onTranscript,
   onError,
-  onStatusChange
+  onStatusChange,
+  isLoading = false
 }: RecordButtonProps) {
   const [isClient, setIsClient] = useState(false)
   const [recorderType, setRecorderType] = useState<'webspeech' | 'ios' | 'mediarecorder' | 'webaudio'>('mediarecorder')
@@ -80,6 +82,18 @@ export function RecordButton({
     if (hiddenButton) {
       hiddenButton.click()
     }
+  }
+
+  // Show skeleton while loading
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center gap-4">
+        {/* Skeleton Circle - Same size as AnimatedRecordButton large (160px) */}
+        <div className="w-40 h-40 rounded-full bg-muted animate-pulse" />
+        {/* Skeleton Text - Label placeholder */}
+        <div className="w-32 h-5 rounded bg-muted animate-pulse" />
+      </div>
+    )
   }
 
   // Don't render anything on server
