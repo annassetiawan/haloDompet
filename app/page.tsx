@@ -50,6 +50,7 @@ export default function HomePage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [wallets, setWallets] = useState<Wallet[]>([])
   const [totalBalance, setTotalBalance] = useState<number>(0)
+  const [growthPercentage, setGrowthPercentage] = useState<number>(0)
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>(
     [],
   )
@@ -133,6 +134,7 @@ export default function HomePage() {
       if (response.ok) {
         setWallets(data.wallets)
         setTotalBalance(data.totalBalance)
+        setGrowthPercentage(data.growthPercentage || 0)
       }
     } catch (error) {
       console.error('Error loading wallets:', error)
@@ -492,6 +494,7 @@ export default function HomePage() {
           <WalletCarousel
             wallets={wallets}
             totalBalance={totalBalance}
+            growthPercentage={growthPercentage}
             isLoading={isLoadingWallets}
             onAddWallet={handleAddWallet}
             onEditWallet={handleEditWallet}

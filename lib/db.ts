@@ -594,3 +594,73 @@ export async function getTransactionStats(
     categorySummary,
   }
 }
+
+/**
+ * Get asset growth percentage for current month
+ * Calculates: ((currentBalance - startOfMonthBalance) / startOfMonthBalance) * 100
+ * @param userId - The user ID
+ * @returns Growth percentage (positive or negative)
+ */
+export async function getAssetGrowth(userId: string): Promise<number> {
+  const supabase = await createClient()
+
+  try {
+    // Step 1: Get total current balance from wallets
+    const totalCurrentBalance = await getTotalBalance(userId)
+
+    // Step 2: Calculate net flow for current month (Income - Expense)
+    const now = new Date()
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const startOfMonthStr = startOfMonth.toISOString().split('T')[0]
+
+    const { data: transactions, error } = await supabase
+      .from('transactions')
+      .select('type, amount')
+      .eq('user_id', userId)
+      .gte('date', startOfMonthStr)
+
+    if (error) {
+      console.error('Error fetching transactions for asset growth:', error)
+      return 0
+    }
+
+    // Calculate net flow (income - expense)
+    let netFlow = 0
+    if (transactions && transactions.length > 0) {
+      netFlow = transactions.reduce((sum: number, t: { type: string; amount: number | string }) => {
+        const amount = parseFloat(t.amount.toString())
+        if (t.type === 'income') {
+          return sum + amount
+        } else if (t.type === 'expense') {
+          return sum - amount
+        }
+        return sum
+      }, 0)
+    }
+
+    // Step 3: Calculate start of month balance
+    const startOfMonthBalance = totalCurrentBalance - netFlow
+
+    // Step 4: Calculate growth percentage
+    // Handle edge cases
+    if (startOfMonthBalance <= 0) {
+      // User was at zero or negative balance at start of month
+      if (totalCurrentBalance > 0) {
+        // Now positive, return 100% growth
+        return 100
+      }
+      // Still zero or negative, return 0
+      return 0
+    }
+
+    // Normal calculation
+    const growthPercentage =
+      ((totalCurrentBalance - startOfMonthBalance) / startOfMonthBalance) * 100
+
+    // Round to 1 decimal place
+    return Math.round(growthPercentage * 10) / 10
+  } catch (error) {
+    console.error('Error calculating asset growth:', error)
+    return 0
+  }
+}
