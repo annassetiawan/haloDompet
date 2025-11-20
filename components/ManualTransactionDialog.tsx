@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { WalletSelector } from '@/components/WalletSelector'
 import { ArrowDownCircle, ArrowUpCircle, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import type { Wallet } from '@/types'
+import type { Wallet, Category } from '@/types'
 
 interface ManualTransactionDialogProps {
   open: boolean
@@ -18,29 +18,6 @@ interface ManualTransactionDialogProps {
   wallets: Wallet[]
   isLoadingWallets?: boolean
 }
-
-// Common Indonesian expense categories
-const EXPENSE_CATEGORIES = [
-  'Makanan',
-  'Minuman',
-  'Transport',
-  'Belanja',
-  'Hiburan',
-  'Kesehatan',
-  'Pendidikan',
-  'Tagihan',
-  'Lainnya'
-]
-
-// Common Indonesian income categories
-const INCOME_CATEGORIES = [
-  'Gaji',
-  'Bonus',
-  'Investasi',
-  'Hadiah',
-  'Penjualan',
-  'Lainnya'
-]
 
 export function ManualTransactionDialog({
   open,
@@ -58,14 +35,47 @@ export function ManualTransactionDialog({
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Set default category when type changes
+  // Categories state
+  const [categories, setCategories] = useState<Category[]>([])
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true)
+
+  // Load categories from API
   useEffect(() => {
-    if (type === 'expense') {
-      setCategory(EXPENSE_CATEGORIES[0])
-    } else {
-      setCategory(INCOME_CATEGORIES[0])
+    const loadCategories = async () => {
+      try {
+        setIsLoadingCategories(true)
+        const response = await fetch('/api/categories')
+        const data = await response.json()
+
+        if (response.ok && data.data) {
+          setCategories(data.data)
+        }
+      } catch (error) {
+        console.error('Error loading categories:', error)
+        toast.error('Gagal memuat kategori')
+      } finally {
+        setIsLoadingCategories(false)
+      }
     }
-  }, [type])
+
+    loadCategories()
+  }, [])
+
+  // Set default category when type changes or categories load
+  useEffect(() => {
+    if (categories.length === 0) return
+
+    const filteredCategories = categories.filter(c => c.type === type)
+    if (filteredCategories.length > 0 && !category) {
+      setCategory(filteredCategories[0].name)
+    } else if (filteredCategories.length > 0) {
+      // Check if current category is valid for selected type
+      const isValidCategory = filteredCategories.some(c => c.name === category)
+      if (!isValidCategory) {
+        setCategory(filteredCategories[0].name)
+      }
+    }
+  }, [type, categories])
 
   // Set default wallet when wallets load
   useEffect(() => {
@@ -81,11 +91,15 @@ export function ManualTransactionDialog({
       setType('expense')
       setItem('')
       setAmount('')
-      setCategory(EXPENSE_CATEGORIES[0])
       setDate(new Date().toISOString().split('T')[0])
       setIsSubmitting(false)
+      // Reset category to first expense category
+      const expenseCategories = categories.filter(c => c.type === 'expense')
+      if (expenseCategories.length > 0) {
+        setCategory(expenseCategories[0].name)
+      }
     }
-  }, [open])
+  }, [open, categories])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -151,7 +165,7 @@ export function ManualTransactionDialog({
     }
   }
 
-  const categories = type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES
+  const filteredCategories = categories.filter(c => c.type === type)
   const walletLabel = type === 'expense' ? 'Bayar pakai apa?' : 'Masuk ke mana?'
 
   return (
@@ -230,24 +244,36 @@ export function ManualTransactionDialog({
           {/* Category */}
           <div className="space-y-2">
             <Label htmlFor="category">Kategori</Label>
-            <div className="grid grid-cols-3 gap-2">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setCategory(cat)}
-                  className={`px-3 py-2 text-sm rounded-lg border transition-all ${
-                    category === cat
-                      ? type === 'expense'
-                        ? 'border-red-500 bg-red-500/10 text-red-700 dark:text-red-400'
-                        : 'border-green-500 bg-green-500/10 text-green-700 dark:text-green-400'
-                      : 'border-muted bg-background hover:bg-accent'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
+            {isLoadingCategories ? (
+              <div className="grid grid-cols-3 gap-2">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="h-10 bg-muted/20 rounded-lg animate-pulse" />
+                ))}
+              </div>
+            ) : filteredCategories.length === 0 ? (
+              <div className="text-center py-4 text-sm text-muted-foreground border border-dashed rounded-lg">
+                Belum ada kategori. Tambahkan di Settings.
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-2">
+                {filteredCategories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setCategory(cat.name)}
+                    className={`px-3 py-2 text-sm rounded-lg border transition-all ${
+                      category === cat.name
+                        ? type === 'expense'
+                          ? 'border-red-500 bg-red-500/10 text-red-700 dark:text-red-400'
+                          : 'border-green-500 bg-green-500/10 text-green-700 dark:text-green-400'
+                        : 'border-muted bg-background hover:bg-accent'
+                    }`}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Date */}

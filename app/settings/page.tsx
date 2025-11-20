@@ -18,17 +18,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { ArrowLeft, Save, Loader2, Wallet, Plus, Edit, Trash2, AlertCircle, AlertTriangle, LogOut } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, Wallet, Plus, Edit, Trash2, AlertCircle, AlertTriangle, LogOut, Tag } from 'lucide-react'
 import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
-import type { User as UserProfile, Wallet as WalletType } from '@/types'
+import type { User as UserProfile, Wallet as WalletType, Category } from '@/types'
 
 export default function SettingsPage() {
   const [user, setUser] = useState<User | null>(null)
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [wallets, setWallets] = useState<WalletType[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingWallets, setIsLoadingWallets] = useState(true)
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
 
   // Form state
@@ -42,6 +44,15 @@ export default function SettingsPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [walletToDelete, setWalletToDelete] = useState<WalletType | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Category management state
+  const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
+  const [newCategoryType, setNewCategoryType] = useState<'income' | 'expense'>('expense')
+  const [isAddingCategory, setIsAddingCategory] = useState(false)
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null)
+  const [isDeleteCategoryDialogOpen, setIsDeleteCategoryDialogOpen] = useState(false)
+  const [isDeletingCategory, setIsDeletingCategory] = useState(false)
 
   // Reset data state
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false)
@@ -63,6 +74,7 @@ export default function SettingsPage() {
       setUser(user)
       loadUserProfile()
       loadWallets()
+      loadCategories()
     }
   }
 
@@ -97,6 +109,22 @@ export default function SettingsPage() {
       console.error('Error loading wallets:', error)
     } finally {
       setIsLoadingWallets(false)
+    }
+  }
+
+  const loadCategories = async () => {
+    try {
+      setIsLoadingCategories(true)
+      const response = await fetch('/api/categories')
+      const data = await response.json()
+
+      if (response.ok) {
+        setCategories(data.data || [])
+      }
+    } catch (error) {
+      console.error('Error loading categories:', error)
+    } finally {
+      setIsLoadingCategories(false)
     }
   }
 
@@ -176,6 +204,86 @@ export default function SettingsPage() {
 
   const handleWalletSuccess = () => {
     loadWallets() // Reload wallets after add/edit
+  }
+
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) {
+      toast.error('Nama kategori harus diisi')
+      return
+    }
+
+    try {
+      setIsAddingCategory(true)
+
+      const response = await fetch('/api/categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: newCategoryName.trim(),
+          type: newCategoryType,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create category')
+      }
+
+      toast.success(data.message || 'Kategori berhasil dibuat!')
+      loadCategories()
+      setIsAddCategoryOpen(false)
+      setNewCategoryName('')
+      setNewCategoryType('expense')
+    } catch (error) {
+      console.error('Error creating category:', error)
+      toast.error(error instanceof Error ? error.message : 'Gagal membuat kategori')
+    } finally {
+      setIsAddingCategory(false)
+    }
+  }
+
+  const handleDeleteCategory = (category: Category) => {
+    if (!category.user_id) {
+      toast.error('Kategori default tidak bisa dihapus')
+      return
+    }
+    setCategoryToDelete(category)
+    setIsDeleteCategoryDialogOpen(true)
+  }
+
+  const confirmDeleteCategory = async () => {
+    if (!categoryToDelete) return
+
+    try {
+      setIsDeletingCategory(true)
+
+      const response = await fetch('/api/categories', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: categoryToDelete.id }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete category')
+      }
+
+      toast.success(`Kategori "${categoryToDelete.name}" berhasil dihapus`)
+      loadCategories()
+      setIsDeleteCategoryDialogOpen(false)
+      setCategoryToDelete(null)
+    } catch (error) {
+      console.error('Error deleting category:', error)
+      toast.error(error instanceof Error ? error.message : 'Gagal menghapus kategori')
+    } finally {
+      setIsDeletingCategory(false)
+    }
   }
 
   const handleResetData = () => {
@@ -421,6 +529,112 @@ export default function SettingsPage() {
               )}
             </div>
 
+            {/* Category Management Section */}
+            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Tag className="h-5 w-5 text-primary" />
+                  <h2 className="text-lg font-normal text-foreground">
+                    Kelola Kategori
+                  </h2>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => setIsAddCategoryOpen(true)}
+                  className="gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Tambah Kategori
+                </Button>
+              </div>
+
+              {isLoadingCategories ? (
+                <div className="space-y-2">
+                  {[1, 2].map((i) => (
+                    <div key={i} className="h-12 bg-muted/20 rounded-lg animate-pulse" />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Expense Categories */}
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                      Pengeluaran
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {categories
+                        .filter(cat => cat.type === 'expense')
+                        .map((category) => (
+                          <div
+                            key={category.id}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-red-500/30 bg-red-500/5 hover:bg-red-500/10 transition-colors"
+                          >
+                            <span className="text-sm text-foreground">
+                              {category.name}
+                            </span>
+                            {!category.user_id ? (
+                              <span className="text-xs px-1.5 py-0.5 rounded bg-muted/50 text-muted-foreground">
+                                Default
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => handleDeleteCategory(category)}
+                                className="text-red-500 hover:text-red-700 dark:hover:text-red-400"
+                                title="Hapus kategori"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+
+                  {/* Income Categories */}
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                      Pemasukan
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {categories
+                        .filter(cat => cat.type === 'income')
+                        .map((category) => (
+                          <div
+                            key={category.id}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-green-500/30 bg-green-500/5 hover:bg-green-500/10 transition-colors"
+                          >
+                            <span className="text-sm text-foreground">
+                              {category.name}
+                            </span>
+                            {!category.user_id ? (
+                              <span className="text-xs px-1.5 py-0.5 rounded bg-muted/50 text-muted-foreground">
+                                Default
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => handleDeleteCategory(category)}
+                                className="text-red-500 hover:text-red-700 dark:hover:text-red-400"
+                                title="Hapus kategori"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Info about default categories */}
+              <div className="mt-4 flex items-start gap-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                <AlertCircle className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-muted-foreground">
+                  Kategori bertanda "Default" adalah kategori bawaan yang tidak bisa dihapus. Anda bisa menambahkan kategori custom sesuai kebutuhan.
+                </p>
+              </div>
+            </div>
+
             {/* Mode Settings */}
             <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-6">
               <h2 className="text-lg font-normal text-foreground mb-4">
@@ -599,6 +813,125 @@ export default function SettingsPage() {
                 </>
               ) : (
                 'Hapus'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Add Category Dialog */}
+      <AlertDialog open={isAddCategoryOpen} onOpenChange={setIsAddCategoryOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tambah Kategori Baru</AlertDialogTitle>
+            <AlertDialogDescription>
+              Buat kategori custom untuk mengorganisir transaksi Anda lebih baik.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4 py-4">
+            {/* Category Type */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Tipe Kategori
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant={newCategoryType === 'expense' ? 'default' : 'outline'}
+                  onClick={() => setNewCategoryType('expense')}
+                  className="h-auto p-3"
+                  disabled={isAddingCategory}
+                >
+                  <div className="text-left">
+                    <div className="font-medium text-sm">Pengeluaran</div>
+                    <div className="text-xs opacity-70">Expense</div>
+                  </div>
+                </Button>
+                <Button
+                  type="button"
+                  variant={newCategoryType === 'income' ? 'default' : 'outline'}
+                  onClick={() => setNewCategoryType('income')}
+                  className="h-auto p-3"
+                  disabled={isAddingCategory}
+                >
+                  <div className="text-left">
+                    <div className="font-medium text-sm">Pemasukan</div>
+                    <div className="text-xs opacity-70">Income</div>
+                  </div>
+                </Button>
+              </div>
+            </div>
+
+            {/* Category Name */}
+            <div className="space-y-2">
+              <label htmlFor="category-name" className="text-sm font-medium text-foreground">
+                Nama Kategori
+              </label>
+              <Input
+                id="category-name"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                placeholder={newCategoryType === 'expense' ? 'Contoh: Skincare, Pet Care' : 'Contoh: Freelance, Side Project'}
+                disabled={isAddingCategory}
+                autoComplete="off"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !isAddingCategory) {
+                    handleAddCategory()
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isAddingCategory}>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleAddCategory}
+              disabled={isAddingCategory || !newCategoryName.trim()}
+            >
+              {isAddingCategory ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Membuat...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Tambah
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Category Confirmation Dialog */}
+      <AlertDialog open={isDeleteCategoryDialogOpen} onOpenChange={setIsDeleteCategoryDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus Kategori?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Anda yakin ingin menghapus kategori <strong>{categoryToDelete?.name}</strong>?
+              <br /><br />
+              Transaksi yang sudah menggunakan kategori ini tidak akan terpengaruh, namun kategori ini tidak akan muncul lagi di pilihan kategori.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingCategory}>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteCategory}
+              disabled={isDeletingCategory}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              {isDeletingCategory ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Menghapus...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Hapus
+                </>
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

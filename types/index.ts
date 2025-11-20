@@ -25,6 +25,14 @@ export interface Wallet {
   updated_at: string
 }
 
+export interface Category {
+  id: string
+  user_id: string | null // NULL means global default category
+  name: string
+  type: 'income' | 'expense'
+  created_at: string
+}
+
 export interface Transaction {
   id: string
   user_id: string
