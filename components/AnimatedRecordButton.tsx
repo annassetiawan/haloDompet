@@ -131,18 +131,18 @@ export function AnimatedRecordButton({
 
         @keyframes animeBorder {
           0%, 100% {
-            border-color: rgba(239, 68, 68, 0.3);
+            border-color: rgba(239, 68, 68, 0.4);
             box-shadow:
-              inset -2px -2px 0 #5e5e5e,
-              inset 2px 2px 0 #1c1c1c,
-              0 0 20px rgba(239, 68, 68, 0.3);
+              inset -2px -2px 0 #6e6e6e,
+              inset 2px 2px 0 #0a0a0a,
+              0 0 20px rgba(239, 68, 68, 0.4);
           }
           50% {
-            border-color: rgba(239, 68, 68, 0.5);
+            border-color: rgba(239, 68, 68, 0.6);
             box-shadow:
-              inset -2px -2px 0 #5e5e5e,
-              inset 2px 2px 0 #1c1c1c,
-              0 0 30px rgba(239, 68, 68, 0.5);
+              inset -2px -2px 0 #7e7e7e,
+              inset 2px 2px 0 #0a0a0a,
+              0 0 35px rgba(239, 68, 68, 0.6);
           }
         }
 
@@ -169,8 +169,8 @@ export function AnimatedRecordButton({
             focus:outline-none
             border-4
             ${state === 'recording'
-              ? 'recording-active border-red-500/30 shadow-[inset_-2px_-2px_0_#cccccc,inset_2px_2px_0_#e6e6e6] dark:shadow-[inset_-2px_-2px_0_#5e5e5e,inset_2px_2px_0_#1c1c1c]'
-              : 'border-gray-200 dark:border-[#090909] shadow-[inset_2px_2px_5px_#d1d1d1,inset_-2px_-2px_5px_#ffffff] dark:shadow-[inset_2px_2px_0_#7d7c7e,inset_-2px_-2px_0px_#1c1c1c]'
+              ? 'recording-active border-red-500/40 shadow-[inset_-2px_-2px_0_#cccccc,inset_2px_2px_0_#e6e6e6] dark:shadow-[inset_-2px_-2px_0_#6e6e6e,inset_2px_2px_0_#0a0a0a]'
+              : 'border-gray-200 dark:border-[#333333] shadow-[inset_2px_2px_5px_#d1d1d1,inset_-2px_-2px_5px_#ffffff] dark:shadow-[inset_2px_2px_0_#0a0a0a,inset_-2px_-2px_0px_#333333]'
             }
             bg-[linear-gradient(145deg,#ffffff,#e6e6e6)]
             dark:bg-[linear-gradient(145deg,#171717,#444245)]
