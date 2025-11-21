@@ -36,7 +36,11 @@ export function MediaRecorderButton({
 
   // Check if MediaRecorder is supported
   const isMediaRecorderSupported = () => {
-    return typeof MediaRecorder !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.getUserMedia
+    if (typeof window === 'undefined') return false
+    return typeof MediaRecorder !== 'undefined' &&
+           typeof navigator !== 'undefined' &&
+           navigator.mediaDevices &&
+           navigator.mediaDevices.getUserMedia
   }
 
   // Detect best supported audio format for browser

@@ -16,7 +16,9 @@ export default function TrialExpiredPage() {
 
   const handleContactAdmin = () => {
     // You can update this with your actual contact method
-    window.open('mailto:support@halodompet.com?subject=Trial Extension Request', '_blank')
+    if (typeof window !== 'undefined') {
+      window.open('mailto:support@halodompet.com?subject=Trial Extension Request', '_blank')
+    }
   }
 
   return (
