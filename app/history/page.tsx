@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { TransactionCard } from '@/components/TransactionCard'
 import { TransactionListSkeleton } from '@/components/TransactionSkeleton'
+import { EditTransactionDialog } from '@/components/EditTransactionDialog'
 import { BottomNav } from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,17 +21,21 @@ import {
 } from '@/components/ui/alert-dialog'
 import { ArrowLeft, Search, Filter, Mic } from 'lucide-react'
 import { toast } from 'sonner'
-import type { Transaction } from '@/types'
+import type { Transaction, Wallet } from '@/types'
 import type { User } from '@supabase/supabase-js'
 
 export default function HistoryPage() {
   const [user, setUser] = useState<User | null>(null)
   const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [wallets, setWallets] = useState<Wallet[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingWallets, setIsLoadingWallets] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null)
+  const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -45,6 +50,7 @@ export default function HistoryPage() {
     } else {
       setUser(user)
       loadTransactions()
+      loadWallets()
     }
   }
 
@@ -64,6 +70,35 @@ export default function HistoryPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const loadWallets = async () => {
+    try {
+      setIsLoadingWallets(true)
+      const response = await fetch('/api/wallets')
+      const data = await response.json()
+
+      if (response.ok) {
+        setWallets(data.wallets || [])
+      } else {
+        console.error('Error loading wallets:', data.error)
+      }
+    } catch (error) {
+      console.error('Error loading wallets:', error)
+    } finally {
+      setIsLoadingWallets(false)
+    }
+  }
+
+  const handleEditSuccess = () => {
+    loadTransactions()
+    // Optionally reload wallets if wallet balance is shown
+    loadWallets()
+  }
+
+  const handleEditTransaction = (transaction: Transaction) => {
+    setTransactionToEdit(transaction)
+    setIsEditDialogOpen(true)
   }
 
   const handleDeleteTransaction = async () => {
@@ -237,7 +272,9 @@ export default function HistoryPage() {
                         // TODO: Open transaction detail modal
                         console.log('Transaction clicked:', transaction)
                       }}
+                      showEdit={true}
                       showDelete={true}
+                      onEdit={() => handleEditTransaction(transaction)}
                       onDelete={() => setTransactionToDelete(transaction)}
                     />
                   ))}
@@ -277,6 +314,16 @@ export default function HistoryPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Transaction Dialog */}
+      <EditTransactionDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        transaction={transactionToEdit}
+        wallets={wallets}
+        isLoadingWallets={isLoadingWallets}
+        onSuccess={handleEditSuccess}
+      />
 
       {/* Bottom Navigation - Mobile Only */}
       <BottomNav />
