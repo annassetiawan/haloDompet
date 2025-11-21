@@ -1,41 +1,42 @@
-import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "sonner";
-import "./globals.css";
+import type { Metadata, Viewport } from 'next'
+import { Geist, Geist_Mono } from 'next/font/google'
+import { Toaster } from 'sonner'
+import { SpeedInsights } from '@vercel/speed-insights/next'
+import './globals.css'
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+})
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+})
 
 export const metadata: Metadata = {
-  title: "HaloDompet - Voice-powered Expense Tracker",
-  description: "Catat keuangan secara otomatis dengan suara menggunakan AI",
-  manifest: "/manifest.json",
+  title: 'HaloDompet - Voice-powered Expense Tracker',
+  description: 'Catat keuangan secara otomatis dengan suara menggunakan AI',
+  manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
-    title: "HaloDompet",
+    statusBarStyle: 'black-translucent',
+    title: 'HaloDompet',
   },
-};
+}
 
 export const viewport: Viewport = {
-  themeColor: "#090909",
-  width: "device-width",
+  themeColor: '#090909',
+  width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-};
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -82,7 +83,8 @@ export default function RootLayout({
       >
         {children}
         <Toaster richColors position="top-center" />
+        <SpeedInsights />
       </body>
     </html>
-  );
+  )
 }

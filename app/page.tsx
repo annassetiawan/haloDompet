@@ -40,9 +40,7 @@ import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
 import type { User as UserProfile, Transaction, Wallet } from '@/types'
 import { isTrialExpired } from '@/lib/trial'
-import { SpeedInsights } from '@vercel/speed-insights/next'
 
-;<SpeedInsights />
 // Konstanta untuk status default agar konsisten
 const IDLE_STATUS = 'Coba: "Beli Kopi 25 ribu di Fore atau Dapat gaji 5 juta"'
 
