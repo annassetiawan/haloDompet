@@ -31,11 +31,19 @@ export function AnimatedRecordButton({
   audioLevel = 0,
 }: AnimatedRecordButtonProps) {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const sizes = sizeMap[size]
 
+  // Track client-side mounting
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   // Check for reduced motion preference
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
     setPrefersReducedMotion(mediaQuery.matches)
 
@@ -46,6 +54,7 @@ export function AnimatedRecordButton({
 
   // Trigger confetti on success
   useEffect(() => {
+    if (typeof window === 'undefined') return
     if (state === 'success' && !prefersReducedMotion && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect()
       const x = (rect.left + rect.width / 2) / window.innerWidth
@@ -63,8 +72,8 @@ export function AnimatedRecordButton({
   // Haptic feedback on tap (mobile)
   const handleClick = () => {
     if (!disabled) {
-      // Vibrate if supported
-      if (navigator.vibrate) {
+      // Vibrate if supported (only on client)
+      if (isMounted && typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate(50)
       }
       onClick()

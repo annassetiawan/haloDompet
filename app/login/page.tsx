@@ -13,6 +13,9 @@ export default function LoginPage() {
     try {
       setIsLoading(true);
 
+      // Ensure we're on the client before accessing window
+      if (typeof window === 'undefined') return;
+
       const redirectUrl = `${window.location.origin}/auth/callback`
       console.log('🔐 Starting Google OAuth login...')
       console.log('📍 Current origin:', window.location.origin)

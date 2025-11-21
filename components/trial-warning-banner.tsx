@@ -16,7 +16,9 @@ export function TrialWarningBanner({ profile }: TrialWarningBannerProps) {
   const daysLeft = getDaysLeft(profile.trial_ends_at)
 
   const handleContactAdmin = () => {
-    window.open('mailto:support@halodompet.com?subject=Trial Extension Request', '_blank')
+    if (typeof window !== 'undefined') {
+      window.open('mailto:support@halodompet.com?subject=Trial Extension Request', '_blank')
+    }
   }
 
   return (

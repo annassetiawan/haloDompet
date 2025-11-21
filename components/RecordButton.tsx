@@ -77,7 +77,9 @@ export function RecordButton({
   }
 
   const handleAnimatedButtonClick = () => {
-    // Trigger click on the hidden recorder component
+    // Trigger click on the hidden recorder component (client-side only)
+    if (typeof document === 'undefined') return
+
     const hiddenButton = document.querySelector('.hidden-recorder-button label') as HTMLElement
     if (hiddenButton) {
       hiddenButton.click()
