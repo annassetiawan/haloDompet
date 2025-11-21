@@ -1,17 +1,19 @@
 import { Transaction } from '@/types'
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
-import { Calendar, Tag, MessageSquare, Trash2, MapPin, Wallet } from 'lucide-react'
+import { Calendar, Tag, MessageSquare, Trash2, MapPin, Wallet, Pencil } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface TransactionCardProps {
   transaction: Transaction
   onClick?: () => void
   onDelete?: () => void
+  onEdit?: () => void
   showDelete?: boolean
+  showEdit?: boolean
 }
 
-export function TransactionCard({ transaction, onClick, onDelete, showDelete = false }: TransactionCardProps) {
+export function TransactionCard({ transaction, onClick, onDelete, onEdit, showDelete = false, showEdit = false }: TransactionCardProps) {
   const formattedDate = format(new Date(transaction.date), 'dd MMM yyyy', { locale: idLocale })
   const formattedAmount = new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -40,7 +42,7 @@ export function TransactionCard({ transaction, onClick, onDelete, showDelete = f
     <div className="relative group/card">
       <button
         onClick={onClick}
-        className={`w-full text-left p-4 rounded-xl bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all hover:shadow-md group ${showDelete ? 'pr-12' : ''}`}
+        className={`w-full text-left p-4 rounded-xl bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all hover:shadow-md group ${showDelete || showEdit ? 'pr-20' : ''}`}
       >
         <div className="flex items-start justify-between gap-3">
           {/* Left side - Icon & Details */}
@@ -106,20 +108,38 @@ export function TransactionCard({ transaction, onClick, onDelete, showDelete = f
         </div>
       </button>
 
-      {/* Delete Button */}
-      {showDelete && onDelete && (
-        <div className="absolute top-1/2 -translate-y-1/2 right-2 opacity-0 group-hover/card:opacity-100 transition-opacity">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation()
-              onDelete()
-            }}
-            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 bg-background/80 dark:bg-background/60 backdrop-blur-sm shadow-sm"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+      {/* Action Buttons */}
+      {(showEdit || showDelete) && (
+        <div className="absolute top-1/2 -translate-y-1/2 right-2 flex gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity">
+          {/* Edit Button */}
+          {showEdit && onEdit && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation()
+                onEdit()
+              }}
+              className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/10 bg-background/80 dark:bg-background/60 backdrop-blur-sm shadow-sm"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
+
+          {/* Delete Button */}
+          {showDelete && onDelete && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete()
+              }}
+              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 bg-background/80 dark:bg-background/60 backdrop-blur-sm shadow-sm"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       )}
     </div>

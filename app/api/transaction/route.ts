@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createTransaction, getTransactions, deleteTransaction, getDefaultWallet } from '@/lib/db'
+import { createTransaction, getTransactions, deleteTransaction, getDefaultWallet, updateTransaction, getTransaction } from '@/lib/db'
 
 export async function POST(request: NextRequest) {
   try {
@@ -169,6 +169,103 @@ export async function DELETE(request: NextRequest) {
     })
   } catch (error) {
     console.error('Transaction DELETE API error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Parse query parameters for transaction ID
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Missing transaction ID' },
+        { status: 400 }
+      )
+    }
+
+    // Verify transaction ownership
+    const existingTransaction = await getTransaction(id)
+    if (!existingTransaction) {
+      return NextResponse.json(
+        { error: 'Transaction not found' },
+        { status: 404 }
+      )
+    }
+
+    if (existingTransaction.user_id !== user.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized: You can only edit your own transactions' },
+        { status: 403 }
+      )
+    }
+
+    // Parse request body
+    const body = await request.json()
+    const { item, amount, category, date, wallet_id, type } = body
+
+    // Validation
+    if (!item || !amount || !category || !date) {
+      return NextResponse.json(
+        { error: 'Missing required fields: item, amount, category, date' },
+        { status: 400 }
+      )
+    }
+
+    if (typeof amount !== 'number' || amount <= 0) {
+      return NextResponse.json(
+        { error: 'Amount must be a positive number' },
+        { status: 400 }
+      )
+    }
+
+    // Validate transaction type if provided
+    if (type && !['income', 'expense', 'adjustment'].includes(type)) {
+      return NextResponse.json(
+        { error: 'Invalid type. Must be: income, expense, or adjustment' },
+        { status: 400 }
+      )
+    }
+
+    // Update transaction
+    const updatedTransaction = await updateTransaction(id, {
+      item,
+      amount,
+      category,
+      date,
+      wallet_id: wallet_id || existingTransaction.wallet_id,
+      type: type || existingTransaction.type,
+    })
+
+    if (!updatedTransaction) {
+      return NextResponse.json(
+        { error: 'Failed to update transaction' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      transaction: updatedTransaction,
+      message: 'Transaction updated successfully',
+    })
+  } catch (error) {
+    console.error('Transaction PUT API error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
