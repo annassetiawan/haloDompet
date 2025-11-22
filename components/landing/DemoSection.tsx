@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react'
-import { RecordButton } from '@/components/RecordButton'
+import { DemoRecordButton } from './DemoRecordButton'
 import { DemoReceipt } from './DemoReceipt'
 import { Loader2, Sparkles } from 'lucide-react'
 
@@ -112,11 +112,10 @@ export function DemoSection() {
             {/* Record Button Area */}
             {!extractedData && (
               <div className="text-center">
-                <RecordButton
+                <DemoRecordButton
                   onTranscript={handleTranscript}
                   onError={handleError}
                   onStatusChange={handleStatusChange}
-                  isLoading={false}
                 />
 
                 {/* Status Message */}
