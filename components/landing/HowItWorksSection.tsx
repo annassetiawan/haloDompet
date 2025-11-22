@@ -46,14 +46,14 @@ export function HowItWorksSection() {
               <div className="mt-6 h-16 rounded-lg bg-zinc-950/50 border border-zinc-800/50 flex items-center justify-center overflow-hidden">
                 {/* Waveform Animation */}
                 <div className="flex items-center gap-1">
-                  {[...Array(12)].map((_, i) => (
+                  {[22, 38, 15, 32, 28, 18, 35, 25, 30, 20, 26, 33].map((height, i) => (
                     <div
                       key={i}
                       className="w-1 bg-purple-500 rounded-full animate-pulse"
                       style={{
-                        height: `${Math.random() * 30 + 10}px`,
+                        height: `${height}px`,
                         animationDelay: `${i * 0.1}s`,
-                        opacity: 0.4 + Math.random() * 0.6,
+                        opacity: 0.4 + (i % 3) * 0.2,
                       }}
                     />
                   ))}
