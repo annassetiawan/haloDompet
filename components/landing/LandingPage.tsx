@@ -1,59 +1,62 @@
 "use client"
 
 import { HeroSection } from './HeroSection'
+import { BentoFeatures } from './BentoFeatures'
 import { DemoSection } from './DemoSection'
 import Link from 'next/link'
 
 export function LandingPage() {
   return (
-    <div className="relative min-h-screen bg-black overflow-hidden">
-      {/* Glowing Orbs Background */}
-      <div className="fixed inset-0 -z-10">
-        {/* Large Purple Orb - Top Left */}
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-purple-600/30 rounded-full blur-3xl animate-pulse" />
+    <div className="relative min-h-screen bg-[#080808] overflow-hidden">
+      {/* Subtle Abstract Background Glow */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        {/* Top Abstract Glow - Purple/Blue */}
+        <div
+          className="absolute -top-[40%] -left-[20%] w-[70%] h-[70%] opacity-[0.15]"
+          style={{
+            background: 'radial-gradient(ellipse at center, rgba(139, 92, 246, 0.3) 0%, transparent 70%)',
+            filter: 'blur(80px)',
+          }}
+        />
 
-        {/* Pink/Magenta Orb - Bottom Right */}
-        <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-pink-600/25 rounded-full blur-3xl" />
-
-        {/* Cyan Orb - Middle */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
-
-        {/* Violet Accent Orb - Top Right */}
-        <div className="absolute top-20 right-20 w-64 h-64 bg-violet-500/20 rounded-full blur-2xl" />
-
-        {/* Grid Pattern Overlay (subtle) */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.02)_1px,transparent_1px)] bg-[size:72px_72px]" />
+        {/* Bottom Right Abstract Glow - Pink/Purple */}
+        <div
+          className="absolute -bottom-[30%] -right-[10%] w-[60%] h-[60%] opacity-[0.12]"
+          style={{
+            background: 'radial-gradient(ellipse at center, rgba(236, 72, 153, 0.25) 0%, rgba(139, 92, 246, 0.2) 50%, transparent 70%)',
+            filter: 'blur(90px)',
+          }}
+        />
       </div>
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-black/80 backdrop-blur-xl supports-[backdrop-filter]:bg-black/60">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      {/* Header - Linear Style */}
+      <header className="sticky top-0 z-50 w-full border-b border-zinc-900/50 bg-[#080808]/80 backdrop-blur-xl">
+        <div className="container mx-auto px-6 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-violet-500/50 group-hover:shadow-violet-500/70 transition-shadow">
-              <span className="text-white font-bold text-lg">H</span>
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500/90 to-pink-500/90 flex items-center justify-center">
+              <span className="text-white font-semibold text-sm">H</span>
             </div>
-            <span className="font-bold text-xl text-white">haloDompet</span>
+            <span className="font-medium text-white text-sm">haloDompet</span>
           </Link>
 
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-6">
             <a
-              href="#demo"
-              className="text-sm font-medium text-gray-400 hover:text-white transition-colors hidden sm:inline-block"
+              href="#features"
+              className="text-sm text-zinc-400 hover:text-white transition-colors hidden sm:inline-block"
             >
-              Demo
+              Features
             </a>
             <Link
               href="/login"
-              className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
+              className="text-sm text-zinc-400 hover:text-white transition-colors"
             >
               Login
             </Link>
             <Link
               href="/login"
-              className="relative px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 rounded-xl hover:scale-105 transition-all shadow-lg shadow-violet-500/50 hover:shadow-violet-500/70 overflow-hidden group"
+              className="relative px-4 py-1.5 text-sm font-medium text-white bg-gradient-to-b from-purple-600/90 to-purple-700/90 border border-purple-500/20 rounded-lg hover:shadow-[0_0_30px_-5px_rgba(168,85,247,0.4)] transition-all"
             >
-              <span className="relative z-10">Mulai Gratis</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+              Start Free
             </Link>
           </nav>
         </div>
@@ -62,68 +65,52 @@ export function LandingPage() {
       {/* Main Content */}
       <main>
         <HeroSection />
+        <BentoFeatures />
         <DemoSection />
 
-        {/* Final CTA Section */}
-        <section className="relative py-32 md:py-40">
-          <div className="container mx-auto px-4">
-            <div className="max-w-5xl mx-auto text-center">
-              <div className="relative">
-                {/* Enhanced Background glow */}
-                <div className="absolute inset-0 bg-gradient-to-r from-violet-600/30 via-pink-600/30 to-violet-600/30 blur-3xl -z-10 animate-pulse" />
+        {/* Final CTA - Linear Minimal Style */}
+        <section className="relative py-24 md:py-32">
+          <div className="container mx-auto px-6">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-4xl md:text-5xl font-medium text-white mb-4 tracking-tight">
+                Siap untuk financial clarity?
+              </h2>
+              <p className="text-lg text-zinc-400 mb-8 leading-relaxed">
+                Daftar sekarang. Gratis selamanya.
+              </p>
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-b from-purple-600/90 to-purple-700/90 border border-purple-500/20 rounded-lg hover:shadow-[0_0_30px_-5px_rgba(168,85,247,0.4)] transition-all"
+              >
+                Get Started
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </Link>
 
-                <div className="relative border border-white/10 rounded-3xl p-12 md:p-20 bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-xl shadow-2xl">
-                  {/* Decorative corners */}
-                  <div className="absolute top-0 left-0 w-20 h-20 border-l-2 border-t-2 border-violet-500/50 rounded-tl-3xl" />
-                  <div className="absolute top-0 right-0 w-20 h-20 border-r-2 border-t-2 border-pink-500/50 rounded-tr-3xl" />
-                  <div className="absolute bottom-0 left-0 w-20 h-20 border-l-2 border-b-2 border-pink-500/50 rounded-bl-3xl" />
-                  <div className="absolute bottom-0 right-0 w-20 h-20 border-r-2 border-b-2 border-violet-500/50 rounded-br-3xl" />
-
-                  <h2 className="text-5xl md:text-6xl font-black mb-6 text-white leading-tight">
-                    Siap Atur Keuangan dengan Lebih{' '}
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-pink-400 to-violet-400 animate-gradient">
-                      Smart?
-                    </span>
-                  </h2>
-                  <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
-                    Daftar sekarang dan mulai catat transaksi cuma dengan ngomong. Gratis. Tanpa ribet.
-                  </p>
-                  <Link
-                    href="/login"
-                    className="inline-flex items-center justify-center px-10 py-5 text-lg font-bold text-white bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-violet-500/50 hover:shadow-violet-500/80"
-                  >
-                    Mulai Sekarang - Gratis! 🚀
-                  </Link>
-
-                  <div className="mt-8 flex items-center justify-center gap-6 text-sm text-gray-400">
-                    <div className="flex items-center gap-2">
-                      <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>Tanpa kartu kredit</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>Gratis selamanya</span>
-                    </div>
-                  </div>
-                </div>
+              <div className="mt-6 flex items-center justify-center gap-4 text-xs text-zinc-500">
+                <span>No credit card required</span>
+                <span>•</span>
+                <span>Free forever</span>
               </div>
             </div>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="relative border-t border-white/5 bg-black/50 backdrop-blur-xl py-12">
-        <div className="container mx-auto px-4">
-          <div className="text-center">
-            <p className="text-sm text-gray-500">
-              © 2025 <span className="text-white font-semibold">haloDompet</span>. Made with{' '}
-              <span className="text-pink-500">❤️</span> for better financial management.
-            </p>
+      {/* Footer - Minimal Linear Style */}
+      <footer className="border-t border-zinc-900/50 py-8">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-between text-xs text-zinc-500">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded bg-gradient-to-br from-purple-500/70 to-pink-500/70 flex items-center justify-center">
+                <span className="text-white font-semibold text-[10px]">H</span>
+              </div>
+              <span>© 2025 haloDompet</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <span>Made with focus</span>
+            </div>
           </div>
         </div>
       </footer>
