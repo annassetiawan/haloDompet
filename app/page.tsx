@@ -3,18 +3,21 @@ import { createClient } from '@/lib/supabase/server'
 import { getWallets, getTotalBalance, getAssetGrowth, getTransactions, getUserProfile } from '@/lib/db'
 import { isTrialExpired } from '@/lib/trial'
 import { DashboardClient } from '@/components/DashboardClient'
+import { LandingPage } from '@/components/landing/LandingPage'
 
-export default async function DashboardPage() {
+export default async function HomePage() {
   // Create Supabase client
   const supabase = await createClient()
 
   // Check authentication
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
+  // If no user, show landing page (guest user)
   if (authError || !user) {
-    redirect('/login')
+    return <LandingPage />
   }
 
+  // User is authenticated - show dashboard
   // Fetch all data in parallel for optimal performance
   const [userProfile, wallets, totalBalance, growthPercentage, recentTransactions] = await Promise.all([
     getUserProfile(user.id),
