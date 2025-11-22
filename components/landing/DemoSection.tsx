@@ -72,37 +72,36 @@ export function DemoSection() {
   }
 
   return (
-    <section id="demo" className="relative py-24 md:py-32">
-      {/* Background */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-violet-500/5 to-transparent" />
-      </div>
-
+    <section id="demo" className="relative py-32 md:py-40">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           {/* Section Header */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full border border-violet-500/20 bg-violet-500/10">
-              <Sparkles className="w-4 h-4 text-violet-500" />
-              <span className="text-sm font-medium text-violet-500">The Magic Demo</span>
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full border border-violet-500/30 bg-violet-500/10 backdrop-blur-sm">
+              <Sparkles className="w-4 h-4 text-violet-400" />
+              <span className="text-sm font-semibold text-violet-300">Coba Sihir AI-nya Sekarang 👇</span>
             </div>
 
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Lihat AI Bekerja
+            <h2 className="text-4xl md:text-6xl font-black mb-6 text-white">
+              Lihat{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-pink-400 to-violet-400">
+                AI Bekerja
+              </span>
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
               Cobain aja dulu. Tekan & bilang:
             </p>
           </div>
 
           {/* Demo Instructions */}
-          <div className="text-center mb-12">
-            <div className="inline-block px-6 py-4 bg-muted/50 rounded-2xl border border-border">
-              <p className="text-lg md:text-xl font-medium mb-2">
+          <div className="text-center mb-16">
+            <div className="inline-block px-8 py-6 bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl">
+              <p className="text-lg md:text-2xl font-bold mb-3 text-white">
                 💬 Contoh: "Beli kopi 25 ribu di Fore"
               </p>
-              <p className="text-sm text-muted-foreground">
-                atau coba: "Isi bensin 50 ribu" • "Dapat gaji 5 juta"
+              <p className="text-sm text-gray-400">
+                atau coba: <span className="text-white font-semibold">"Isi bensin 50 ribu"</span> •{' '}
+                <span className="text-white font-semibold">"Dapat gaji 5 juta"</span>
               </p>
             </div>
           </div>
@@ -138,12 +137,12 @@ export function DemoSection() {
 
                 {/* Error Message */}
                 {error && (
-                  <div className="mt-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-                    <p className="text-red-500 text-sm">{error}</p>
+                  <div className="mt-8 p-5 bg-red-500/10 border border-red-500/30 rounded-2xl backdrop-blur-sm">
+                    <p className="text-red-400 font-medium">{error}</p>
                     {error.includes('Rate limit') && (
                       <a
                         href="/login"
-                        className="mt-2 inline-block text-sm text-violet-500 hover:underline"
+                        className="mt-3 inline-block text-sm text-violet-400 hover:text-violet-300 hover:underline"
                       >
                         Login untuk akses unlimited →
                       </a>
@@ -166,7 +165,7 @@ export function DemoSection() {
                       setError(null)
                       setStatusMessage('')
                     }}
-                    className="px-6 py-3 text-sm font-medium text-muted-foreground border border-border rounded-lg hover:bg-muted/50 transition-all"
+                    className="px-8 py-3 text-sm font-semibold text-white border-2 border-white/20 rounded-2xl hover:bg-white/5 hover:border-white/30 transition-all"
                   >
                     Coba Lagi
                   </button>
@@ -176,33 +175,33 @@ export function DemoSection() {
           </div>
 
           {/* Features Grid */}
-          <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-xl border border-border bg-card/50 backdrop-blur-sm">
-              <div className="w-12 h-12 mb-4 rounded-lg bg-violet-500/10 flex items-center justify-center">
-                <span className="text-2xl">🎤</span>
+          <div className="mt-32 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="group p-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all">
+              <div className="w-14 h-14 mb-5 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <span className="text-3xl">🎤</span>
               </div>
-              <h3 className="text-lg font-semibold mb-2">Voice Recognition</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="text-xl font-bold mb-3 text-white">Voice Recognition</h3>
+              <p className="text-sm text-gray-400 leading-relaxed">
                 Teknologi speech-to-text yang akurat untuk bahasa Indonesia
               </p>
             </div>
 
-            <div className="p-6 rounded-xl border border-border bg-card/50 backdrop-blur-sm">
-              <div className="w-12 h-12 mb-4 rounded-lg bg-cyan-500/10 flex items-center justify-center">
-                <span className="text-2xl">🤖</span>
+            <div className="group p-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all">
+              <div className="w-14 h-14 mb-5 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <span className="text-3xl">🤖</span>
               </div>
-              <h3 className="text-lg font-semibold mb-2">AI Extraction</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="text-xl font-bold mb-3 text-white">AI Extraction</h3>
+              <p className="text-sm text-gray-400 leading-relaxed">
                 AI Gemini mendeteksi item, harga, kategori secara otomatis
               </p>
             </div>
 
-            <div className="p-6 rounded-xl border border-border bg-card/50 backdrop-blur-sm">
-              <div className="w-12 h-12 mb-4 rounded-lg bg-violet-500/10 flex items-center justify-center">
-                <span className="text-2xl">⚡</span>
+            <div className="group p-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all">
+              <div className="w-14 h-14 mb-5 rounded-xl bg-gradient-to-br from-violet-500/20 to-pink-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <span className="text-3xl">⚡</span>
               </div>
-              <h3 className="text-lg font-semibold mb-2">Instant Save</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="text-xl font-bold mb-3 text-white">Instant Save</h3>
+              <p className="text-sm text-gray-400 leading-relaxed">
                 Transaksi tersimpan otomatis. Tidak perlu input manual lagi.
               </p>
             </div>
