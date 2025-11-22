@@ -28,14 +28,30 @@ export async function POST(request: NextRequest) {
 
     // Get authenticated user
     const supabase = await createClient();
-    const { data: { user: authUser } } = await supabase.auth.getUser();
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
 
-    if (!authUser) {
+    // Enhanced debugging for auth failures
+    if (!authUser || authError) {
+      console.error('🔴 [/api/process] Authentication failed');
+      console.error('Auth Error:', authError);
+      console.error('Request Headers:', {
+        'user-agent': request.headers.get('user-agent'),
+        'cookie': request.headers.get('cookie') ? 'Present' : 'Missing',
+        'content-type': request.headers.get('content-type'),
+        'origin': request.headers.get('origin'),
+        'referer': request.headers.get('referer'),
+      });
+
       return NextResponse.json(
-        { error: 'Unauthorized. Please login first.' },
+        {
+          error: 'Unauthorized. Please login first.',
+          details: authError?.message || 'No session cookie found'
+        },
         { status: 401 }
       );
     }
+
+    console.log('✅ [/api/process] User authenticated:', authUser.id);
 
     // Fetch dynamic categories from database
     const expenseCategories = await getCategories(authUser.id, 'expense');

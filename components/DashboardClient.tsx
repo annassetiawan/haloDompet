@@ -94,7 +94,9 @@ export function DashboardClient({
 
   const loadUserProfile = async () => {
     try {
-      const response = await fetch('/api/user')
+      const response = await fetch('/api/user', {
+        credentials: 'include', // CRITICAL: Ensure cookies are sent (Firefox compatibility)
+      })
       const data = await response.json()
 
       if (response.ok) {
@@ -110,7 +112,9 @@ export function DashboardClient({
 
   const loadWallets = async () => {
     try {
-      const response = await fetch('/api/wallet')
+      const response = await fetch('/api/wallet', {
+        credentials: 'include', // CRITICAL: Ensure cookies are sent (Firefox compatibility)
+      })
       const data = await response.json()
 
       if (response.ok) {
@@ -125,7 +129,9 @@ export function DashboardClient({
 
   const loadRecentTransactions = async () => {
     try {
-      const response = await fetch('/api/transaction?limit=5')
+      const response = await fetch('/api/transaction?limit=5', {
+        credentials: 'include', // CRITICAL: Ensure cookies are sent (Firefox compatibility)
+      })
       const data = await response.json()
 
       if (response.ok) {
@@ -279,6 +285,7 @@ export function DashboardClient({
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // CRITICAL: Ensure cookies are sent (Firefox compatibility)
         body: JSON.stringify(processPayload),
       })
 
@@ -297,6 +304,7 @@ export function DashboardClient({
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // CRITICAL: Ensure cookies are sent (Firefox compatibility)
         body: JSON.stringify({
           item: processData.data.item,
           amount: processData.data.amount,

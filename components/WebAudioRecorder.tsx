@@ -263,6 +263,7 @@ export function WebAudioRecorder({
 
       const response = await fetch('/api/stt', {
         method: 'POST',
+        credentials: 'include', // CRITICAL: Ensure cookies are sent (Firefox compatibility)
         body: formData,
       })
 
