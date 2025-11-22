@@ -2,7 +2,10 @@
 
 import { HeroSection } from './HeroSection'
 import { BentoFeatures } from './BentoFeatures'
+import { HowItWorksSection } from './HowItWorksSection'
+import { TestimonialsSection } from './TestimonialsSection'
 import { DemoSection } from './DemoSection'
+import { FAQSection } from './FAQSection'
 import Link from 'next/link'
 
 export function LandingPage() {
@@ -66,7 +69,10 @@ export function LandingPage() {
       <main>
         <HeroSection />
         <BentoFeatures />
+        <HowItWorksSection />
+        <TestimonialsSection />
         <DemoSection />
+        <FAQSection />
 
         {/* Final CTA - Linear Minimal Style */}
         <section className="relative py-24 md:py-32">
