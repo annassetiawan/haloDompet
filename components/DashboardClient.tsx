@@ -492,6 +492,39 @@ export function DashboardClient({
             onEditWallet={handleEditWallet}
           />
 
+          {/* Area Chat Bubble Status */}
+          <div className="relative w-full max-w-[400px] mx-auto mb-4 flex flex-col justify-end items-center transition-all duration-300">
+            <div
+              className={`relative px-4 py-2.5 rounded-2xl shadow-sm border transition-all duration-300 ${
+                isBubbleActive
+                  ? 'bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/40 dark:to-gray-800 border-indigo-100 dark:border-indigo-900/50 text-indigo-900 dark:text-indigo-100 scale-100 opacity-100'
+                  : 'bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700/50 text-gray-400 dark:text-gray-500 scale-95 opacity-80'
+              }`}
+            >
+              {/* Label Bubble Dynamic */}
+              <span className="absolute -top-2.5 left-4 bg-white dark:bg-gray-800 text-[9px] font-bold px-1.5 py-px rounded-full shadow-sm border border-gray-100 dark:border-gray-700 text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                {bubbleLabel}
+              </span>
+
+              <p
+                className={`text-center font-medium leading-snug ${
+                  isBubbleActive ? 'text-sm' : 'text-xs italic'
+                }`}
+              >
+                {/* Hilangkan tanda kutip jika status adalah prompt/saran */}
+                {status === IDLE_STATUS ? status : `"${status}"`}
+              </p>
+
+              <div
+                className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-b border-r ${
+                  isBubbleActive
+                    ? 'bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/40 dark:to-gray-800 border-indigo-100 dark:border-indigo-900/50'
+                    : 'bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700/50'
+                }`}
+              ></div>
+            </div>
+          </div>
+
           {/* Voice Recording Section */}
           <div className="flex flex-col items-center gap-2">
             <FinancialAvatarRecorder
