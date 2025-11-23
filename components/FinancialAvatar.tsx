@@ -171,7 +171,7 @@ export function FinancialAvatar({
 
   return (
     <div className={`flex flex-col items-center gap-4 ${className}`}>
-      {/* Roast Bubble - Comic Style */}
+      {/* Roast Bubble - Style konsisten dengan bubble chat sebelumnya */}
       <AnimatePresence>
         {showRoast && roastMessage && (
           <motion.div
@@ -183,31 +183,34 @@ export function FinancialAvatar({
               stiffness: 300,
               damping: 20
             }}
-            className="relative mb-2"
+            className="relative mb-2 w-full max-w-[320px]"
           >
             {/* Bubble Container */}
-            <div className="relative bg-white dark:bg-gray-800 px-5 py-3 rounded-2xl shadow-lg border-2 border-gray-900 dark:border-gray-100 max-w-[280px]">
+            <div className="relative px-4 py-3 rounded-2xl shadow-sm border transition-all duration-300 bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/40 dark:to-gray-800 border-indigo-100 dark:border-indigo-900/50 text-indigo-900 dark:text-indigo-100">
+              {/* Label Bubble */}
+              <span className="absolute -top-2.5 left-4 bg-white dark:bg-gray-800 text-[9px] font-bold px-1.5 py-px rounded-full shadow-sm border border-indigo-100 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+                Dompie
+              </span>
+
               {/* Close Button */}
               <button
                 onClick={() => {
                   setShowRoast(false)
                   onRoastDismiss?.()
                 }}
-                className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 flex items-center justify-center text-xs font-bold hover:scale-110 transition-transform"
+                className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center text-xs font-bold hover:scale-110 hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all shadow-md"
+                aria-label="Tutup pesan"
               >
                 ×
               </button>
 
               {/* Roast Message */}
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 leading-snug">
+              <p className="text-center font-medium leading-snug text-sm pt-1">
                 {roastMessage}
               </p>
 
-              {/* Comic Bubble Tail - Pointing Down */}
-              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2">
-                <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[12px] border-t-gray-900 dark:border-t-gray-100"></div>
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[10px] border-t-white dark:border-t-gray-800"></div>
-              </div>
+              {/* Bubble Tail - Pointing Down */}
+              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-b border-r bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/40 dark:to-gray-800 border-indigo-100 dark:border-indigo-900/50"></div>
             </div>
           </motion.div>
         )}
