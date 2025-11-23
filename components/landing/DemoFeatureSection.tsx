@@ -5,63 +5,53 @@ import { DemoRecorder } from './DemoRecorder'
 
 export function DemoFeatureSection() {
   return (
-    <section id="demo" className="relative py-24 bg-[#080808] overflow-hidden">
-      {/* Background Gradient Accent */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] rounded-[100%] opacity-10 blur-[150px]"
-          style={{
-            background: 'radial-gradient(ellipse at center, #a855f7 0%, #ec4899 50%, transparent 100%)',
-          }}
-        />
-      </div>
-
+    <section id="demo" className="relative py-24 bg-zinc-950 overflow-hidden border-y-2 border-zinc-900">
       <div className="relative z-10 container mx-auto px-4 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left Column - Text Content */}
           <div className="order-2 lg:order-1">
             <Badge
               variant="outline"
-              className="mb-6 border-purple-900/50 bg-purple-950/30 text-purple-400 hover:bg-purple-950/50"
+              className="mb-6 border-2 border-blue-900 bg-blue-950 text-blue-400 hover:bg-blue-900/50 font-bold"
             >
               Powered by Gemini 2.5 Flash
             </Badge>
 
-            <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-6">
+            <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter leading-tight mb-6">
               Speak naturally.{' '}
-              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+              <span className="text-emerald-400">
                 It understands everything.
               </span>
             </h2>
 
-            <div className="space-y-4 text-zinc-400 leading-relaxed">
+            <div className="space-y-4 text-zinc-500 leading-relaxed font-medium">
               <p className="text-lg">
                 Tidak perlu form manual yang membosankan. Cukup ucapkan transaksi Anda secara natural, dan AI kami akan otomatis mengenali:
               </p>
 
               <ul className="space-y-3 ml-4">
                 <li className="flex items-start gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2.5 flex-shrink-0" />
+                  <div className="w-1.5 h-1.5 bg-emerald-400 mt-2.5 flex-shrink-0" />
                   <span><strong className="text-white">Item & Harga</strong> - Apa yang Anda beli dan berapa harganya</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2.5 flex-shrink-0" />
+                  <div className="w-1.5 h-1.5 bg-emerald-400 mt-2.5 flex-shrink-0" />
                   <span><strong className="text-white">Kategori Otomatis</strong> - Makanan, transportasi, hiburan, dll</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2.5 flex-shrink-0" />
+                  <div className="w-1.5 h-1.5 bg-emerald-400 mt-2.5 flex-shrink-0" />
                   <span><strong className="text-white">Dompet & Metode</strong> - BCA, Gopay, OVO, cash, dll</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2.5 flex-shrink-0" />
+                  <div className="w-1.5 h-1.5 bg-emerald-400 mt-2.5 flex-shrink-0" />
                   <span><strong className="text-white">Lokasi & Detail</strong> - Tempat belanja dan info tambahan</span>
                 </li>
               </ul>
 
-              <p className="text-sm italic pt-4 border-t border-zinc-800 mt-6">
+              <p className="text-sm font-medium pt-4 border-t-2 border-zinc-800 mt-6">
                 Contoh: &quot;Beli kopi 25 ribu di Starbucks pakai Gopay&quot;
                 <br />
-                <span className="text-purple-400">→</span> Langsung jadi struk digital lengkap!
+                <span className="text-emerald-400">→</span> Langsung jadi struk digital lengkap!
               </p>
             </div>
           </div>
@@ -69,22 +59,11 @@ export function DemoFeatureSection() {
           {/* Right Column - Interactive Phone Mockup */}
           <div className="order-1 lg:order-2 flex justify-center">
             <div className="relative">
-              {/* Phone Frame with Glow */}
+              {/* Phone Frame */}
               <div className="relative">
-                {/* Glow Effect Behind Phone */}
-                <div
-                  className="absolute inset-0 rounded-[3rem] blur-3xl opacity-40"
-                  style={{
-                    background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)',
-                  }}
-                />
-
                 {/* Phone Container */}
                 <div
-                  className="relative w-[340px] h-[680px] rounded-[3rem] border-[12px] border-zinc-900 bg-zinc-950 shadow-2xl overflow-hidden"
-                  style={{
-                    boxShadow: '0 0 60px rgba(0, 0, 0, 0.8), inset 0 0 2px rgba(255, 255, 255, 0.1)',
-                  }}
+                  className="relative w-[340px] h-[680px] rounded-[3rem] border-[12px] border-zinc-800 bg-black overflow-hidden shadow-[8px_8px_0_0_rgba(16,185,129,0.3)]"
                 >
                   {/* Notch */}
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-zinc-950 rounded-b-3xl z-10 border-b-2 border-zinc-900" />

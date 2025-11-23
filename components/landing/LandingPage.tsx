@@ -10,7 +10,7 @@ import { LandingFooter } from './LandingFooter'
 
 export function LandingPage() {
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-[#0a0a0a]">
       {/* Sticky Navbar */}
       <LandingNavbar />
 
