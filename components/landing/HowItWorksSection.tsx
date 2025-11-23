@@ -98,12 +98,7 @@ export function HowItWorksSection() {
             <div className="relative z-10">
               {/* Icon */}
               <div className="mb-6 inline-flex items-center justify-center w-14 h-14 border-2 border-orange-400 bg-orange-400/10">
-                <div className="relative">
-                  <Archive className="w-7 h-7 text-orange-400" />
-                  <div className="absolute inset-0 animate-ping opacity-75">
-                    <Archive className="w-7 h-7 text-orange-400" />
-                  </div>
-                </div>
+                <Archive className="w-7 h-7 text-orange-400" />
               </div>
 
               {/* Step Number */}
@@ -126,8 +121,11 @@ export function HowItWorksSection() {
                   {[40, 60, 45, 75, 50, 85].map((height, i) => (
                     <div
                       key={i}
-                      className="w-full bg-orange-400 opacity-60"
-                      style={{ height: `${height}%` }}
+                      className="w-full bg-orange-400 opacity-60 transition-all duration-1000 animate-pulse"
+                      style={{
+                        height: `${height}%`,
+                        animationDelay: `${i * 0.15}s`
+                      }}
                     />
                   ))}
                 </div>
