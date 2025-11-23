@@ -198,13 +198,13 @@ export function HowItWorksSection() {
                     <motion.div
                       key={i}
                       className="w-2 bg-gradient-to-t from-green-500/60 to-green-400/60 rounded-sm"
-                      initial={{ height: 0 }}
-                      whileInView={{ height: `${height}%` }}
+                      initial={{ height: 0, opacity: 0 }}
+                      whileInView={{ height: `${height}%`, opacity: 1 }}
                       viewport={{ once: true }}
                       transition={{
-                        duration: 0.6,
-                        delay: i * 0.1,
-                        ease: "easeOut"
+                        duration: 0.8,
+                        delay: i * 0.15,
+                        ease: [0.43, 0.13, 0.23, 0.96]
                       }}
                     />
                   ))}
