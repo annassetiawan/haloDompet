@@ -121,14 +121,27 @@ export function HowItWorksSection() {
                   {[40, 60, 45, 75, 50, 85].map((height, i) => (
                     <div
                       key={i}
-                      className="w-full bg-orange-400 opacity-60 transition-all duration-1000 animate-pulse"
+                      className="w-full bg-orange-400"
                       style={{
                         height: `${height}%`,
+                        animation: 'barPulse 2s ease-in-out infinite',
                         animationDelay: `${i * 0.15}s`
                       }}
                     />
                   ))}
                 </div>
+                <style jsx>{`
+                  @keyframes barPulse {
+                    0%, 100% {
+                      opacity: 0.6;
+                      transform: scaleY(1);
+                    }
+                    50% {
+                      opacity: 1;
+                      transform: scaleY(1.15);
+                    }
+                  }
+                `}</style>
               </div>
             </div>
           </div>
