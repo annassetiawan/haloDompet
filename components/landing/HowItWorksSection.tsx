@@ -97,8 +97,8 @@ export function HowItWorksSection() {
           <div className="group relative p-8 border-2 border-zinc-800 bg-zinc-950 hover:border-orange-400 transition-all duration-200">
             <div className="relative z-10">
               {/* Icon */}
-              <div className="mb-6 inline-flex items-center justify-center w-14 h-14 border-2 border-orange-400 bg-orange-400/10">
-                <Archive className="w-7 h-7 text-orange-400" />
+              <div className="mb-6 inline-flex items-center justify-center w-14 h-14 border-2 border-orange-400 bg-orange-400/10 relative">
+                <Archive className="w-7 h-7 text-orange-400 animate-pulse" />
               </div>
 
               {/* Step Number */}
