@@ -1,62 +1,58 @@
-"use client"
+'use client'
+import { Mic, Cpu, PieChart } from 'lucide-react'
 
 export function ProcessSteps() {
   const steps = [
     {
-      title: 'Ngomong aja',
-      description: 'Beli kopi 25rb pakai GoPay',
-      example: 'Natural, gak perlu format khusus',
+      icon: <Mic size={24} />,
+      title: 'Rekam Suara',
+      desc: 'Cukup tekan tombol dan ucapkan pengeluaranmu secara natural. Tidak perlu format kaku.',
     },
     {
-      title: 'AI proses',
-      description: 'Ekstrak item, jumlah, kategori, metode bayar',
-      example: 'Semua otomatis dalam hitungan detik',
+      icon: <Cpu size={24} />,
+      title: 'AI Processing',
+      desc: 'Gemini AI menganalisa konteks kalimat untuk memisahkan nama barang, harga, dan kategori.',
     },
     {
-      title: 'Langsung masuk',
-      description: 'Data tersimpan rapi di dompet digital kamu',
-      example: 'Siap dilacak kapan aja',
+      icon: <PieChart size={24} />,
+      title: 'Visualisasi Data',
+      desc: 'Transaksi tersimpan rapi. Pantau cashflow harianmu lewat grafik yang mudah dipahami.',
     },
   ]
 
   return (
-    <section className="py-20 px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-12">
-          <h2 className="text-3xl md:text-4xl font-semibold text-white mb-3">
-            Gampang banget makenya
+    <section
+      id="features"
+      className="py-24 border-y border-white/5 bg-[#0A0A0A]"
+    >
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="text-center mb-16 max-w-2xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-semibold text-white mb-4">
+            Workflow super simpel.
           </h2>
-          <p className="text-lg text-zinc-400">
-            Tiga langkah. Itu aja.
+          <p className="text-zinc-400">
+            Kami menghilangkan friksi dalam mencatat keuangan. Dari suara
+            menjadi data insight dalam hitungan detik.
           </p>
         </div>
 
-        {/* Horizontal timeline */}
-        <div className="grid md:grid-cols-3 gap-6">
-          {steps.map((step, index) => (
-            <div
-              key={index}
-              className="group relative bg-zinc-900/30 border border-zinc-800/40 hover:border-[#8B5CF6]/60 rounded-2xl p-8 transition-all duration-300 ease-out"
-            >
-              {/* Step number */}
-              <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#8B5CF6]/20 text-[#8B5CF6] font-semibold mb-6">
-                {index + 1}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+          {/* Connecting Line (Desktop) */}
+          <div className="hidden md:block absolute top-8 left-[16%] right-[16%] h-[1px] bg-gradient-to-r from-zinc-800 via-zinc-700 to-zinc-800 -z-0"></div>
+
+          {steps.map((step, idx) => (
+            <div key={idx} className="relative z-10 group">
+              <div className="w-16 h-16 mx-auto bg-[#0A0A0A] border border-zinc-800 rounded-2xl flex items-center justify-center text-zinc-400 group-hover:border-violet-500/50 group-hover:text-violet-400 transition-all duration-500 shadow-lg mb-6">
+                {step.icon}
               </div>
-
-              <h3 className="text-xl font-semibold text-white mb-3">
-                {step.title}
-              </h3>
-
-              <p className="text-zinc-400 mb-4 leading-relaxed">
-                {step.description}
-              </p>
-
-              <p className="text-sm text-zinc-500 italic">
-                {step.example}
-              </p>
-
-              {/* Hover glow effect */}
-              <div className="absolute inset-0 bg-[#8B5CF6]/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-300 -z-10" />
+              <div className="text-center px-4">
+                <h3 className="text-lg font-medium text-white mb-2">
+                  {step.title}
+                </h3>
+                <p className="text-sm text-zinc-500 leading-relaxed">
+                  {step.desc}
+                </p>
+              </div>
             </div>
           ))}
         </div>

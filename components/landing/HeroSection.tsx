@@ -1,6 +1,7 @@
-"use client"
+'use client'
 
 import Link from 'next/link'
+import { ArrowRight, PlayCircle } from 'lucide-react'
 
 export function HeroSection() {
   const scrollToDemo = () => {
@@ -8,42 +9,55 @@ export function HeroSection() {
   }
 
   return (
-    <section className="relative min-h-screen flex items-center px-6 overflow-hidden">
-      {/* Background orb */}
-      <div
-        className="absolute top-1/4 -left-32 w-96 h-96 bg-[#8B5CF6] rounded-full blur-3xl opacity-10"
-        style={{
-          transform: 'rotate(-15deg) scale(1.2)',
-        }}
-      />
+    <section className="pt-32 pb-16 md:pt-48 md:pb-24 max-w-5xl mx-auto px-6 relative">
+      {/* Abstract Orb */}
+      <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-violet-600/10 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="max-w-6xl mx-auto w-full pt-20">
-        {/* Asymmetric layout - content offset to left */}
-        <div className="max-w-3xl">
-          <h1 className="text-4xl md:text-6xl font-semibold text-white leading-tight mb-6">
-            Catat pengeluaran<br />cuma pakai suara
-          </h1>
+      <div className="max-w-4xl mx-auto relative z-10 text-center flex flex-col items-center">
+        <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight leading-[1.1] mb-8">
+          Catat pengeluaran <br className="hidden md:block" />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-indigo-400">
+            cuma pakai suara.
+          </span>
+        </h1>
+        <p className="text-xl text-zinc-400 max-w-2xl leading-relaxed mb-10">
+          Capek ngetik manual tiap abis jajan? HaloDompet pake AI buat dengerin
+          cerita lo dan nyatet semuanya otomatis. Akurat, cepet, gak ribet.
+        </p>
 
-          <p className="text-xl md:text-2xl text-zinc-400 leading-relaxed mb-10 max-w-2xl">
-            Ngomong → langsung masuk. AI yang urus sisanya.
-          </p>
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
+          <button className="h-12 px-8 rounded-full bg-white text-black font-semibold hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 group">
+            Coba Sekarang
+            <ArrowRight
+              size={18}
+              className="group-hover:translate-x-1 transition-transform"
+            />
+          </button>
+          <button
+            className="h-12 px-8 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2"
+            onClick={() =>
+              document
+                .getElementById('demo')
+                ?.scrollIntoView({ behavior: 'smooth' })
+            }
+          >
+            <PlayCircle size={18} />
+            Lihat Demo
+          </button>
+        </div>
 
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Link
-              href="/login"
-              className="px-8 py-4 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-medium rounded-lg transition-all duration-300 ease-out text-center"
-            >
-              Coba Sekarang
-            </Link>
-
-            <button
-              onClick={scrollToDemo}
-              className="px-8 py-4 bg-zinc-900/30 hover:bg-zinc-900/50 border border-zinc-800/40 hover:border-zinc-700/60 text-white font-medium rounded-lg transition-all duration-300 ease-out flex items-center justify-center gap-2"
-            >
-              Lihat Demo
-              <span className="text-lg">↓</span>
-            </button>
+        <div className="mt-12 flex items-center justify-center gap-4 text-xs text-zinc-500 font-medium">
+          <div className="flex -space-x-2">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="w-8 h-8 rounded-full bg-zinc-800 border border-black flex items-center justify-center text-[10px] text-zinc-400"
+              >
+                U{i}
+              </div>
+            ))}
           </div>
+          <p>Disukai 2,000+ pengguna early access</p>
         </div>
       </div>
     </section>

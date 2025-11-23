@@ -1,99 +1,87 @@
-"use client"
+'use client'
+
+interface Review {
+  id: number
+  name: string
+  role: string
+  avatar: string
+  content: string
+  span: string
+}
 
 export function SocialProof() {
-  const testimonials = [
+  const reviews: Review[] = [
     {
-      name: 'Andi',
-      initial: 'A',
-      role: 'Freelancer',
-      text: 'Gue suka banget fitur rekam suara. Biasanya males nyatet pengeluaran, sekarang tinggal ngomong doang.',
-      color: 'bg-blue-500',
+      id: 1,
+      name: 'Dimas Suryono',
+      role: 'Freelance Designer',
+      avatar: 'https://i.pravatar.cc/150?u=1',
+      content:
+        'Jujur ini game changer. Biasanya males nyatet karena harus buka app, klik kategori, ketik harga. Sekarang tinggal ngomong pas lagi jalan.',
+      span: 'md:col-span-2',
     },
     {
-      name: 'Sinta',
-      initial: 'S',
+      id: 2,
+      name: 'Sarah Wijaya',
       role: 'Mahasiswa',
-      text: 'AI-nya akurat banget! Langsung ngerti kalau gue bilang "beli kopi 25rb" itu kategori makanan.',
-      color: 'bg-purple-500',
+      avatar: 'https://i.pravatar.cc/150?u=2',
+      content:
+        "Deteksi 'pakai Gopay' atau 'pakai Cash' nya akurat banget. Gak perlu milih wallet lagi manual.",
+      span: 'col-span-1',
     },
     {
-      name: 'Riko',
-      initial: 'R',
-      role: 'Desainer',
-      text: 'Praktis buat tracking pengeluaran harian. Gak perlu buka notes lagi.',
-      color: 'bg-green-500',
+      id: 3,
+      name: 'Budi Santoso',
+      role: 'Small Business Owner',
+      avatar: 'https://i.pravatar.cc/150?u=3',
+      content:
+        'Simpel, cepet, dan UI-nya gak norak. Jarang nemu app lokal kualitas begini.',
+      span: 'col-span-1',
     },
     {
-      name: 'Maya',
-      initial: 'M',
-      role: 'Marketing',
-      text: 'Simpel, cepet, dan tampilannya bersih. Exactly what I needed.',
-      color: 'bg-pink-500',
-    },
-    {
-      name: 'Budi',
-      initial: 'B',
-      role: 'Developer',
-      text: 'Lebih efisien dari app sejenis. Voice recognition-nya responsif banget.',
-      color: 'bg-orange-500',
+      id: 4,
+      name: 'Jessica Tan',
+      role: 'Marketing Lead',
+      avatar: 'https://i.pravatar.cc/150?u=4',
+      content:
+        'Fitur AI-nya beneran pinter, bukan gimmick doang. Salah ngomong dikit dia tetep ngerti konteksnya.',
+      span: 'md:col-span-2',
     },
   ]
 
   return (
-    <section className="py-16 px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-12 text-center">
-          <h2 className="text-3xl md:text-4xl font-semibold text-white mb-3">
-            Yang lain bilang
-          </h2>
-          <p className="text-lg text-zinc-400">
-            Real feedback dari pengguna awal
-          </p>
-        </div>
+    <section id="reviews" className="py-32">
+      <div className="max-w-5xl mx-auto px-6">
+        <h2 className="text-3xl font-semibold text-white mb-12">
+          Apa kata early users?
+        </h2>
 
-        {/* Masonry grid */}
-        <div className="grid md:grid-cols-3 gap-6">
-          {/* Column 1 */}
-          <div className="space-y-6">
-            {testimonials.slice(0, 2).map((testimonial, idx) => (
-              <TestimonialCard key={idx} testimonial={testimonial} />
-            ))}
-          </div>
-
-          {/* Column 2 */}
-          <div className="space-y-6 md:mt-8">
-            {testimonials.slice(2, 4).map((testimonial, idx) => (
-              <TestimonialCard key={idx} testimonial={testimonial} />
-            ))}
-          </div>
-
-          {/* Column 3 */}
-          <div className="space-y-6 md:mt-4">
-            {testimonials.slice(4).map((testimonial, idx) => (
-              <TestimonialCard key={idx} testimonial={testimonial} />
-            ))}
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {reviews.map((review) => (
+            <div
+              key={review.id}
+              className={`bg-zinc-900/30 border border-white/5 p-6 rounded-2xl hover:border-white/10 transition-colors ${review.span || 'col-span-1'}`}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <img
+                  src={review.avatar}
+                  alt={review.name}
+                  className="w-10 h-10 rounded-full grayscale opacity-80"
+                />
+                <div>
+                  <h4 className="text-sm font-medium text-white">
+                    {review.name}
+                  </h4>
+                  <p className="text-xs text-zinc-500">{review.role}</p>
+                </div>
+              </div>
+              <p className="text-zinc-400 text-sm leading-relaxed">
+                "{review.content}"
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
-  )
-}
-
-function TestimonialCard({ testimonial }: { testimonial: any }) {
-  return (
-    <div className="bg-zinc-900/30 border border-zinc-800/40 rounded-2xl p-6">
-      <div className="flex items-center gap-3 mb-4">
-        <div className={`w-10 h-10 rounded-full ${testimonial.color} flex items-center justify-center text-white font-semibold`}>
-          {testimonial.initial}
-        </div>
-        <div>
-          <div className="text-white font-medium">{testimonial.name}</div>
-          <div className="text-sm text-zinc-500">{testimonial.role}</div>
-        </div>
-      </div>
-      <p className="text-zinc-400 leading-relaxed">
-        {testimonial.text}
-      </p>
-    </div>
   )
 }

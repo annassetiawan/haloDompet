@@ -1,10 +1,16 @@
-"use client"
+'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, ReactNode } from 'react'
 
-export type DemoRecordingState = 'idle' | 'recording' | 'processing' | 'success' | 'error'
+export type DemoRecordingState =
+  | 'idle'
+  | 'recording'
+  | 'processing'
+  | 'success'
+  | 'error'
 
 export interface DemoTransactionResult {
+  wallet: ReactNode
   item: string
   amount: number
   category: string
@@ -20,6 +26,7 @@ export function useDemoRecorder() {
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<DemoTransactionResult | null>(null)
   const [audioLevel, setAudioLevel] = useState(0)
+  const [recordingTime, setRecordingTime] = useState(0)
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
@@ -27,10 +34,12 @@ export function useDemoRecorder() {
   const audioContextRef = useRef<AudioContext | null>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
   const animationFrameRef = useRef<number | null>(null)
+  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   const startAudioLevelDetection = useCallback((stream: MediaStream) => {
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const audioContext = new (window.AudioContext ||
+        (window as any).webkitAudioContext)()
       const analyser = audioContext.createAnalyser()
       const microphone = audioContext.createMediaStreamSource(stream)
 
@@ -94,8 +103,8 @@ export function useDemoRecorder() {
     const formData = new FormData()
     formData.append('audio', audioBlob, `recording.${extension}`)
 
-    // Upload to STT API
-    const response = await fetch('/api/stt', {
+    // Upload to demo STT API (no authentication required)
+    const response = await fetch('/api/demo/stt', {
       method: 'POST',
       body: formData,
     })
@@ -114,10 +123,16 @@ export function useDemoRecorder() {
       setState('recording')
       setError(null)
       setResult(null)
+      setRecordingTime(0)
 
       // Request microphone permission
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       streamRef.current = stream
+
+      // Start recording timer
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingTime((prev) => prev + 1)
+      }, 1000)
 
       // Start audio level detection
       startAudioLevelDetection(stream)
@@ -136,12 +151,18 @@ export function useDemoRecorder() {
       mediaRecorder.onstop = async () => {
         stopAudioLevelDetection()
 
+        // Stop recording timer
+        if (recordingTimerRef.current) {
+          clearInterval(recordingTimerRef.current)
+          recordingTimerRef.current = null
+        }
+
         const audioBlob = new Blob(audioChunksRef.current, {
-          type: mediaRecorder.mimeType || 'audio/webm'
+          type: mediaRecorder.mimeType || 'audio/webm',
         })
 
         // Stop stream
-        stream.getTracks().forEach(track => track.stop())
+        stream.getTracks().forEach((track) => track.stop())
         streamRef.current = null
 
         // Process audio
@@ -177,27 +198,49 @@ export function useDemoRecorder() {
           }
         } catch (err: any) {
           console.error('Processing error:', err)
-          setError(err.message || 'Terjadi kesalahan')
+
+          // Provide user-friendly error messages
+          let userMessage = err.message || 'Terjadi kesalahan'
+          let resetDelay = 3000
+
+          // Handle specific error cases
+          if (userMessage.includes('quota') || userMessage.includes('Quota')) {
+            userMessage = 'Demo sedang sibuk. Coba lagi nanti.'
+            resetDelay = 5000
+          } else if (userMessage.includes('Rate limit')) {
+            userMessage = 'Terlalu banyak percobaan. Tunggu sebentar.'
+            resetDelay = 5000
+          } else if (userMessage.includes('tidak terdeteksi')) {
+            userMessage = 'Suara tidak terdeteksi. Coba lagi.'
+          }
+
+          setError(userMessage)
           setState('error')
 
-          // Reset to idle after 3 seconds
+          // Reset to idle
           setTimeout(() => {
             setState('idle')
             setError(null)
-          }, 3000)
+          }, resetDelay)
         }
       }
 
       mediaRecorder.onerror = () => {
         stopAudioLevelDetection()
+
+        // Stop recording timer
+        if (recordingTimerRef.current) {
+          clearInterval(recordingTimerRef.current)
+          recordingTimerRef.current = null
+        }
+
         setError('Terjadi kesalahan saat merekam')
         setState('error')
-        stream.getTracks().forEach(track => track.stop())
+        stream.getTracks().forEach((track) => track.stop())
         streamRef.current = null
       }
 
       mediaRecorder.start(1000)
-
     } catch (err: any) {
       console.error('Start recording error:', err)
       stopAudioLevelDetection()
@@ -227,10 +270,17 @@ export function useDemoRecorder() {
   }, [])
 
   const reset = useCallback(() => {
+    // Stop recording timer if running
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current)
+      recordingTimerRef.current = null
+    }
+
     setState('idle')
     setError(null)
     setResult(null)
     setAudioLevel(0)
+    setRecordingTime(0)
   }, [])
 
   return {
@@ -238,9 +288,10 @@ export function useDemoRecorder() {
     error,
     result,
     audioLevel,
+    recordingTime,
     startRecording,
     stopRecording,
-    reset,
+    resetDemo: reset,
     isRecording: state === 'recording',
     isProcessing: state === 'processing',
   }

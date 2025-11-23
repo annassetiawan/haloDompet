@@ -1,76 +1,59 @@
-"use client"
+'use client'
 
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 
 export function FAQ() {
-  const [openIndex, setOpenIndex] = useState(0)
+  const [openIndex, setOpenIndex] = useState<number | null>(0)
 
   const faqs = [
     {
-      question: 'Aman gak sih data gue?',
-      answer: 'Data kamu tersimpan aman dengan enkripsi. Rekaman suara langsung diproses jadi text dan gak disimpan permanen. Kita cuma simpan data transaksi kamu.',
+      q: 'Apakah data keuangan saya aman?',
+      a: 'Sangat aman. Kami menggunakan enkripsi standar industri untuk semua data. Suara Anda hanya diproses untuk ekstraksi teks dan tidak disimpan permanen.',
     },
     {
-      question: 'Harus bayar?',
-      answer: 'Gratis untuk fitur dasar! Kamu bisa rekam transaksi unlimited, tracking pengeluaran, dan lihat laporan bulanan. Premium features coming soon.',
+      q: 'Seberapa akurat AI-nya?',
+      a: "Kami menggunakan model Gemini terbaru yang sangat fasih bahasa Indonesia, termasuk slang sehari-hari seperti 'pewe', 'ceban', atau 'goceng'.",
     },
     {
-      question: 'AI-nya paham bahasa Indo?',
-      answer: 'Iya dong! AI kita dilatih khusus buat bahasa Indonesia casual. Ngomong natural aja kayak ngobrol biasa, AI bakal ngerti.',
+      q: 'Bisa export ke Excel/CSV?',
+      a: 'Bisa banget. Anda bisa export laporan bulanan ke format CSV atau PDF untuk keperluan audit pribadi.',
     },
     {
-      question: 'Bisa dipakai offline?',
-      answer: 'Untuk voice recognition perlu internet. Tapi kamu tetap bisa input manual dan lihat data yang udah tersimpan tanpa koneksi.',
-    },
-    {
-      question: 'Support platform apa aja?',
-      answer: 'Web app bisa diakses dari browser mana aja - Chrome, Safari, Firefox. Fitur voice recording optimal di Chrome & Safari terbaru.',
+      q: 'Apakah gratis?',
+      a: 'HaloDompet memiliki tier gratis selamanya untuk penggunaan dasar. Fitur advanced analytics tersedia di paket Pro.',
     },
   ]
 
   return (
-    <section className="py-20 px-6">
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-12 text-center">
-          <h2 className="text-3xl md:text-4xl font-semibold text-white mb-3">
-            Pertanyaan umum
-          </h2>
-          <p className="text-lg text-zinc-400">
-            Yang sering ditanyain
-          </p>
-        </div>
+    <section id="faq" className="py-24 border-t border-white/5">
+      <div className="max-w-3xl mx-auto px-6">
+        <h2 className="text-3xl font-semibold text-white mb-12 text-center">
+          Pertanyaan Umum
+        </h2>
 
-        <div className="space-y-4">
-          {faqs.map((faq, index) => (
+        <div className="space-y-2">
+          {faqs.map((item, idx) => (
             <div
-              key={index}
-              className="bg-zinc-900/30 border border-zinc-800/40 rounded-2xl overflow-hidden transition-all duration-300 ease-out"
+              key={idx}
+              className="border border-zinc-800 rounded-xl bg-zinc-900/20 overflow-hidden"
             >
               <button
-                onClick={() => setOpenIndex(openIndex === index ? -1 : index)}
-                className="w-full flex items-center justify-between p-6 text-left hover:bg-zinc-900/50 transition-colors"
+                onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
+                className="w-full flex items-center justify-between p-5 text-left hover:bg-zinc-900/50 transition-colors"
               >
-                <span className="text-lg font-medium text-white pr-4">
-                  {faq.question}
-                </span>
+                <span className="font-medium text-zinc-200">{item.q}</span>
                 <ChevronDown
-                  className={`w-5 h-5 text-zinc-400 flex-shrink-0 transition-transform duration-300 ${
-                    openIndex === index ? 'rotate-180' : ''
-                  }`}
+                  className={`text-zinc-500 transition-transform duration-300 ${openIndex === idx ? 'rotate-180' : ''}`}
+                  size={20}
                 />
               </button>
-
               <div
-                className={`overflow-hidden transition-all duration-300 ease-out ${
-                  openIndex === index ? 'max-h-96' : 'max-h-0'
-                }`}
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${openIndex === idx ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}`}
               >
-                <div className="px-6 pb-6">
-                  <p className="text-zinc-400 leading-relaxed">
-                    {faq.answer}
-                  </p>
-                </div>
+                <p className="p-5 pt-0 text-zinc-400 text-sm leading-relaxed">
+                  {item.a}
+                </p>
               </div>
             </div>
           ))}
