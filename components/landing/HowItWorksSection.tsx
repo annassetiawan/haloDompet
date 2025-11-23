@@ -179,7 +179,19 @@ export function HowItWorksSection() {
 
                 {/* Icon */}
                 <div className="w-12 h-12 mb-6 rounded-xl bg-gradient-to-br from-green-500/20 to-green-600/10 border border-green-500/20 flex items-center justify-center">
-                  <CheckCircle2 className="w-6 h-6 text-green-400" />
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    whileInView={{ scale: 1, rotate: 0 }}
+                    viewport={{ once: true }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 200,
+                      damping: 15,
+                      delay: 0.2
+                    }}
+                  >
+                    <CheckCircle2 className="w-6 h-6 text-green-400" />
+                  </motion.div>
                 </div>
 
                 {/* Title */}
