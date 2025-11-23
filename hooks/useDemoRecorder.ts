@@ -188,11 +188,7 @@ export function useDemoRecorder() {
           if (data.success && data.data) {
             setResult(data.data)
             setState('success')
-
-            // Reset to idle after 3 seconds
-            setTimeout(() => {
-              setState('idle')
-            }, 3000)
+            // Tidak auto-reset, biarkan user yang klik tombol untuk kembali
           } else {
             throw new Error('Invalid response format')
           }
