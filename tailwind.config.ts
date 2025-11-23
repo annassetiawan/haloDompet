@@ -62,10 +62,21 @@ const config: Config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "bar-pulse": {
+          "0%, 100%": {
+            opacity: "0.6",
+            transform: "scaleY(1)",
+          },
+          "50%": {
+            opacity: "1",
+            transform: "scaleY(1.15)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "bar-pulse": "bar-pulse 2s ease-in-out infinite",
       },
     },
   },
