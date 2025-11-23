@@ -12,7 +12,7 @@ import { ManualTransactionDialog } from '@/components/ManualTransactionDialog'
 import { TransactionCard } from '@/components/TransactionCard'
 import { TrialWarningBanner } from '@/components/trial-warning-banner'
 import { DarkModeToggle } from '@/components/DarkModeToggle'
-import { RecordButton } from '@/components/RecordButton'
+import { FinancialAvatarRecorder } from '@/components/FinancialAvatarRecorder'
 import { BottomNav } from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
 import {
@@ -75,6 +75,9 @@ export function DashboardClient({
       : ''
   )
   const [isProcessing, setIsProcessing] = useState(false)
+
+  // State for AI roast message
+  const [roastMessage, setRoastMessage] = useState<string | null>(null)
 
   // Review dialog state
   const [isReviewOpen, setIsReviewOpen] = useState(false)
@@ -292,6 +295,12 @@ export function DashboardClient({
         throw new Error(friendlyError)
       }
 
+      // Extract roast message from AI response
+      const aiRoastMessage = processData.data?.roast_message || null
+      if (aiRoastMessage) {
+        console.log('🤑 AI Roast:', aiRoastMessage)
+      }
+
       const transactionResponse = await fetch('/api/transaction', {
         method: 'POST',
         headers: {
@@ -323,6 +332,12 @@ export function DashboardClient({
       loadRecentTransactions()
 
       setStatus('Berhasil! Transaksi tersimpan')
+
+      // Show roast message if available
+      if (aiRoastMessage) {
+        setRoastMessage(aiRoastMessage)
+      }
+
       toast.success(
         `${processData.data.item} - Rp ${processData.data.amount.toLocaleString('id-ID')} tercatat!`,
       )
@@ -477,45 +492,14 @@ export function DashboardClient({
             onEditWallet={handleEditWallet}
           />
 
-          {/* Area Chat Bubble */}
-          <div className="relative w-full max-w-[400px] mx-auto mb-4 flex flex-col justify-end items-center transition-all duration-300">
-            <div
-              className={`relative px-4 py-2.5 rounded-2xl shadow-sm border transition-all duration-300 ${
-                isBubbleActive
-                  ? 'bg-gradient-to-br from-indigo-50 to-white border-indigo-100 text-indigo-900 scale-100 opacity-100'
-                  : 'bg-gray-50 border-gray-100 text-gray-400 scale-95 opacity-80'
-              }`}
-            >
-              {/* Label Bubble Dynamic */}
-              <span className="absolute -top-2.5 left-4 bg-white text-[9px] font-bold px-1.5 py-px rounded-full shadow-sm border border-gray-100 text-gray-400 uppercase tracking-wider">
-                {bubbleLabel}
-              </span>
-
-              <p
-                className={`text-center font-medium leading-snug ${
-                  isBubbleActive ? 'text-sm' : 'text-xs italic'
-                }`}
-              >
-                {/* Hilangkan tanda kutip jika status adalah prompt/saran */}
-                {status === IDLE_STATUS ? status : `"${status}"`}
-              </p>
-
-              <div
-                className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-b border-r ${
-                  isBubbleActive
-                    ? 'bg-indigo-50 border-indigo-100'
-                    : 'bg-gray-50 border-gray-100'
-                }`}
-              ></div>
-            </div>
-          </div>
-
           {/* Voice Recording Section */}
           <div className="flex flex-col items-center gap-2">
-            <RecordButton
+            <FinancialAvatarRecorder
               onTranscript={handleTranscript}
               onStatusChange={handleStatusChange}
               isLoading={false}
+              roastMessage={roastMessage}
+              onRoastDismiss={() => setRoastMessage(null)}
             />
 
             {/* Manual Transaction Button */}
