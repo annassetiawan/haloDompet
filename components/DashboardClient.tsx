@@ -336,6 +336,10 @@ export function DashboardClient({
       // Show roast message if available
       if (aiRoastMessage) {
         setRoastMessage(aiRoastMessage)
+        // Auto-hide roast message after 8 seconds
+        setTimeout(() => {
+          setRoastMessage(null)
+        }, 8000)
       }
 
       toast.success(
@@ -365,15 +369,18 @@ export function DashboardClient({
 
   // Logic Bubble Active
   const isBubbleActive =
-    status !== IDLE_STATUS && // Jika bukan idle, berarti aktif
-    (status === 'Mendengarkan...' ||
-      status.toLowerCase().includes('memproses') ||
-      status.toLowerCase().includes('berhasil') ||
-      status.toLowerCase().includes('gagal') ||
-      status.toLowerCase().includes('merekam'))
+    roastMessage !== null || // Jika ada roast message, bubble aktif
+    (status !== IDLE_STATUS && // Jika bukan idle, berarti aktif
+      (status === 'Mendengarkan...' ||
+        status.toLowerCase().includes('memproses') ||
+        status.toLowerCase().includes('berhasil') ||
+        status.toLowerCase().includes('gagal') ||
+        status.toLowerCase().includes('merekam')))
 
   // Helper untuk menentukan Label Bubble
   const getBubbleLabel = () => {
+    // Jika ada roast message yang sedang ditampilkan
+    if (roastMessage) return 'Dompie'
     if (status === IDLE_STATUS) return 'Saran'
     // Jika status mengandung kutip (misal: Memproses: "Beli kopi"), itu kata-kata user -> "Anda"
     if (status.includes('"') || status.includes("'")) return 'Anda'
@@ -382,6 +389,9 @@ export function DashboardClient({
   }
 
   const bubbleLabel = getBubbleLabel()
+
+  // Content bubble: prioritaskan roast message jika ada, kalau tidak tampilkan status
+  const bubbleContent = roastMessage || status
 
   return (
     <div className="min-h-screen bg-background">
@@ -502,17 +512,36 @@ export function DashboardClient({
               }`}
             >
               {/* Label Bubble Dynamic */}
-              <span className="absolute -top-2.5 left-4 bg-white dark:bg-gray-800 text-[9px] font-bold px-1.5 py-px rounded-full shadow-sm border border-gray-100 dark:border-gray-700 text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+              <span className={`absolute -top-2.5 left-4 bg-white dark:bg-gray-800 text-[9px] font-bold px-1.5 py-px rounded-full shadow-sm border uppercase tracking-wider ${
+                roastMessage
+                  ? 'border-indigo-100 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400'
+                  : 'border-gray-100 dark:border-gray-700 text-gray-400 dark:text-gray-500'
+              }`}>
                 {bubbleLabel}
               </span>
+
+              {/* Close Button - Only show for roast message */}
+              {roastMessage && (
+                <button
+                  onClick={() => setRoastMessage(null)}
+                  className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center text-xs font-bold hover:scale-110 hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all shadow-md"
+                  aria-label="Tutup pesan"
+                >
+                  ×
+                </button>
+              )}
 
               <p
                 className={`text-center font-medium leading-snug ${
                   isBubbleActive ? 'text-sm' : 'text-xs italic'
                 }`}
               >
-                {/* Hilangkan tanda kutip jika status adalah prompt/saran */}
-                {status === IDLE_STATUS ? status : `"${status}"`}
+                {/* Tampilkan roast message (tanpa kutip) atau status */}
+                {roastMessage
+                  ? roastMessage
+                  : status === IDLE_STATUS
+                    ? status
+                    : `"${status}"`}
               </p>
 
               <div
@@ -531,8 +560,6 @@ export function DashboardClient({
               onTranscript={handleTranscript}
               onStatusChange={handleStatusChange}
               isLoading={false}
-              roastMessage={roastMessage}
-              onRoastDismiss={() => setRoastMessage(null)}
             />
 
             {/* Manual Transaction Button */}

@@ -13,8 +13,6 @@ interface FinancialAvatarRecorderProps {
   onError?: (error: string) => void
   onStatusChange?: (status: string) => void
   isLoading?: boolean
-  roastMessage?: string | null
-  onRoastDismiss?: () => void
 }
 
 export function FinancialAvatarRecorder({
@@ -22,8 +20,6 @@ export function FinancialAvatarRecorder({
   onError,
   onStatusChange,
   isLoading = false,
-  roastMessage = null,
-  onRoastDismiss,
 }: FinancialAvatarRecorderProps) {
   const [isClient, setIsClient] = useState(false)
   const [recorderType, setRecorderType] = useState<'webspeech' | 'ios' | 'mediarecorder' | 'webaudio'>('mediarecorder')
@@ -102,8 +98,6 @@ export function FinancialAvatarRecorder({
       <FinancialAvatar
         state={avatarState}
         onClick={handleAvatarClick}
-        roastMessage={roastMessage}
-        onRoastDismiss={onRoastDismiss}
       />
 
       {/* Hidden Recorder (Logic Only) */}

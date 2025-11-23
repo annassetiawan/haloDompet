@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import { Ear, Brain, DollarSign, AlertCircle } from 'lucide-react'
 
@@ -12,8 +12,6 @@ interface FinancialAvatarProps {
   onClick: () => void
   disabled?: boolean
   className?: string
-  roastMessage?: string | null
-  onRoastDismiss?: () => void
 }
 
 // Emoji expressions per state
@@ -30,13 +28,10 @@ export function FinancialAvatar({
   onClick,
   disabled = false,
   className = '',
-  roastMessage = null,
-  onRoastDismiss,
 }: FinancialAvatarProps) {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   const avatarRef = useRef<HTMLButtonElement>(null)
-  const [showRoast, setShowRoast] = useState(false)
 
   // Track client-side mounting
   useEffect(() => {
@@ -54,21 +49,6 @@ export function FinancialAvatar({
     mediaQuery.addEventListener('change', handler)
     return () => mediaQuery.removeEventListener('change', handler)
   }, [])
-
-  // Show roast bubble when roastMessage changes
-  useEffect(() => {
-    if (roastMessage) {
-      setShowRoast(true)
-
-      // Auto-hide after 8 seconds
-      const timer = setTimeout(() => {
-        setShowRoast(false)
-        onRoastDismiss?.()
-      }, 8000)
-
-      return () => clearTimeout(timer)
-    }
-  }, [roastMessage, onRoastDismiss])
 
   // Trigger confetti on success
   useEffect(() => {
@@ -171,51 +151,6 @@ export function FinancialAvatar({
 
   return (
     <div className={`flex flex-col items-center gap-4 ${className}`}>
-      {/* Roast Bubble - Style konsisten dengan bubble chat sebelumnya */}
-      <AnimatePresence>
-        {showRoast && roastMessage && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: -10 }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 20
-            }}
-            className="relative mb-2 w-full max-w-[320px]"
-          >
-            {/* Bubble Container */}
-            <div className="relative px-4 py-3 rounded-2xl shadow-sm border transition-all duration-300 bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/40 dark:to-gray-800 border-indigo-100 dark:border-indigo-900/50 text-indigo-900 dark:text-indigo-100">
-              {/* Label Bubble */}
-              <span className="absolute -top-2.5 left-4 bg-white dark:bg-gray-800 text-[9px] font-bold px-1.5 py-px rounded-full shadow-sm border border-indigo-100 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
-                Dompie
-              </span>
-
-              {/* Close Button */}
-              <button
-                onClick={() => {
-                  setShowRoast(false)
-                  onRoastDismiss?.()
-                }}
-                className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center text-xs font-bold hover:scale-110 hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all shadow-md"
-                aria-label="Tutup pesan"
-              >
-                ×
-              </button>
-
-              {/* Roast Message */}
-              <p className="text-center font-medium leading-snug text-sm pt-1">
-                {roastMessage}
-              </p>
-
-              {/* Bubble Tail - Pointing Down */}
-              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-b border-r bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/40 dark:to-gray-800 border-indigo-100 dark:border-indigo-900/50"></div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Avatar Container */}
       <div className="relative">
         {/* Pulse Rings - Only show when listening */}
