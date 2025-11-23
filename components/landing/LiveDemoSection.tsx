@@ -93,38 +93,107 @@ export function LiveDemoSection() {
             </div>
 
             {/* App Screen Content */}
-            <div className="flex flex-col h-full px-5 relative">
-              {/* Header App */}
-              <div className="flex justify-between items-center mb-8">
+            <div className="flex flex-col h-full px-5 pb-6 relative">
+              {/* Header - Greeting */}
+              <div className="flex justify-between items-center mb-6">
                 <div>
-                  <p className="text-xs text-zinc-500 mb-1">
-                    Total Pengeluaran
-                  </p>
-                  <h3 className="text-2xl font-bold text-white">
-                    Rp 2.450.000
-                  </h3>
+                  <h1 className="text-2xl font-bold text-white mb-1">HaloDompet</h1>
+                  <p className="text-sm text-zinc-400">Hai, annas 👋</p>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-zinc-800"></div>
+                <button className="w-10 h-10 rounded-full bg-zinc-800/50 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" strokeWidth="2"/>
+                    <circle cx="12" cy="7" r="1.5" fill="currentColor"/>
+                  </svg>
+                </button>
+              </div>
+
+              {/* Dompet Saya Card */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-white text-base font-semibold flex items-center gap-2">
+                    Dompet Saya
+                    <svg className="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  </h2>
+                  <button className="text-xs text-white flex items-center gap-1">
+                    <span>+ Tambah</span>
+                  </button>
+                </div>
+
+                <div className="relative h-32 rounded-2xl overflow-hidden bg-gradient-to-br from-purple-500 via-purple-600 to-pink-500 p-4 shadow-lg">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                        <Wallet size={20} className="text-white" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-white/80">Total Aset</p>
+                        <p className="text-[10px] text-white/60">2 dompet aktif</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-white/90 bg-white/10 px-2 py-1 rounded-full">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
+                      <span>100%</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-3xl font-bold text-white">Rp</span>
+                    <div className="flex gap-0.5 mt-2">
+                      {[1,2,3,4,5,6].map((i) => (
+                        <div key={i} className="w-2 h-2 rounded-full bg-white"></div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Dynamic Content Area */}
               <div className="flex-1 flex flex-col justify-center items-center relative">
                 {state === 'idle' && (
-                  <div className="text-center space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                  <div className="text-center space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    {/* Status Bubble */}
+                    <div className="relative mb-4">
+                      <div className="bg-zinc-800/80 backdrop-blur-sm rounded-2xl px-4 py-2 text-xs text-zinc-400 inline-block">
+                        <div className="text-[10px] text-zinc-500 mb-1 uppercase tracking-wider">STATUS</div>
+                        <div className="italic">"Tidak ada suara terdeteksi"</div>
+                      </div>
+                      {/* Speech bubble arrow */}
+                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-transparent border-t-zinc-800/80"></div>
+                    </div>
+
+                    {/* Big Mic Button */}
                     <div
-                      className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto mb-4 group cursor-pointer hover:border-violet-500/50 hover:bg-violet-500/10 transition-all"
+                      className="w-32 h-32 rounded-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center mx-auto cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-2xl ring-4 ring-zinc-800/50"
                       onClick={startRecording}
                     >
-                      <Mic
-                        className="text-white group-hover:text-violet-400 transition-colors"
-                        size={32}
-                      />
+                      <Mic className="text-zinc-400" size={48} />
                     </div>
+
                     <p className="text-sm text-zinc-400">
-                      Tap untuk mulai mencatat
+                      Tekan untuk merekam
                     </p>
-                    <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl text-xs text-zinc-500 max-w-[200px] mx-auto">
-                      "Beli martabak manis 35 ribu pakai OVO"
+
+                    {/* Input Manual Button */}
+                    <button className="flex items-center gap-2 text-sm text-zinc-500 border-2 border-dashed border-zinc-800 rounded-xl px-4 py-3 hover:border-zinc-700 hover:text-zinc-400 transition-colors">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                      <span>Input Manual</span>
+                    </button>
+
+                    {/* Helper Text */}
+                    <div className="mt-4 bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2 max-w-[240px] mx-auto">
+                      <div className="flex items-start gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500 mt-1.5 animate-pulse"></div>
+                        <p className="text-xs text-green-400/80 text-left leading-relaxed">
+                          Tekan tombol dan ucapkan pemasukan atau pengeluaran Anda
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -240,12 +309,48 @@ export function LiveDemoSection() {
               </div>
 
               {/* Bottom Nav Mock */}
-              <div className="h-20 mb-6 border-t border-zinc-800 flex items-center justify-around text-zinc-600">
+              <div className="absolute bottom-0 left-0 right-0 h-16 border-t border-zinc-800/50 flex items-center justify-around px-6 bg-black/50 backdrop-blur-sm">
+                {/* Home */}
                 <div className="flex flex-col items-center gap-1 text-violet-500">
-                  <div className="w-6 h-6 rounded bg-current opacity-20"></div>
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                  </svg>
+                  <span className="text-[10px] font-medium">Home</span>
                 </div>
-                <div className="w-6 h-6 rounded bg-zinc-800"></div>
-                <div className="w-6 h-6 rounded bg-zinc-800"></div>
+
+                {/* Riwayat */}
+                <div className="flex flex-col items-center gap-1 text-zinc-600">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v6l4 2"/>
+                  </svg>
+                  <span className="text-[10px]">Riwayat</span>
+                </div>
+
+                {/* Laporan */}
+                <div className="flex flex-col items-center gap-1 text-zinc-600">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                  </svg>
+                  <span className="text-[10px]">Laporan</span>
+                </div>
+
+                {/* Advisor */}
+                <div className="flex flex-col items-center gap-1 text-zinc-600">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                  </svg>
+                  <span className="text-[10px]">Advisor</span>
+                </div>
+
+                {/* Setting */}
+                <div className="flex flex-col items-center gap-1 text-zinc-600">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                  <span className="text-[10px]">Setting</span>
+                </div>
               </div>
             </div>
           </div>
