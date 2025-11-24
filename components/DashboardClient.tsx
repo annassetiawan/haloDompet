@@ -482,9 +482,18 @@ export function DashboardClient({
                 </p>
               </div>
 
-              {/* Right: Dark Mode Toggle */}
-              <div>
+              {/* Right: Dark Mode Toggle & Logout */}
+              <div className="flex items-center gap-1">
                 <DarkModeToggle />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleLogout}
+                  className="h-9 w-9"
+                  title="Keluar"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>
