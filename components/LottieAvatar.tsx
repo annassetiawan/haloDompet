@@ -1,9 +1,14 @@
-"use client"
+'use client'
 
 import Lottie from 'lottie-react'
 import avatarIdleAnimation from '@/public/animations/avatar-idle.json'
 
-export type LottieAvatarState = 'idle' | 'listening' | 'processing' | 'success' | 'error'
+export type LottieAvatarState =
+  | 'idle'
+  | 'listening'
+  | 'processing'
+  | 'success'
+  | 'error'
 
 interface LottieAvatarProps {
   state?: LottieAvatarState
@@ -16,7 +21,7 @@ export function LottieAvatar({
   state = 'idle',
   onClick,
   className = '',
-  disabled = false
+  disabled = false,
 }: LottieAvatarProps) {
   const handleClick = () => {
     if (!disabled) {
@@ -38,21 +43,21 @@ export function LottieAvatar({
     return avatarIdleAnimation
   }
 
-  // State-based styling
-  const getStateClasses = () => {
-    switch (state) {
-      case 'listening':
-        return 'animate-pulse ring-4 ring-blue-500/50'
-      case 'processing':
-        return 'animate-bounce'
-      case 'success':
-        return 'scale-110 ring-4 ring-green-500/50'
-      case 'error':
-        return 'animate-shake ring-4 ring-red-500/50'
-      default:
-        return ''
-    }
-  }
+  // // State-based styling
+  // const getStateClasses = () => {
+  //   switch (state) {
+  //     case 'listening':
+  //       return 'animate-pulse ring-4 ring-blue-500/50'
+  //     case 'processing':
+  //       return 'animate-bounce'
+  //     case 'success':
+  //       return 'scale-110 ring-4 ring-green-500/50'
+  //     case 'error':
+  //       return 'animate-shake ring-4 ring-red-500/50'
+  //     default:
+  //       return ''
+  //   }
+  // }
 
   return (
     <div
@@ -61,7 +66,7 @@ export function LottieAvatar({
         cursor-pointer transition-all duration-300
         w-40 h-40 flex items-center justify-center
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}
-        ${getStateClasses()}
+        
         ${className}
       `}
     >
@@ -73,12 +78,12 @@ export function LottieAvatar({
         style={{ width: '160px', height: '160px' }}
       />
 
-      {/* Label State untuk debugging/development */}
+      {/* Label State untuk debugging/development
       {process.env.NODE_ENV === 'development' && (
         <div className="text-xs text-center text-gray-500 mt-2 absolute -bottom-6">
           State: {state}
         </div>
-      )}
+      )} */}
     </div>
   )
 }
