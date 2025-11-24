@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { CheckCircle2, Share2, Download } from 'lucide-react'
@@ -28,6 +28,20 @@ export function TransactionReceipt({
   data,
 }: TransactionReceiptProps) {
   const receiptRef = useRef<HTMLDivElement>(null)
+  const [html2canvasLib, setHtml2canvasLib] = useState<any>(null)
+
+  // Load html2canvas only on client side
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !html2canvasLib) {
+      import('html2canvas')
+        .then((module) => {
+          setHtml2canvasLib(() => module.default)
+        })
+        .catch((error) => {
+          console.error('Failed to load html2canvas:', error)
+        })
+    }
+  }, [html2canvasLib])
 
   if (!data) return null
 
@@ -69,22 +83,32 @@ Dicatat dengan HaloDompet 💰
   // Handle download as PDF/Image
   const handleDownload = async () => {
     try {
-      // Dynamic import html2canvas
-      const html2canvas = (await import('html2canvas')).default
+      if (!receiptRef.current) {
+        toast.error('Element struk tidak ditemukan')
+        return
+      }
 
-      if (!receiptRef.current) return
+      if (!html2canvasLib) {
+        toast.error('Library belum dimuat. Tunggu sebentar dan coba lagi')
+        return
+      }
 
-      toast.loading('Membuat PDF...', { id: 'pdf-download' })
+      toast.loading('Membuat gambar struk...', { id: 'pdf-download' })
+
+      // Small delay to ensure toast is visible
+      await new Promise((resolve) => setTimeout(resolve, 100))
 
       // Capture the receipt element
-      const canvas = await html2canvas(receiptRef.current, {
+      const canvas = await html2canvasLib(receiptRef.current, {
         backgroundColor: '#ffffff',
         scale: 2, // Higher quality
         logging: false,
+        useCORS: true,
+        allowTaint: true,
       })
 
       // Convert to blob and download
-      canvas.toBlob((blob) => {
+      canvas.toBlob((blob: Blob | null) => {
         if (blob) {
           const url = URL.createObjectURL(blob)
           const link = document.createElement('a')
@@ -97,6 +121,8 @@ Dicatat dengan HaloDompet 💰
           URL.revokeObjectURL(url)
 
           toast.success('Struk berhasil diunduh!', { id: 'pdf-download' })
+        } else {
+          throw new Error('Failed to create blob')
         }
       })
     } catch (error) {
@@ -299,6 +325,12 @@ Dicatat dengan HaloDompet 💰
                 onClick={handleDownload}
                 variant="outline"
                 className="font-mono font-semibold gap-2"
+                disabled={!html2canvasLib}
+                title={
+                  !html2canvasLib
+                    ? 'Memuat library... tunggu sebentar'
+                    : 'Unduh struk sebagai gambar'
+                }
               >
                 <Download className="h-4 w-4" />
                 Unduh
