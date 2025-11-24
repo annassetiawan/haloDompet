@@ -77,13 +77,11 @@ export function isAndroidDevice(): boolean {
 
 /**
  * Format number to Indonesian currency format
- * Example: 25000 -> "Rp 25.000"
+ * Example: 25000 -> "Rp25.000"
+ * Uses custom formatting to prevent hydration mismatch between server and client
  */
 export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount)
+  // Custom format to ensure consistency between server and client rendering
+  const formatted = amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  return `Rp${formatted}`
 }
