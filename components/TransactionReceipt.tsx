@@ -1,6 +1,6 @@
 'use client'
 
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { CheckCircle2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -75,6 +75,11 @@ export function TransactionReceipt({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[380px] p-0 gap-0 font-mono overflow-hidden">
+        {/* Hidden title for screen readers */}
+        <DialogTitle className="sr-only">
+          Struk Digital Transaksi - {data.item}
+        </DialogTitle>
+
         {/* Receipt Container */}
         <div className="bg-zinc-50 dark:bg-zinc-900 rounded-lg">
           {/* Header with Success Icon */}
