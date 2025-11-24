@@ -1,9 +1,11 @@
 'use client'
 
+import { useRef } from 'react'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, Share2, Download } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 interface TransactionReceiptProps {
   open: boolean
@@ -25,7 +27,83 @@ export function TransactionReceipt({
   onOpenChange,
   data,
 }: TransactionReceiptProps) {
+  const receiptRef = useRef<HTMLDivElement>(null)
+
   if (!data) return null
+
+  // Handle share functionality
+  const handleShare = async () => {
+    const shareText = `
+🧾 STRUK DIGITAL HALODOMPET
+
+${getTypeLabel(data.type)}: ${data.item}
+Kategori: ${data.category}
+${data.wallet_name ? `Dompet: ${data.wallet_name}` : ''}
+Total: ${data.type === 'income' ? '+' : '-'} ${formatCurrency(data.amount)}
+Tanggal: ${formatDate(data.date)}
+
+Dicatat dengan HaloDompet 💰
+    `.trim()
+
+    try {
+      // Check if Web Share API is available
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Struk Digital HaloDompet',
+          text: shareText,
+        })
+        toast.success('Berhasil membagikan struk!')
+      } else {
+        // Fallback: Copy to clipboard
+        await navigator.clipboard.writeText(shareText)
+        toast.success('Struk berhasil disalin ke clipboard!')
+      }
+    } catch (error) {
+      // User cancelled or error occurred
+      if (error instanceof Error && error.name !== 'AbortError') {
+        toast.error('Gagal membagikan struk')
+      }
+    }
+  }
+
+  // Handle download as PDF/Image
+  const handleDownload = async () => {
+    try {
+      // Dynamic import html2canvas
+      const html2canvas = (await import('html2canvas')).default
+
+      if (!receiptRef.current) return
+
+      toast.loading('Membuat PDF...', { id: 'pdf-download' })
+
+      // Capture the receipt element
+      const canvas = await html2canvas(receiptRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2, // Higher quality
+        logging: false,
+      })
+
+      // Convert to blob and download
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          const fileName = `struk-${data.item.replace(/\s+/g, '-').toLowerCase()}-${new Date().getTime()}.png`
+          link.href = url
+          link.download = fileName
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          URL.revokeObjectURL(url)
+
+          toast.success('Struk berhasil diunduh!', { id: 'pdf-download' })
+        }
+      })
+    } catch (error) {
+      console.error('Download error:', error)
+      toast.error('Gagal mengunduh struk. Coba lagi ya!', { id: 'pdf-download' })
+    }
+  }
 
   // Format date to Indonesian format
   const formatDate = (dateString: string) => {
@@ -81,7 +159,7 @@ export function TransactionReceipt({
         </DialogTitle>
 
         {/* Receipt Container */}
-        <div className="bg-zinc-50 dark:bg-zinc-900 rounded-lg">
+        <div ref={receiptRef} className="bg-zinc-50 dark:bg-zinc-900 rounded-lg">
           {/* Header with Success Icon */}
           <div className="flex flex-col items-center justify-center pt-6 pb-4 space-y-2">
             <div className="w-14 h-14 rounded-full bg-green-500/10 dark:bg-green-500/20 flex items-center justify-center">
@@ -206,11 +284,29 @@ export function TransactionReceipt({
             </p>
           </div>
 
-          {/* Close Button */}
-          <div className="px-4 pb-4">
+          {/* Action Buttons */}
+          <div className="px-4 pb-4 space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                onClick={handleShare}
+                variant="outline"
+                className="font-mono font-semibold gap-2"
+              >
+                <Share2 className="h-4 w-4" />
+                Bagikan
+              </Button>
+              <Button
+                onClick={handleDownload}
+                variant="outline"
+                className="font-mono font-semibold gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Unduh
+              </Button>
+            </div>
             <Button
               onClick={() => onOpenChange(false)}
-              variant="outline"
+              variant="default"
               className="w-full font-mono font-semibold"
             >
               Tutup
