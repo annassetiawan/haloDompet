@@ -85,9 +85,9 @@ export default function ReportsPage() {
     }
   }
 
-  // Calculate statistics - EXPENSE transactions
-  const expenseTransactions = transactions.filter(t => t.type !== 'income')
-  const previousExpenseTransactions = previousMonthTransactions.filter(t => t.type !== 'income')
+  // Calculate statistics - EXPENSE transactions (exclude 'adjustment')
+  const expenseTransactions = transactions.filter(t => t.type === 'expense')
+  const previousExpenseTransactions = previousMonthTransactions.filter(t => t.type === 'expense')
 
   const totalSpent = expenseTransactions.reduce(
     (sum, t) => sum + parseFloat(t.amount.toString()),

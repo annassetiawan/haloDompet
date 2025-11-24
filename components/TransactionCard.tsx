@@ -31,9 +31,20 @@ export function TransactionCard({ transaction, onClick, onDelete, onEdit, showDe
     tagihan: '💳',
     olahraga: '⚽',
     lainnya: '📦',
+    'penyesuaian saldo': '⚖️',
+    adjustment: '⚖️',
   }
 
   const emoji = categoryEmoji[transaction.category.toLowerCase()] || '💰'
+
+  // Determine transaction type and color
+  const isAdjustment = transaction.type === 'adjustment'
+  const isIncome = transaction.type === 'income'
+  const amountColorClass = isAdjustment
+    ? 'text-purple-600 dark:text-purple-400'
+    : isIncome
+    ? 'text-emerald-600 dark:text-emerald-400'
+    : 'text-foreground'
 
   return (
     <div className="relative group/card">
@@ -95,12 +106,17 @@ export function TransactionCard({ transaction, onClick, onDelete, onEdit, showDe
 
           {/* Right side - Amount */}
           <div className={`flex-shrink-0 text-right ${showDelete ? 'mr-2' : ''}`}>
-            <div className="font-normal text-lg text-foreground">
-              {formattedAmount}
+            <div className={`font-normal text-lg ${amountColorClass}`}>
+              {isIncome ? '+' : ''}{formattedAmount}
             </div>
             <div className="text-xs text-muted-foreground mt-0.5">
               {format(new Date(transaction.created_at), 'HH:mm')}
             </div>
+            {isAdjustment && (
+              <div className="text-[10px] text-purple-600 dark:text-purple-400 font-medium mt-0.5">
+                Penyesuaian
+              </div>
+            )}
           </div>
         </div>
       </button>
