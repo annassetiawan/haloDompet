@@ -3,6 +3,7 @@ import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 import { Calendar, Tag, MessageSquare, Trash2, MapPin, Wallet, Pencil } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { formatCurrency } from '@/lib/utils'
 
 interface TransactionCardProps {
   transaction: Transaction
@@ -15,11 +16,7 @@ interface TransactionCardProps {
 
 export function TransactionCard({ transaction, onClick, onDelete, onEdit, showDelete = false, showEdit = false }: TransactionCardProps) {
   const formattedDate = format(new Date(transaction.date), 'dd MMM yyyy', { locale: idLocale })
-  const formattedAmount = new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-  }).format(parseFloat(transaction.amount.toString()))
+  const formattedAmount = formatCurrency(parseFloat(transaction.amount.toString()))
 
   // Category emoji mapping
   const categoryEmoji: Record<string, string> = {
