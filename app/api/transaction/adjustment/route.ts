@@ -70,14 +70,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Determine adjustment type based on difference
-    // Positive difference = need to add money (income)
-    // Negative difference = need to subtract money (expense)
-    const adjustmentType = difference > 0 ? 'income' : 'expense'
+    // Use fixed amount (absolute value of difference)
     const adjustmentAmount = Math.abs(difference)
 
-    // Create adjustment transaction
-    // The database trigger will automatically update wallet balance
+    // Create adjustment transaction with type 'adjustment'
+    // This ensures adjustment transactions don't pollute income/expense statistics
     const { data: transaction, error: transactionError } = await supabase
       .from('transactions')
       .insert({
@@ -85,10 +82,10 @@ export async function POST(request: NextRequest) {
         wallet_id: targetWalletId,
         item: 'Penyesuaian Saldo',
         amount: adjustmentAmount,
-        category: 'Adjustment',
+        category: 'Penyesuaian Saldo',
         date: new Date().toISOString().split('T')[0],
-        type: adjustmentType, // Use income/expense, not 'adjustment'
-        notes: notes || `Koreksi saldo ${difference > 0 ? 'naik' : 'turun'} ${adjustmentAmount.toLocaleString('id-ID')}`,
+        type: 'adjustment', // Use 'adjustment' type to exclude from reports
+        notes: notes || `Koreksi saldo manual: ${difference > 0 ? '+' : '-'}${adjustmentAmount.toLocaleString('id-ID')}. Saldo sebelum: ${currentBalance.toLocaleString('id-ID')}, Saldo baru: ${target_balance.toLocaleString('id-ID')}`,
         voice_text: null,
         location: null,
         payment_method: null
@@ -100,6 +97,28 @@ export async function POST(request: NextRequest) {
       console.error('Error creating adjustment transaction:', transactionError)
       return NextResponse.json(
         { error: 'Failed to create adjustment transaction' },
+        { status: 500 }
+      )
+    }
+
+    // Manually update wallet balance since trigger might not handle 'adjustment' type
+    // This ensures the balance is exactly what the user requested
+    const { error: walletUpdateError } = await supabase
+      .from('wallets')
+      .update({ balance: target_balance })
+      .eq('id', targetWalletId)
+      .eq('user_id', user.id)
+
+    if (walletUpdateError) {
+      console.error('Error updating wallet balance:', walletUpdateError)
+      // Rollback: delete the transaction we just created
+      await supabase
+        .from('transactions')
+        .delete()
+        .eq('id', transaction.id)
+
+      return NextResponse.json(
+        { error: 'Failed to update wallet balance' },
         { status: 500 }
       )
     }

@@ -1,17 +1,19 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react'
-import { Eye, EyeOff, Plus, Wallet as WalletIcon, MoreVertical, Edit, Star, TrendingUp, TrendingDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Eye, EyeOff, Plus, Wallet as WalletIcon, MoreVertical, Edit, Star, TrendingUp, TrendingDown, ChevronLeft, ChevronRight, DollarSign } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { formatCurrency } from '@/lib/utils'
 import type { Wallet } from '@/types'
+import { EditBalanceDialog } from '@/components/EditBalanceDialog'
 
 interface WalletCarouselProps {
   wallets: Wallet[]
@@ -34,6 +36,7 @@ export function WalletCarousel({
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
+  const [selectedWalletForBalance, setSelectedWalletForBalance] = useState<Wallet | null>(null)
 
   const maskedAmount = (amount: number) => {
     return 'Rp ' + '•'.repeat(amount.toString().replace(/[^0-9]/g, '').length)
@@ -221,6 +224,13 @@ export function WalletCarousel({
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuItem
+                                onClick={() => setSelectedWalletForBalance(wallet)}
+                                className="cursor-pointer"
+                              >
+                                <DollarSign className="mr-2 h-4 w-4" /> Sesuaikan Saldo
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
                               <DropdownMenuItem onClick={() => onEditWallet(wallet)} className="cursor-pointer">
                                 <Edit className="mr-2 h-4 w-4" /> Edit Dompet
                               </DropdownMenuItem>
@@ -275,6 +285,23 @@ export function WalletCarousel({
             <div key={i} className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30" />
           ))}
         </div>
+      )}
+
+      {/* Edit Balance Dialog */}
+      {selectedWalletForBalance && (
+        <EditBalanceDialog
+          walletId={selectedWalletForBalance.id}
+          walletName={selectedWalletForBalance.name}
+          currentBalance={selectedWalletForBalance.balance}
+          open={!!selectedWalletForBalance}
+          onOpenChange={(open) => {
+            if (!open) setSelectedWalletForBalance(null)
+          }}
+          onSuccess={() => {
+            setSelectedWalletForBalance(null)
+            // Refresh will be handled by router.refresh() in EditBalanceDialog
+          }}
+        />
       )}
     </div>
   )
