@@ -14,6 +14,7 @@ import { TrialWarningBanner } from '@/components/trial-warning-banner'
 import { DarkModeToggle } from '@/components/DarkModeToggle'
 import { LottieAvatarRecorder } from '@/components/LottieAvatarRecorder'
 import { BottomNav } from '@/components/BottomNav'
+import { TransactionReceipt } from '@/components/TransactionReceipt'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -91,6 +92,19 @@ export function DashboardClient({
 
   // Manual transaction dialog state
   const [isManualTransactionOpen, setIsManualTransactionOpen] = useState(false)
+
+  // Transaction receipt state
+  const [showReceipt, setShowReceipt] = useState(false)
+  const [lastTransactionData, setLastTransactionData] = useState<{
+    item: string
+    amount: number
+    category: string
+    type: 'expense' | 'income' | 'adjustment'
+    date: string
+    wallet_name?: string
+    location?: string | null
+    payment_method?: string | null
+  } | null>(null)
 
   const router = useRouter()
   const supabase = createClient()
@@ -333,6 +347,27 @@ export function DashboardClient({
 
       setStatus('Berhasil! Transaksi tersimpan')
 
+      // Get wallet name if walletId is provided
+      const selectedWalletName = walletId
+        ? wallets.find((w) => w.id === walletId)?.name
+        : undefined
+
+      // Prepare transaction data for receipt
+      const receiptData = {
+        item: processData.data.item,
+        amount: processData.data.amount,
+        category: processData.data.category,
+        type: processData.data.type || 'expense',
+        date: processData.data.date,
+        wallet_name: selectedWalletName,
+        location: processData.data.location,
+        payment_method: processData.data.payment_method,
+      }
+
+      // Show receipt dialog
+      setLastTransactionData(receiptData)
+      setShowReceipt(true)
+
       // Show roast message if available
       if (aiRoastMessage) {
         setRoastMessage(aiRoastMessage)
@@ -341,10 +376,6 @@ export function DashboardClient({
           setRoastMessage(null)
         }, 8000)
       }
-
-      toast.success(
-        `${processData.data.item} - Rp ${processData.data.amount.toLocaleString('id-ID')} tercatat!`,
-      )
 
       await new Promise((resolve) => setTimeout(resolve, 2000))
       setStatus(IDLE_STATUS)
@@ -736,6 +767,13 @@ export function DashboardClient({
           loadWallets()
           loadRecentTransactions()
         }}
+      />
+
+      {/* Transaction Receipt Dialog */}
+      <TransactionReceipt
+        open={showReceipt}
+        onOpenChange={setShowReceipt}
+        data={lastTransactionData}
       />
     </div>
   )
