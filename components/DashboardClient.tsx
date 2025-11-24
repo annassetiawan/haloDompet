@@ -12,7 +12,7 @@ import { ManualTransactionDialog } from '@/components/ManualTransactionDialog'
 import { TransactionCard } from '@/components/TransactionCard'
 import { TrialWarningBanner } from '@/components/trial-warning-banner'
 import { DarkModeToggle } from '@/components/DarkModeToggle'
-import { FinancialAvatarRecorder } from '@/components/FinancialAvatarRecorder'
+import { LottieAvatar } from '@/components/LottieAvatar'
 import { BottomNav } from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
 import {
@@ -556,11 +556,7 @@ export function DashboardClient({
 
           {/* Voice Recording Section */}
           <div className="flex flex-col items-center gap-2">
-            <FinancialAvatarRecorder
-              onTranscript={handleTranscript}
-              onStatusChange={handleStatusChange}
-              isLoading={false}
-            />
+            <LottieAvatar onClick={() => console.log('Avatar clicked - recording will be implemented later')} />
 
             {/* Manual Transaction Button */}
             <Button
