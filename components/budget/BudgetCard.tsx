@@ -46,12 +46,9 @@ export function BudgetCard({ budget, onDelete }: BudgetCardProps) {
   const percentage = Math.min(budget.percentage_used, 100)
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
+    // Simple formatter to avoid hydration mismatch
+    const formatted = Math.floor(amount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+    return `Rp${formatted}`
   }
 
   const getProgressColor = (percentage: number) => {
