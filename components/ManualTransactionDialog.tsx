@@ -170,7 +170,7 @@ export function ManualTransactionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95%] sm:max-w-lg max-h-[90vh] overflow-y-auto overflow-x-hidden rounded-xl">
         <DialogHeader>
           <DialogTitle>Tambah Transaksi Manual</DialogTitle>
           <DialogDescription>
@@ -285,6 +285,7 @@ export function ManualTransactionDialog({
               value={date}
               onChange={(e) => setDate(e.target.value)}
               max={new Date().toISOString().split('T')[0]}
+              className="max-w-full"
               required
             />
           </div>

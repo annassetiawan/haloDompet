@@ -105,7 +105,7 @@ export function AddWalletDialog({ open, onOpenChange, onSuccess }: AddWalletDial
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95%] max-w-md max-h-[85vh] overflow-y-auto rounded-xl">
+      <DialogContent className="w-[95%] max-w-md max-h-[85vh] overflow-y-auto overflow-x-hidden rounded-xl">
         <DialogHeader>
           <DialogTitle>Tambah Dompet Baru</DialogTitle>
           <DialogDescription>
