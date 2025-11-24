@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { formatCurrency } from '@/lib/utils'
 import type { Wallet } from '@/types'
 
 interface WalletCarouselProps {
@@ -33,12 +34,6 @@ export function WalletCarousel({
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
-
-  const formatCurrency = (amount: number) => {
-    // Custom format untuk konsistensi server-client hydration
-    const formatted = amount.toLocaleString('id-ID')
-    return `Rp${formatted}`
-  }
 
   const maskedAmount = (amount: number) => {
     return 'Rp ' + '•'.repeat(amount.toString().replace(/[^0-9]/g, '').length)
