@@ -191,7 +191,7 @@ export function EditWalletDialog({ open, onOpenChange, wallet, onSuccess }: Edit
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-[95%] max-w-md max-h-[85vh] overflow-y-auto rounded-xl">
+        <DialogContent className="w-[95%] max-w-md max-h-[85vh] overflow-y-auto overflow-x-hidden rounded-xl">
           <DialogHeader>
             <DialogTitle>Edit Dompet</DialogTitle>
             <DialogDescription>

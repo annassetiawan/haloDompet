@@ -653,7 +653,7 @@ export function DashboardClient({
 
       {/* Review Transcript Dialog */}
       <Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
-        <DialogContent className="w-[95%] sm:max-w-md rounded-xl">
+        <DialogContent className="w-[95%] sm:max-w-md overflow-x-hidden rounded-xl">
           <DialogHeader>
             <DialogTitle>Review Hasil Rekaman</DialogTitle>
             <DialogDescription>

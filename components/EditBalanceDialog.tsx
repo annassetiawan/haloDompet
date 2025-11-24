@@ -124,7 +124,7 @@ export function EditBalanceDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[95%] max-w-md rounded-xl">
+      <DialogContent className="w-[95%] max-w-md overflow-x-hidden rounded-xl">
         <DialogHeader>
           <DialogTitle>Sesuaikan Saldo</DialogTitle>
           <DialogDescription>
