@@ -35,11 +35,9 @@ export function WalletCarousel({
   const [canScrollRight, setCanScrollRight] = useState(false)
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-    }).format(amount)
+    // Custom format untuk konsistensi server-client hydration
+    const formatted = amount.toLocaleString('id-ID')
+    return `Rp${formatted}`
   }
 
   const maskedAmount = (amount: number) => {
