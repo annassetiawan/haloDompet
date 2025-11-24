@@ -58,7 +58,8 @@ export function LottieAvatar({
     <div
       onClick={handleClick}
       className={`
-        cursor-pointer transition-all duration-300 rounded-full
+        cursor-pointer transition-all duration-300
+        w-40 h-40 flex items-center justify-center
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}
         ${getStateClasses()}
         ${className}
@@ -68,12 +69,13 @@ export function LottieAvatar({
         animationData={getAnimationData()}
         loop={true}
         autoplay={true}
-        className="w-40 h-40"
+        className="w-full h-full"
+        style={{ width: '160px', height: '160px' }}
       />
 
       {/* Label State untuk debugging/development */}
       {process.env.NODE_ENV === 'development' && (
-        <div className="text-xs text-center text-gray-500 mt-2">
+        <div className="text-xs text-center text-gray-500 mt-2 absolute -bottom-6">
           State: {state}
         </div>
       )}
