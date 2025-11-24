@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 
 export function DarkModeToggle() {
   const [isDark, setIsDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     // Check initial theme
     const isDarkMode = document.documentElement.classList.contains("dark");
     setIsDark(isDarkMode);
@@ -25,6 +27,20 @@ export function DarkModeToggle() {
       setIsDark(true);
     }
   };
+
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!mounted) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-9 w-9"
+        disabled
+      >
+        <Moon className="h-4 w-4 opacity-0" />
+      </Button>
+    );
+  }
 
   return (
     <Button
