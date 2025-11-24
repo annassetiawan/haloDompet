@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, History, BarChart3, Sparkles, Settings } from 'lucide-react';
+import { Home, Target, BarChart3, Sparkles, Settings } from 'lucide-react';
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -17,17 +17,10 @@ export function BottomNav() {
           </div>
         </Link>
 
-        <Link href="/history" className="flex flex-col items-center justify-center gap-1 flex-1 py-2">
-          <div className={`flex flex-col items-center justify-center gap-1 transition-colors ${pathname === '/history' ? 'text-primary' : 'text-muted-foreground'}`}>
-            <History className="h-5 w-5" />
-            <span className="text-xs font-medium">Riwayat</span>
-          </div>
-        </Link>
-
-        <Link href="/reports" className="flex flex-col items-center justify-center gap-1 flex-1 py-2">
-          <div className={`flex flex-col items-center justify-center gap-1 transition-colors ${pathname === '/reports' ? 'text-primary' : 'text-muted-foreground'}`}>
-            <BarChart3 className="h-5 w-5" />
-            <span className="text-xs font-medium">Laporan</span>
+        <Link href="/budget" className="flex flex-col items-center justify-center gap-1 flex-1 py-2">
+          <div className={`flex flex-col items-center justify-center gap-1 transition-colors ${pathname === '/budget' ? 'text-primary' : 'text-muted-foreground'}`}>
+            <Target className="h-5 w-5" />
+            <span className="text-xs font-medium">Budget</span>
           </div>
         </Link>
 
@@ -35,6 +28,13 @@ export function BottomNav() {
           <div className={`flex flex-col items-center justify-center gap-1 transition-colors ${pathname === '/advisor' ? 'text-primary' : 'text-muted-foreground'}`}>
             <Sparkles className="h-5 w-5" />
             <span className="text-xs font-medium">Advisor</span>
+          </div>
+        </Link>
+
+        <Link href="/reports" className="flex flex-col items-center justify-center gap-1 flex-1 py-2">
+          <div className={`flex flex-col items-center justify-center gap-1 transition-colors ${pathname === '/reports' ? 'text-primary' : 'text-muted-foreground'}`}>
+            <BarChart3 className="h-5 w-5" />
+            <span className="text-xs font-medium">Laporan</span>
           </div>
         </Link>
 

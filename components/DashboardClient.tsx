@@ -15,6 +15,7 @@ import { DarkModeToggle } from '@/components/DarkModeToggle'
 import { LottieAvatarRecorder } from '@/components/LottieAvatarRecorder'
 import { BottomNav } from '@/components/BottomNav'
 import { TransactionReceipt } from '@/components/TransactionReceipt'
+import { BudgetProgress } from '@/components/BudgetProgress'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -39,6 +40,7 @@ import {
 import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
 import type { User as UserProfile, Transaction, Wallet } from '@/types'
+import type { BudgetSummary } from '@/lib/budget'
 
 // Konstanta untuk status default agar konsisten
 const IDLE_STATUS = 'Coba: "Beli Kopi 25 ribu di Fore atau Dapat gaji 5 juta"'
@@ -50,6 +52,7 @@ interface DashboardClientProps {
   initialTotalBalance: number
   initialGrowthPercentage: number
   initialTransactions: Transaction[]
+  initialBudgetSummary: BudgetSummary[]
 }
 
 export function DashboardClient({
@@ -59,6 +62,7 @@ export function DashboardClient({
   initialTotalBalance,
   initialGrowthPercentage,
   initialTransactions,
+  initialBudgetSummary,
 }: DashboardClientProps) {
   // State Management
   const [user] = useState<User>(initialUser)
@@ -67,6 +71,7 @@ export function DashboardClient({
   const [totalBalance, setTotalBalance] = useState<number>(initialTotalBalance)
   const [growthPercentage, setGrowthPercentage] = useState<number>(initialGrowthPercentage)
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>(initialTransactions)
+  const [budgetSummary, setBudgetSummary] = useState<BudgetSummary[]>(initialBudgetSummary)
 
   // Ubah initial state menggunakan IDLE_STATUS
   const [status, setStatus] = useState(IDLE_STATUS)
@@ -150,6 +155,19 @@ export function DashboardClient({
       }
     } catch (error) {
       console.error('Error loading transactions:', error)
+    }
+  }
+
+  const loadBudgetSummary = async () => {
+    try {
+      const response = await fetch('/api/budget/summary')
+      const data = await response.json()
+
+      if (response.ok && data.budgets) {
+        setBudgetSummary(data.budgets)
+      }
+    } catch (error) {
+      console.error('Error loading budget summary:', error)
     }
   }
 
@@ -344,6 +362,7 @@ export function DashboardClient({
       loadUserProfile()
       loadWallets()
       loadRecentTransactions()
+      loadBudgetSummary()
 
       setStatus('Berhasil! Transaksi tersimpan')
 
@@ -636,6 +655,11 @@ export function DashboardClient({
             </div>
           </div>
 
+          {/* Budget Progress Widget */}
+          <div className="animate-slide-up">
+            <BudgetProgress budgets={budgetSummary} />
+          </div>
+
           {/* Recent Transactions */}
           {recentTransactions.length > 0 && (
             <div className="space-y-4 animate-slide-up">
@@ -766,6 +790,7 @@ export function DashboardClient({
         onSuccess={() => {
           loadWallets()
           loadRecentTransactions()
+          loadBudgetSummary()
         }}
       />
 
