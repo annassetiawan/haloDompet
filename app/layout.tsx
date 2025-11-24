@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { PWAInstallBanner } from '@/components/PWAInstallBanner'
 import './globals.css'
 
 const geistSans = Geist({
@@ -84,6 +85,7 @@ export default function RootLayout({
         {children}
         <Toaster richColors position="top-center" />
         <SpeedInsights />
+        <PWAInstallBanner />
       </body>
     </html>
   )
