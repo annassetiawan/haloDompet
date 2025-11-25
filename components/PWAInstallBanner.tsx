@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { usePWAInstallPrompt } from '@/hooks/usePWAInstallPrompt'
+import { createClient } from '@/lib/supabase/client'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { X, Smartphone, Zap, Shield } from 'lucide-react'
@@ -9,12 +10,14 @@ import { X, Smartphone, Zap, Shield } from 'lucide-react'
 /**
  * Komponen banner untuk mengajak user menginstall PWA
  * Muncul di bagian bawah layar ketika PWA dapat diinstall
+ * HANYA untuk user yang sudah login
  */
 export function PWAInstallBanner() {
   const { isInstallable, promptToInstall } = usePWAInstallPrompt()
   const [isVisible, setIsVisible] = useState(false)
   const [isDismissed, setIsDismissed] = useState(false)
   const [isDevMode, setIsDevMode] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   useEffect(() => {
     // Deteksi development mode
@@ -23,6 +26,17 @@ export function PWAInstallBanner() {
       (window.location.hostname === 'localhost' ||
         window.location.hostname === '127.0.0.1')
     setIsDevMode(isDev)
+
+    // Cek authentication status
+    const checkAuth = async () => {
+      const supabase = createClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      setIsAuthenticated(!!user)
+    }
+
+    checkAuth()
 
     // Di production, cek apakah user sudah pernah dismiss banner
     if (!isDev) {
@@ -34,7 +48,12 @@ export function PWAInstallBanner() {
   }, [])
 
   useEffect(() => {
-    // Di dev mode: selalu tampilkan banner untuk testing
+    // HANYA tampilkan jika user sudah login
+    if (!isAuthenticated) {
+      return
+    }
+
+    // Di dev mode: selalu tampilkan banner untuk testing (jika sudah login)
     // Di production: hanya tampilkan jika installable dan belum dismissed
     const shouldShow = isDevMode || (isInstallable && !isDismissed)
 
@@ -45,7 +64,7 @@ export function PWAInstallBanner() {
 
       return () => clearTimeout(timer)
     }
-  }, [isInstallable, isDismissed, isDevMode])
+  }, [isInstallable, isDismissed, isDevMode, isAuthenticated])
 
   const handleInstall = async () => {
     await promptToInstall()
@@ -62,7 +81,12 @@ export function PWAInstallBanner() {
     }
   }
 
-  // Di dev mode: selalu render untuk testing
+  // Jangan render jika user belum login
+  if (!isAuthenticated) {
+    return null
+  }
+
+  // Di dev mode: selalu render untuk testing (jika sudah login)
   // Di production: jangan render jika tidak installable atau sudah dismissed
   if (!isDevMode && (!isInstallable || isDismissed)) {
     return null
