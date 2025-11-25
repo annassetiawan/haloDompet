@@ -114,24 +114,31 @@ export function DashboardClient({
   const router = useRouter()
   const supabase = createClient()
 
-  // Show early adopter toast once on first load
+  // Show welcome toast for new users
   useEffect(() => {
     // Check if user is early adopter
-    if (isEarlyAdopter(userProfile)) {
-      // Check if toast has been shown before (using localStorage)
-      const hasSeenToast = localStorage.getItem('early_adopter_toast_shown')
+    const isUserEarlyAdopter = isEarlyAdopter(userProfile)
 
-      if (!hasSeenToast) {
-        // Show celebration toast
+    // Check if welcome toast has been shown before
+    const hasSeenWelcomeToast = localStorage.getItem('welcome_toast_shown')
+
+    if (!hasSeenWelcomeToast) {
+      // Show appropriate welcome message
+      if (isUserEarlyAdopter) {
         toast.success('🎉 Selamat! Anda Early Adopter', {
           description: 'Sebagai salah satu dari 20 pengguna pertama, Anda mendapatkan Akses Premium Selamanya tanpa batas waktu!',
           duration: 8000,
           important: true,
         })
-
-        // Mark as shown in localStorage
-        localStorage.setItem('early_adopter_toast_shown', 'true')
+      } else {
+        toast.success('Selamat datang di HaloDompet!', {
+          description: 'Trial 30 hari aktif. Mulai catat pengeluaran Anda dengan suara.',
+          duration: 6000,
+        })
       }
+
+      // Mark as shown in localStorage
+      localStorage.setItem('welcome_toast_shown', 'true')
     }
   }, [userProfile])
 
