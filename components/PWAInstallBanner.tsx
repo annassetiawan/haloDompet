@@ -14,25 +14,38 @@ export function PWAInstallBanner() {
   const { isInstallable, promptToInstall } = usePWAInstallPrompt()
   const [isVisible, setIsVisible] = useState(false)
   const [isDismissed, setIsDismissed] = useState(false)
+  const [isDevMode, setIsDevMode] = useState(false)
 
   useEffect(() => {
-    // Cek apakah user sudah pernah dismiss banner
-    const dismissed = localStorage.getItem('pwa-install-dismissed')
-    if (dismissed) {
-      setIsDismissed(true)
+    // Deteksi development mode
+    const isDev =
+      typeof window !== 'undefined' &&
+      (window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1')
+    setIsDevMode(isDev)
+
+    // Di production, cek apakah user sudah pernah dismiss banner
+    if (!isDev) {
+      const dismissed = localStorage.getItem('pwa-install-dismissed')
+      if (dismissed) {
+        setIsDismissed(true)
+      }
     }
   }, [])
 
   useEffect(() => {
-    // Tampilkan banner dengan delay untuk animasi smooth
-    if (isInstallable && !isDismissed) {
+    // Di dev mode: selalu tampilkan banner untuk testing
+    // Di production: hanya tampilkan jika installable dan belum dismissed
+    const shouldShow = isDevMode || (isInstallable && !isDismissed)
+
+    if (shouldShow) {
       const timer = setTimeout(() => {
         setIsVisible(true)
-      }, 2000) // Delay 2 detik setelah page load
+      }, isDevMode ? 1000 : 2000) // Dev: 1 detik, Production: 2 detik
 
       return () => clearTimeout(timer)
     }
-  }, [isInstallable, isDismissed])
+  }, [isInstallable, isDismissed, isDevMode])
 
   const handleInstall = async () => {
     await promptToInstall()
@@ -41,14 +54,17 @@ export function PWAInstallBanner() {
 
   const handleDismiss = () => {
     setIsVisible(false)
-    // Simpan ke localStorage agar tidak muncul lagi dalam 7 hari
-    const dismissedUntil = Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 hari
-    localStorage.setItem('pwa-install-dismissed', dismissedUntil.toString())
-    setIsDismissed(true)
+    // Di production, simpan ke localStorage agar tidak muncul lagi dalam 7 hari
+    if (!isDevMode) {
+      const dismissedUntil = Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 hari
+      localStorage.setItem('pwa-install-dismissed', dismissedUntil.toString())
+      setIsDismissed(true)
+    }
   }
 
-  // Jangan render jika tidak installable atau sudah dismissed
-  if (!isInstallable || isDismissed) {
+  // Di dev mode: selalu render untuk testing
+  // Di production: jangan render jika tidak installable atau sudah dismissed
+  if (!isDevMode && (!isInstallable || isDismissed)) {
     return null
   }
 
@@ -59,6 +75,13 @@ export function PWAInstallBanner() {
       }`}
     >
       <Card className="relative overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-primary/10 via-background to-background shadow-2xl backdrop-blur-sm">
+        {/* Dev Mode Badge */}
+        {isDevMode && (
+          <div className="absolute left-3 top-3 rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-bold text-white">
+            DEV MODE
+          </div>
+        )}
+
         {/* Tombol Close */}
         <button
           onClick={handleDismiss}
