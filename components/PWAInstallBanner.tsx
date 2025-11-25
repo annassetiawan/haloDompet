@@ -173,7 +173,7 @@ export function PWAInstallBanner() {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="mx-4 w-[calc(100%-2rem)] max-w-md sm:mx-auto sm:w-full">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-md">
         {/* Dev Mode Badge */}
         {isDevMode && (
           <div className="absolute left-4 top-4 z-10 rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-bold text-white">
