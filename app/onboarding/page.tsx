@@ -111,8 +111,17 @@ export default function OnboardingPage() {
           localStorage.setItem('halodompet_webhook_url', webhookUrl);
         }
 
-        // Redirect to main app
-        toast.success('Selamat datang di HaloDompet! Trial 30 hari aktif. 🎉');
+        // Check if user is early adopter
+        const isEarlyAdopter = verifyData.user.trial_ends_at === null && verifyData.user.account_status === 'trial';
+
+        // Redirect to main app with appropriate message
+        if (isEarlyAdopter) {
+          toast.success('🎉 Selamat! Anda Early Adopter - Akses Premium Selamanya!', {
+            duration: 6000,
+          });
+        } else {
+          toast.success('Selamat datang di HaloDompet! Trial 30 hari aktif. 🎉');
+        }
         setTimeout(() => router.push('/'), 500);
       } else {
         console.error('❌ Failed to verify saved data');
