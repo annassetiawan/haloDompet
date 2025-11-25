@@ -68,6 +68,10 @@ export async function createOrUpdateUserProfile(
 
   if (existingUser) {
     // Update existing user
+    console.log('📝 Updating existing user:', userId)
+    console.log('Current user data:', JSON.stringify(existingUser, null, 2))
+    console.log('Data to update:', JSON.stringify(data, null, 2))
+
     const { data: updatedUser, error } = await supabase
       .from('users')
       .update(data)
@@ -76,7 +80,7 @@ export async function createOrUpdateUserProfile(
       .single()
 
     if (error) {
-      console.error('Error updating user profile:', error)
+      console.error('❌ Error updating user profile:', error)
       console.error('Error details:', {
         code: error.code,
         message: error.message,
@@ -84,10 +88,15 @@ export async function createOrUpdateUserProfile(
         hint: error.hint,
         userId,
         dataToUpdate: data,
+        existingUser: existingUser,
       })
+
+      // Log full error for debugging
+      console.error('Full error object:', JSON.stringify(error, null, 2))
       return null
     }
 
+    console.log('✅ Successfully updated user')
     return updatedUser
   } else {
     // Create new user (this should rarely happen since trigger creates users)
