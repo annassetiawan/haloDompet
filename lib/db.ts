@@ -103,8 +103,8 @@ export async function createOrUpdateUserProfile(
         webhook_url: data.webhook_url || null,
         is_onboarded: data.is_onboarded ?? false,
         account_status: 'trial',
-        trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        trial_started_at: new Date().toISOString(),
+        // Don't set trial_ends_at and trial_started_at here
+        // Let the database default values and early adopter trigger handle it
       })
       .select()
       .single()
