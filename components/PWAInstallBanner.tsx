@@ -25,6 +25,7 @@ export function PWAInstallBanner() {
   const [isDismissed, setIsDismissed] = useState(false)
   const [isDevMode, setIsDevMode] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isIOS, setIsIOS] = useState(false)
 
   useEffect(() => {
     // Deteksi development mode
@@ -34,7 +35,15 @@ export function PWAInstallBanner() {
         window.location.hostname === '127.0.0.1')
     setIsDevMode(isDev)
 
-    console.log('🔧 PWA Banner - Dev Mode:', isDev)
+    // Deteksi iOS
+    const iOS =
+      typeof window !== 'undefined' &&
+      /iPad|iPhone|iPod/.test(navigator.userAgent)
+    setIsIOS(iOS)
+
+    console.log('🔧 PWA Dialog - Dev Mode:', isDev)
+    console.log('📱 PWA Dialog - iOS Device:', iOS)
+    console.log('🌐 PWA Dialog - User Agent:', navigator.userAgent)
 
     // Cek authentication status
     const checkAuth = async () => {
@@ -44,7 +53,7 @@ export function PWAInstallBanner() {
       } = await supabase.auth.getUser()
       const isAuth = !!user
       setIsAuthenticated(isAuth)
-      console.log('🔐 PWA Banner - Authenticated:', isAuth)
+      console.log('🔐 PWA Dialog - Authenticated:', isAuth)
     }
 
     checkAuth()
@@ -54,20 +63,27 @@ export function PWAInstallBanner() {
       const dismissed = localStorage.getItem('pwa-install-dismissed')
       if (dismissed) {
         setIsDismissed(true)
-        console.log('❌ PWA Banner - Dismissed in localStorage')
+        console.log('❌ PWA Dialog - Dismissed in localStorage')
       }
     }
   }, [])
 
   useEffect(() => {
+    console.log('🔄 PWA Dialog - Second useEffect triggered', {
+      isDevMode,
+      isAuthenticated,
+      isInstallable,
+      isDismissed,
+    })
+
     // Di dev mode: skip auth check untuk testing
     // Di production: HANYA tampilkan jika user sudah login
     if (!isDevMode && !isAuthenticated) {
-      console.log('⏸️  PWA Dialog - Waiting for authentication')
+      console.log('⏸️  PWA Dialog - Waiting for authentication (not in dev mode)')
       return
     }
 
-    // Di dev mode: selalu tampilkan dialog untuk testing
+    // Di dev mode: selalu tampilkan dialog untuk testing (bahkan di iOS)
     // Di production: hanya tampilkan jika installable dan belum dismissed
     const shouldShow = isDevMode || (isInstallable && !isDismissed)
 
@@ -79,18 +95,47 @@ export function PWAInstallBanner() {
     })
 
     if (shouldShow) {
-      const timer = setTimeout(() => {
-        console.log('✅ PWA Dialog - Showing dialog!')
-        setIsOpen(true)
-      }, isDevMode ? 1000 : 2000) // Dev: 1 detik, Production: 2 detik
+      const delay = isDevMode ? 1000 : 2000
+      console.log(`⏱️  PWA Dialog - Setting timer for ${delay}ms`)
 
-      return () => clearTimeout(timer)
+      const timer = setTimeout(() => {
+        console.log('✅ PWA Dialog - Timer fired! Opening dialog...')
+        setIsOpen(true)
+      }, delay)
+
+      return () => {
+        console.log('🧹 PWA Dialog - Cleaning up timer')
+        clearTimeout(timer)
+      }
+    } else {
+      console.log('❌ PWA Dialog - Not showing (shouldShow = false)')
     }
   }, [isInstallable, isDismissed, isDevMode, isAuthenticated])
 
   const handleInstall = async () => {
-    await promptToInstall()
-    setIsOpen(false)
+    // Untuk iOS, tampilkan instruksi manual
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+
+    if (isIOS) {
+      // iOS tidak support beforeinstallprompt, tampilkan instruksi
+      alert(
+        '📱 Untuk install di iOS:\n\n' +
+        '1. Tap tombol Share (ikon kotak dengan panah)\n' +
+        '2. Scroll dan pilih "Add to Home Screen"\n' +
+        '3. Tap "Add" untuk konfirmasi'
+      )
+      setIsOpen(false)
+      // Simpan dismiss agar tidak muncul terus
+      if (!isDevMode) {
+        const dismissedUntil = Date.now() + 7 * 24 * 60 * 60 * 1000
+        localStorage.setItem('pwa-install-dismissed', dismissedUntil.toString())
+        setIsDismissed(true)
+      }
+    } else {
+      // Android/Chrome - gunakan native prompt
+      await promptToInstall()
+      setIsOpen(false)
+    }
   }
 
   const handleDismiss = () => {
@@ -106,49 +151,58 @@ export function PWAInstallBanner() {
   // Di dev mode: skip auth check untuk testing
   // Di production: jangan render jika user belum login
   if (!isDevMode && !isAuthenticated) {
-    console.log('🚫 PWA Dialog - Not rendering (not authenticated)')
+    console.log('🚫 PWA Dialog - Not rendering (not authenticated)', {
+      isDevMode,
+      isAuthenticated,
+    })
     return null
   }
 
-  // Di dev mode: selalu render untuk testing
+  // Di dev mode: selalu render untuk testing (termasuk di iOS!)
   // Di production: jangan render jika tidak installable atau sudah dismissed
   if (!isDevMode && (!isInstallable || isDismissed)) {
-    console.log('🚫 PWA Dialog - Not rendering (not installable or dismissed)')
+    console.log('🚫 PWA Dialog - Not rendering (not installable or dismissed)', {
+      isDevMode,
+      isInstallable,
+      isDismissed,
+    })
     return null
   }
 
-  console.log('🎨 PWA Dialog - Rendering component')
+  console.log('🎨 PWA Dialog - Rendering component!', { isOpen })
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="mx-4 w-[calc(100%-2rem)] max-w-md sm:mx-auto sm:w-full">
         {/* Dev Mode Badge */}
         {isDevMode && (
-          <div className="absolute left-4 top-4 rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-bold text-white">
+          <div className="absolute left-4 top-4 z-10 rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-bold text-white">
             DEV
           </div>
         )}
 
-        <DialogHeader className="items-center space-y-4 text-center">
+        <DialogHeader className="items-center space-y-4 pb-2 text-center">
           {/* Icon */}
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
             <Smartphone className="h-8 w-8 text-primary" />
           </div>
 
           {/* Title & Description */}
-          <div className="space-y-2">
+          <div className="space-y-2 px-2">
             <DialogTitle className="text-xl">Pasang HaloDompet</DialogTitle>
-            <DialogDescription className="text-center">
-              Install aplikasi ke home screen untuk akses lebih cepat dan pengalaman lebih baik.
+            <DialogDescription className="text-center text-sm leading-relaxed">
+              {isIOS
+                ? 'Install aplikasi ke home screen untuk akses lebih cepat. Tap tombol Share, lalu "Add to Home Screen".'
+                : 'Install aplikasi ke home screen untuk akses lebih cepat dan pengalaman lebih baik.'}
             </DialogDescription>
           </div>
         </DialogHeader>
 
-        <DialogFooter className="flex-col gap-2 sm:flex-col">
-          <Button onClick={handleInstall} className="w-full">
-            Install Sekarang
+        <DialogFooter className="flex-col gap-2 pt-2 sm:flex-col">
+          <Button onClick={handleInstall} className="w-full" size="lg">
+            {isIOS ? 'Lihat Cara Install' : 'Install Sekarang'}
           </Button>
-          <Button onClick={handleDismiss} variant="ghost" className="w-full">
+          <Button onClick={handleDismiss} variant="ghost" className="w-full" size="lg">
             Nanti Saja
           </Button>
         </DialogFooter>
