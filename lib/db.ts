@@ -36,18 +36,33 @@ export async function createOrUpdateUserProfile(
   const supabase = await createClient()
 
   // Verify authentication
-  const { data: { user: authUser } } = await supabase.auth.getUser()
+  console.log('🔐 Verifying authentication for userId:', userId)
+  const { data: authData, error: authError } = await supabase.auth.getUser()
+
+  if (authError) {
+    console.error('❌ Auth error:', authError)
+  }
+
+  console.log('Auth data:', authData)
+  const authUser = authData?.user
+
   if (!authUser) {
-    console.error('No authenticated user in createOrUpdateUserProfile')
+    console.error('❌ No authenticated user in createOrUpdateUserProfile')
+    console.error('Auth data received:', JSON.stringify(authData, null, 2))
     return null
   }
+
+  console.log('✅ Authenticated user:', authUser.id, authUser.email)
+
   if (authUser.id !== userId) {
-    console.error('Authenticated user ID does not match target user ID:', {
+    console.error('❌ Authenticated user ID does not match target user ID:', {
       authUserId: authUser.id,
       targetUserId: userId,
     })
     return null
   }
+
+  console.log('✅ User ID matches, proceeding with update')
 
   // Check if user exists
   const { data: existingUser, error: fetchError } = await supabase
