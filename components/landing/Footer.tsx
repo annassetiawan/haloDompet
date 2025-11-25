@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import Link from 'next/link'
 
@@ -26,7 +26,7 @@ export function Footer() {
               Masuk
             </Link>
             <a
-              href="https://github.com/annassetiawan/haloDompet"
+              href="#"
               target="_blank"
               rel="noopener noreferrer"
               className="text-zinc-400 hover:text-white transition-colors"
