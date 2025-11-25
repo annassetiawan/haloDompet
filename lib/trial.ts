@@ -57,11 +57,26 @@ export function getDaysLeft(trialEndsAt: string | null): number {
 }
 
 /**
+ * Check if user is an early adopter (lifetime premium)
+ * Early adopters have trial_ends_at = null while still on trial status
+ */
+export function isEarlyAdopter(profile: UserProfile | null): boolean {
+  if (!profile) return false
+  if (profile.account_status !== 'trial') return false
+  // Early adopters have NULL trial_ends_at (unlimited trial)
+  return profile.trial_ends_at === null
+}
+
+/**
  * Check if user should see warning banner (7 days or less)
  */
 export function shouldShowWarning(profile: UserProfile | null): boolean {
   if (!profile) return false
   if (profile.account_status !== 'trial') return false
+
+  // Don't show warning for early adopters (they have lifetime access)
+  if (isEarlyAdopter(profile)) return false
+
   if (!profile.trial_ends_at) return false
 
   const daysLeft = getDaysLeft(profile.trial_ends_at)
