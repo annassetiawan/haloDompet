@@ -3,6 +3,12 @@
 -- Created: 2025-11-25
 
 -- ============================================================================
+-- 0. CLEANUP: Drop existing trigger and function if they exist
+-- ============================================================================
+DROP TRIGGER IF EXISTS on_user_created_early_adopter ON public.users;
+DROP FUNCTION IF EXISTS public.handle_early_adopter_trial();
+
+-- ============================================================================
 -- 1. CREATE FUNCTION: handle_early_adopter_trial
 -- ============================================================================
 -- Function ini akan mengecek jumlah user dan memberikan unlimited trial
