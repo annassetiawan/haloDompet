@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -10,13 +10,13 @@ import { AddWalletDialog } from '@/components/AddWalletDialog'
 import { EditWalletDialog } from '@/components/EditWalletDialog'
 import { ManualTransactionDialog } from '@/components/ManualTransactionDialog'
 import { TransactionCard } from '@/components/TransactionCard'
-import { TrialWarningBanner } from '@/components/trial-warning-banner'
 import { DarkModeToggle } from '@/components/DarkModeToggle'
 import { LottieAvatarRecorder } from '@/components/LottieAvatarRecorder'
 import { BottomNav } from '@/components/BottomNav'
 import { TransactionReceipt } from '@/components/TransactionReceipt'
 import { BudgetProgress } from '@/components/BudgetProgress'
 import { Button } from '@/components/ui/button'
+import { isEarlyAdopter } from '@/lib/trial'
 import {
   Dialog,
   DialogContent,
@@ -113,6 +113,34 @@ export function DashboardClient({
 
   const router = useRouter()
   const supabase = createClient()
+
+  // Show welcome toast for new users
+  useEffect(() => {
+    // Check if user is early adopter
+    const isUserEarlyAdopter = isEarlyAdopter(userProfile)
+
+    // Check if welcome toast has been shown before
+    const hasSeenWelcomeToast = localStorage.getItem('welcome_toast_shown')
+
+    if (!hasSeenWelcomeToast) {
+      // Show appropriate welcome message
+      if (isUserEarlyAdopter) {
+        toast.success('🎉 Selamat! Anda Early Adopter', {
+          description: 'Sebagai salah satu dari 20 pengguna pertama, Anda mendapatkan Akses Premium Selamanya tanpa batas waktu!',
+          duration: 8000,
+          important: true,
+        })
+      } else {
+        toast.success('Selamat datang di HaloDompet!', {
+          description: 'Trial 30 hari aktif. Mulai catat pengeluaran Anda dengan suara.',
+          duration: 6000,
+        })
+      }
+
+      // Mark as shown in localStorage
+      localStorage.setItem('welcome_toast_shown', 'true')
+    }
+  }, [userProfile])
 
   const loadUserProfile = async () => {
     try {
@@ -547,9 +575,6 @@ export function DashboardClient({
               </div>
             </div>
           </div>
-
-          {/* Trial Warning Banner */}
-          <TrialWarningBanner profile={userProfile} />
 
           {/* Wallet Carousel - Multi-Wallet Display */}
           <WalletCarousel

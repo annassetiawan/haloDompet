@@ -36,18 +36,33 @@ export async function createOrUpdateUserProfile(
   const supabase = await createClient()
 
   // Verify authentication
-  const { data: { user: authUser } } = await supabase.auth.getUser()
+  console.log('🔐 Verifying authentication for userId:', userId)
+  const { data: authData, error: authError } = await supabase.auth.getUser()
+
+  if (authError) {
+    console.error('❌ Auth error:', authError)
+  }
+
+  console.log('Auth data:', authData)
+  const authUser = authData?.user
+
   if (!authUser) {
-    console.error('No authenticated user in createOrUpdateUserProfile')
+    console.error('❌ No authenticated user in createOrUpdateUserProfile')
+    console.error('Auth data received:', JSON.stringify(authData, null, 2))
     return null
   }
+
+  console.log('✅ Authenticated user:', authUser.id, authUser.email)
+
   if (authUser.id !== userId) {
-    console.error('Authenticated user ID does not match target user ID:', {
+    console.error('❌ Authenticated user ID does not match target user ID:', {
       authUserId: authUser.id,
       targetUserId: userId,
     })
     return null
   }
+
+  console.log('✅ User ID matches, proceeding with update')
 
   // Check if user exists
   const { data: existingUser, error: fetchError } = await supabase
@@ -68,6 +83,10 @@ export async function createOrUpdateUserProfile(
 
   if (existingUser) {
     // Update existing user
+    console.log('📝 Updating existing user:', userId)
+    console.log('Current user data:', JSON.stringify(existingUser, null, 2))
+    console.log('Data to update:', JSON.stringify(data, null, 2))
+
     const { data: updatedUser, error } = await supabase
       .from('users')
       .update(data)
@@ -76,7 +95,7 @@ export async function createOrUpdateUserProfile(
       .single()
 
     if (error) {
-      console.error('Error updating user profile:', error)
+      console.error('❌ Error updating user profile:', error)
       console.error('Error details:', {
         code: error.code,
         message: error.message,
@@ -84,10 +103,15 @@ export async function createOrUpdateUserProfile(
         hint: error.hint,
         userId,
         dataToUpdate: data,
+        existingUser: existingUser,
       })
+
+      // Log full error for debugging
+      console.error('Full error object:', JSON.stringify(error, null, 2))
       return null
     }
 
+    console.log('✅ Successfully updated user')
     return updatedUser
   } else {
     // Create new user (this should rarely happen since trigger creates users)
@@ -103,8 +127,8 @@ export async function createOrUpdateUserProfile(
         webhook_url: data.webhook_url || null,
         is_onboarded: data.is_onboarded ?? false,
         account_status: 'trial',
-        trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        trial_started_at: new Date().toISOString(),
+        // Don't set trial_ends_at and trial_started_at here
+        // Let the database default values and early adopter trigger handle it
       })
       .select()
       .single()

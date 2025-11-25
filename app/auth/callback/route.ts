@@ -20,24 +20,8 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (!error) {
-      // Check if user has completed onboarding
-      const { data: { user } } = await supabase.auth.getUser()
-      let redirectPath = '/onboarding' // Default for new users
-
-      if (user) {
-        // Check if user profile exists and has initial_balance set
-        const { data: profile } = await supabase
-          .from('users')
-          .select('initial_balance')
-          .eq('id', user.id)
-          .single()
-
-        // If profile exists and initial_balance is set (not null, not undefined, and > 0), user has completed onboarding
-        // Balance = 0 or NULL means user hasn't completed onboarding yet
-        if (profile && profile.initial_balance !== null && profile.initial_balance !== undefined && profile.initial_balance > 0) {
-          redirectPath = '/' // Go to dashboard
-        }
-      }
+      // Onboarding is auto-completed, redirect directly to dashboard
+      const redirectPath = '/'
 
       // Allow override with "next" param if provided
       const next = searchParams.get('next') ?? redirectPath

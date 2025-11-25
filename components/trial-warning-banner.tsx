@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertCircle, Clock, Mail } from 'lucide-react'
+import { Clock, Mail } from 'lucide-react'
 import { shouldShowWarning, getDaysLeft, type UserProfile } from '@/lib/trial'
 import { Button } from './ui/button'
 
@@ -9,6 +9,7 @@ interface TrialWarningBannerProps {
 }
 
 export function TrialWarningBanner({ profile }: TrialWarningBannerProps) {
+  // Show trial warning banner if needed
   if (!profile || !shouldShowWarning(profile)) {
     return null
   }

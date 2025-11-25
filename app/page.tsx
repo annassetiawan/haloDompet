@@ -33,9 +33,10 @@ export default async function DashboardPage() {
     redirect('/login')
   }
 
-  if (!userProfile.is_onboarded) {
-    redirect('/onboarding')
-  }
+  // Onboarding is now auto-completed by trigger, skip this check
+  // if (!userProfile.is_onboarded) {
+  //   redirect('/onboarding')
+  // }
 
   if (isTrialExpired(userProfile)) {
     redirect('/trial-expired')
