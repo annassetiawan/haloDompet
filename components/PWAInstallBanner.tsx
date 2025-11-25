@@ -27,13 +27,17 @@ export function PWAInstallBanner() {
         window.location.hostname === '127.0.0.1')
     setIsDevMode(isDev)
 
+    console.log('🔧 PWA Banner - Dev Mode:', isDev)
+
     // Cek authentication status
     const checkAuth = async () => {
       const supabase = createClient()
       const {
         data: { user },
       } = await supabase.auth.getUser()
-      setIsAuthenticated(!!user)
+      const isAuth = !!user
+      setIsAuthenticated(isAuth)
+      console.log('🔐 PWA Banner - Authenticated:', isAuth)
     }
 
     checkAuth()
@@ -43,22 +47,33 @@ export function PWAInstallBanner() {
       const dismissed = localStorage.getItem('pwa-install-dismissed')
       if (dismissed) {
         setIsDismissed(true)
+        console.log('❌ PWA Banner - Dismissed in localStorage')
       }
     }
   }, [])
 
   useEffect(() => {
-    // HANYA tampilkan jika user sudah login
-    if (!isAuthenticated) {
+    // Di dev mode: skip auth check untuk testing
+    // Di production: HANYA tampilkan jika user sudah login
+    if (!isDevMode && !isAuthenticated) {
+      console.log('⏸️  PWA Banner - Waiting for authentication')
       return
     }
 
-    // Di dev mode: selalu tampilkan banner untuk testing (jika sudah login)
+    // Di dev mode: selalu tampilkan banner untuk testing
     // Di production: hanya tampilkan jika installable dan belum dismissed
     const shouldShow = isDevMode || (isInstallable && !isDismissed)
 
+    console.log('🎯 PWA Banner - Should Show:', shouldShow, {
+      isDevMode,
+      isInstallable,
+      isDismissed,
+      isAuthenticated,
+    })
+
     if (shouldShow) {
       const timer = setTimeout(() => {
+        console.log('✅ PWA Banner - Showing banner!')
         setIsVisible(true)
       }, isDevMode ? 1000 : 2000) // Dev: 1 detik, Production: 2 detik
 
@@ -81,16 +96,21 @@ export function PWAInstallBanner() {
     }
   }
 
-  // Jangan render jika user belum login
-  if (!isAuthenticated) {
+  // Di dev mode: skip auth check untuk testing
+  // Di production: jangan render jika user belum login
+  if (!isDevMode && !isAuthenticated) {
+    console.log('🚫 PWA Banner - Not rendering (not authenticated)')
     return null
   }
 
-  // Di dev mode: selalu render untuk testing (jika sudah login)
+  // Di dev mode: selalu render untuk testing
   // Di production: jangan render jika tidak installable atau sudah dismissed
   if (!isDevMode && (!isInstallable || isDismissed)) {
+    console.log('🚫 PWA Banner - Not rendering (not installable or dismissed)')
     return null
   }
+
+  console.log('🎨 PWA Banner - Rendering component')
 
   return (
     <div
