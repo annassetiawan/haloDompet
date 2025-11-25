@@ -128,7 +128,6 @@ export function DashboardClient({
         toast.success('🎉 Selamat! Anda Early Adopter', {
           description: 'Sebagai salah satu dari 20 pengguna pertama, Anda mendapatkan Akses Premium Selamanya tanpa batas waktu!',
           duration: 8000,
-          important: true,
         })
       } else {
         toast.success('Selamat datang di HaloDompet!', {
