@@ -1,7 +1,7 @@
 'use client'
 
-import { AlertCircle, Clock, Mail, Sparkles } from 'lucide-react'
-import { shouldShowWarning, getDaysLeft, isEarlyAdopter, type UserProfile } from '@/lib/trial'
+import { Clock, Mail } from 'lucide-react'
+import { shouldShowWarning, getDaysLeft, type UserProfile } from '@/lib/trial'
 import { Button } from './ui/button'
 
 interface TrialWarningBannerProps {
@@ -9,37 +9,8 @@ interface TrialWarningBannerProps {
 }
 
 export function TrialWarningBanner({ profile }: TrialWarningBannerProps) {
-  if (!profile) {
-    return null
-  }
-
-  // Check if user is early adopter
-  const isEarlyAdopterUser = isEarlyAdopter(profile)
-
-  // Show early adopter banner
-  if (isEarlyAdopterUser) {
-    return (
-      <div className="bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-purple-500/10 border border-purple-500/20 rounded-xl p-4 mb-6 animate-slide-down">
-        <div className="flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-purple-500/10 dark:bg-purple-500/20 flex-shrink-0">
-            <Sparkles className="h-5 w-5 text-purple-500" />
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold text-purple-900 dark:text-purple-100 mb-1">
-              🎉 Selamat! Anda Early Adopter
-            </h3>
-            <p className="text-xs text-purple-800 dark:text-purple-200">
-              Sebagai salah satu dari 20 pengguna pertama, Anda mendapatkan <span className="font-semibold">Akses Premium Selamanya</span> tanpa batas waktu!
-            </p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   // Show trial warning banner if needed
-  if (!shouldShowWarning(profile)) {
+  if (!profile || !shouldShowWarning(profile)) {
     return null
   }
 

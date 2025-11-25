@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -10,13 +10,13 @@ import { AddWalletDialog } from '@/components/AddWalletDialog'
 import { EditWalletDialog } from '@/components/EditWalletDialog'
 import { ManualTransactionDialog } from '@/components/ManualTransactionDialog'
 import { TransactionCard } from '@/components/TransactionCard'
-import { TrialWarningBanner } from '@/components/trial-warning-banner'
 import { DarkModeToggle } from '@/components/DarkModeToggle'
 import { LottieAvatarRecorder } from '@/components/LottieAvatarRecorder'
 import { BottomNav } from '@/components/BottomNav'
 import { TransactionReceipt } from '@/components/TransactionReceipt'
 import { BudgetProgress } from '@/components/BudgetProgress'
 import { Button } from '@/components/ui/button'
+import { isEarlyAdopter } from '@/lib/trial'
 import {
   Dialog,
   DialogContent,
@@ -113,6 +113,27 @@ export function DashboardClient({
 
   const router = useRouter()
   const supabase = createClient()
+
+  // Show early adopter toast once on first load
+  useEffect(() => {
+    // Check if user is early adopter
+    if (isEarlyAdopter(userProfile)) {
+      // Check if toast has been shown before (using localStorage)
+      const hasSeenToast = localStorage.getItem('early_adopter_toast_shown')
+
+      if (!hasSeenToast) {
+        // Show celebration toast
+        toast.success('🎉 Selamat! Anda Early Adopter', {
+          description: 'Sebagai salah satu dari 20 pengguna pertama, Anda mendapatkan Akses Premium Selamanya tanpa batas waktu!',
+          duration: 8000,
+          important: true,
+        })
+
+        // Mark as shown in localStorage
+        localStorage.setItem('early_adopter_toast_shown', 'true')
+      }
+    }
+  }, [userProfile])
 
   const loadUserProfile = async () => {
     try {
@@ -547,9 +568,6 @@ export function DashboardClient({
               </div>
             </div>
           </div>
-
-          {/* Trial Warning Banner */}
-          <TrialWarningBanner profile={userProfile} />
 
           {/* Wallet Carousel - Multi-Wallet Display */}
           <WalletCarousel
