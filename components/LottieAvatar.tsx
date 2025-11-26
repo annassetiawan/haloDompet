@@ -110,10 +110,13 @@ export function LottieAvatar({
       className={`
         cursor-pointer transition-all duration-300
         w-40 h-40 flex items-center justify-center
-        ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}
-        
+        ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
+
         ${className}
       `}
+      style={{
+        transform: disabled ? 'scale(1)' : undefined
+      }}
     >
       <Lottie
         animationData={getAnimationData()}
