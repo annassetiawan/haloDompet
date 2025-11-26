@@ -108,23 +108,22 @@ export function LottieAvatar({
     <div
       onClick={handleClick}
       className={`
-        cursor-pointer transition-all duration-300
-        w-40 h-40 flex items-center justify-center
-        ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
-
+        w-40 h-40 flex items-center justify-center flex-shrink-0
+        ${disabled
+          ? 'opacity-50 cursor-not-allowed'
+          : 'cursor-pointer transition-transform duration-300 hover:scale-105'
+        }
         ${className}
       `}
-      style={{
-        transform: disabled ? 'scale(1)' : undefined
-      }}
     >
-      <Lottie
-        animationData={getAnimationData()}
-        loop={true}
-        autoplay={true}
-        className="w-full h-full"
-        style={{ width: '160px', height: '160px' }}
-      />
+      <div className="w-40 h-40 flex items-center justify-center">
+        <Lottie
+          animationData={getAnimationData()}
+          loop={true}
+          autoplay={true}
+          style={{ width: '160px', height: '160px' }}
+        />
+      </div>
 
       {/* Label State untuk debugging/development
       {process.env.NODE_ENV === 'development' && (
