@@ -2,13 +2,27 @@
 
 import Lottie from 'lottie-react'
 import avatarIdleAnimation from '@/public/animations/avatar-idle.json'
+import avatarListeningAnimation from '@/public/animations/avatar-listening.json'
+import avatarProcessingAnimation from '@/public/animations/avatar-processing.json'
+import avatarSuccessAnimation from '@/public/animations/avatar-success.json'
+import avatarErrorAnimation from '@/public/animations/avatar-error.json'
 
 export type LottieAvatarState =
+  // Basic states
   | 'idle'
   | 'listening'
   | 'processing'
   | 'success'
   | 'error'
+  // Sentiment-based states for EXPENSE
+  | 'proud'        // Pengeluaran hemat/cerdas (warteg, transport umum)
+  | 'concerned'    // Pengeluaran boros tier sedang (30k-100k lifestyle)
+  | 'shocked'      // Pengeluaran sangat boros (>200k lifestyle)
+  | 'disappointed' // Pengeluaran berulang yang buruk
+  // Sentiment-based states for INCOME
+  | 'excited'      // Gaji/income besar
+  | 'celebrating'  // Bonus/windfall/THR
+  | 'motivated'    // Side hustle/freelance income
 
 interface LottieAvatarProps {
   state?: LottieAvatarState
@@ -30,17 +44,48 @@ export function LottieAvatar({
     }
   }
 
-  // Untuk sekarang semua state menggunakan animasi yang sama
-  // Nanti user bisa ganti dengan file berbeda per state:
-  // - avatar-idle.json
-  // - avatar-listening.json
-  // - avatar-processing.json
-  // - avatar-success.json
-  // - avatar-error.json
   const getAnimationData = () => {
-    // Placeholder: gunakan animasi yang sama untuk semua state
-    // TODO: Ganti dengan animasi berbeda per state
-    return avatarIdleAnimation
+    switch (state) {
+      // Basic states
+      case 'idle':
+        return avatarIdleAnimation
+      case 'listening':
+        return avatarListeningAnimation
+      case 'processing':
+        return avatarProcessingAnimation
+      case 'success':
+        return avatarSuccessAnimation
+      case 'error':
+        return avatarErrorAnimation
+
+      // Sentiment-based states for EXPENSE
+      case 'proud':
+        // TODO: Ganti dengan avatar-proud.json saat sudah ada
+        return avatarSuccessAnimation // Placeholder: gunakan success (positif)
+      case 'concerned':
+        // TODO: Ganti dengan avatar-concerned.json saat sudah ada
+        return avatarProcessingAnimation // Placeholder: gunakan processing (ragu-ragu)
+      case 'shocked':
+        // TODO: Ganti dengan avatar-shocked.json saat sudah ada
+        return avatarErrorAnimation // Placeholder: gunakan error (negatif kuat)
+      case 'disappointed':
+        // TODO: Ganti dengan avatar-disappointed.json saat sudah ada
+        return avatarErrorAnimation // Placeholder: gunakan error (negatif)
+
+      // Sentiment-based states for INCOME
+      case 'excited':
+        // TODO: Ganti dengan avatar-excited.json saat sudah ada
+        return avatarSuccessAnimation // Placeholder: gunakan success (positif kuat)
+      case 'celebrating':
+        // TODO: Ganti dengan avatar-celebrating.json saat sudah ada
+        return avatarSuccessAnimation // Placeholder: gunakan success (positif kuat)
+      case 'motivated':
+        // TODO: Ganti dengan avatar-motivated.json saat sudah ada
+        return avatarSuccessAnimation // Placeholder: gunakan success (positif)
+
+      default:
+        return avatarIdleAnimation
+    }
   }
 
   // // State-based styling
