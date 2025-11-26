@@ -17,6 +17,7 @@ export function WebSpeechRecorder({
   onStatusChange
 }: WebSpeechRecorderProps) {
   const [isListening, setIsListening] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
   const recognitionRef = useRef<any>(null)
   const finalTranscriptRef = useRef<string>('')
   const shouldBeListeningRef = useRef<boolean>(false)
@@ -30,6 +31,7 @@ export function WebSpeechRecorder({
     if (recognitionRef.current) {
       recognitionRef.current.stop()
       setIsListening(false)
+      setIsProcessing(false)
     }
   }
 
@@ -129,6 +131,7 @@ export function WebSpeechRecorder({
       // Other errors - stop listening
       shouldBeListeningRef.current = false
       setIsListening(false)
+      setIsProcessing(false)
 
       let errorMsg = 'Terjadi kesalahan'
       if (event.error === 'not-allowed') {
@@ -160,17 +163,30 @@ export function WebSpeechRecorder({
       const finalText = finalTranscriptRef.current.trim()
 
       if (finalText) {
-        onStatusChange?.(`Terdeteksi: "${finalText}"`)
-        onTranscript(finalText)
+        // Show processing state with artificial delay for better UX consistency
+        setIsProcessing(true)
+        onStatusChange?.("Memproses...")
+
+        // Delay 700ms to show processing state (similar to MediaRecorder UX)
+        setTimeout(() => {
+          onStatusChange?.(`Terdeteksi: "${finalText}"`)
+          onTranscript(finalText)
+          setIsProcessing(false)
+
+          // Clear ref
+          finalTranscriptRef.current = ''
+          recognitionRef.current = null
+          restartCountRef.current = 0
+        }, 700)
       } else {
         onStatusChange?.("Tidak ada suara terdeteksi")
         toast.info("Tidak ada suara terdeteksi. Coba lagi!")
-      }
 
-      // Clear ref
-      finalTranscriptRef.current = ''
-      recognitionRef.current = null
-      restartCountRef.current = 0
+        // Clear ref
+        finalTranscriptRef.current = ''
+        recognitionRef.current = null
+        restartCountRef.current = 0
+      }
     }
 
     // Start listening
@@ -181,6 +197,7 @@ export function WebSpeechRecorder({
       toast.error(errorMsg)
       onError?.(errorMsg)
       setIsListening(false)
+      setIsProcessing(false)
     }
   }
 
@@ -194,10 +211,13 @@ export function WebSpeechRecorder({
         className="neomorphic-input"
       />
       <label
-        className={`neomorphic-button ${isListening ? 'active' : ''}`}
+        className={`neomorphic-button ${isListening ? 'active' : ''} ${isProcessing ? 'processing' : ''}`}
         htmlFor="record-checkbox"
         onClick={(e) => {
           e.preventDefault()
+          if (isProcessing) {
+            return // Do nothing while processing
+          }
           if (isListening) {
             stopListening()
           } else {
@@ -206,7 +226,9 @@ export function WebSpeechRecorder({
         }}
       >
         <span className="neomorphic-icon">
-          {isListening ? (
+          {isProcessing ? (
+            <Loader2 className="h-12 w-12 md:h-16 md:w-16 animate-spin" />
+          ) : isListening ? (
             <Mic className="h-12 w-12 md:h-16 md:w-16" />
           ) : (
             <MicOff className="h-12 w-12 md:h-16 md:w-16" />
