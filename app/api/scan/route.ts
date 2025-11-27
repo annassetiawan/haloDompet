@@ -121,12 +121,12 @@ ${expenseCategories.map((cat, idx) => `${idx + 1}. ${cat.name}`).join('\n')}
 
 ## ⚠️ CRITICAL RULES:
 
-1. **Output HANYA JSON murni** - TIDAK BOLEH ada markdown wrapper ```json atau ```
-2. **Amount HARUS number** - Bukan string, bukan ada separator
-3. **Category HARUS dari list** - Jangan ngarang kategori baru
-4. **Type SELALU "expense"** - Ini struk pengeluaran
-5. **Date SELALU "${today}"** - Jangan pakai tanggal dari struk
-6. **Jika gambar tidak jelas/bukan struk:**
+1. Output HANYA JSON murni - TIDAK BOLEH ada markdown wrapper triple backtick json atau triple backtick
+2. Amount HARUS number - Bukan string, bukan ada separator
+3. Category HARUS dari list - Jangan ngarang kategori baru
+4. Type SELALU "expense" - Ini struk pengeluaran
+5. Date SELALU "${today}" - Jangan pakai tanggal dari struk
+6. Jika gambar tidak jelas/bukan struk:
    Return: {"error": "Gambar tidak jelas atau bukan struk belanja", "item": null, "amount": 0, "category": "Lainnya", "type": "expense", "date": "${today}", "location": null, "payment_method": null}
 
 ## 📝 CONTOH OUTPUT:
