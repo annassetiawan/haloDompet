@@ -10,6 +10,8 @@ import { ArrowLeft, Send, Sparkles, Loader2, TrendingUp, PiggyBank, Target, Ligh
 import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
 import { useAIAdvisor } from '@/hooks/useAIAdvisor'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 const SUGGESTED_QUESTIONS = [
   {
@@ -142,9 +144,11 @@ export default function AdvisorPage() {
                   <Sparkles className="h-4 w-4 text-purple-500" />
                   <span className="text-xs font-medium text-muted-foreground">Dompie</span>
                 </div>
-                <p className="text-sm whitespace-pre-wrap leading-relaxed">
-                  👋 Halo! Aku Dompie, asisten keuangan pribadimu. Aku siap membantu menganalisis pola pengeluaran dan memberikan saran untuk keuangan yang lebih sehat. Ada yang mau kamu tanyakan?
-                </p>
+                <div className="text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    👋 Halo! Aku Dompie, asisten keuangan pribadimu. Aku siap membantu menganalisis pola pengeluaran dan memberikan saran untuk keuangan yang lebih sehat. Ada yang mau kamu tanyakan?
+                  </ReactMarkdown>
+                </div>
               </div>
             </div>
           )}
@@ -167,12 +171,20 @@ export default function AdvisorPage() {
                     <span className="text-xs font-medium text-muted-foreground">Dompie</span>
                   </div>
                 )}
-                <p className="text-sm whitespace-pre-wrap leading-relaxed">
-                  {message.content}
-                  {message.isStreaming && (
-                    <span className="inline-block w-2 h-4 bg-purple-500 animate-pulse ml-1" />
-                  )}
-                </p>
+                {message.role === 'assistant' ? (
+                  <div className="text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert prose-p:my-1 prose-ul:my-1 prose-ol:my-1">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {message.content}
+                    </ReactMarkdown>
+                    {message.isStreaming && (
+                      <span className="inline-block w-2 h-4 bg-purple-500 animate-pulse ml-1" />
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                    {message.content}
+                  </p>
+                )}
                 <p className={`text-xs mt-2 ${
                   message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
                 }`}>

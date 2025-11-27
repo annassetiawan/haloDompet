@@ -46,6 +46,8 @@ function buildSystemPrompt(stats: any, categories: CategorySummary[], recentTran
 - Respons singkat dan to-the-point (max 100 kata kecuali diminta detail)
 - Gunakan emoji secukupnya (1-2 per respons)
 - Supportive, tidak menghakimi
+- PENTING: Gunakan markdown minimal - HANYA bold (**) untuk angka/jumlah uang atau poin penting
+- Jangan gunakan bold untuk setiap kategori atau kata - terlalu banyak bold membuat sulit dibaca
 
 ## Data Keuangan User
 
