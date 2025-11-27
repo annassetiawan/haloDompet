@@ -16,22 +16,22 @@ import remarkGfm from 'remark-gfm'
 const SUGGESTED_QUESTIONS = [
   {
     icon: TrendingUp,
-    question: "Bagaimana pola pengeluaran saya bulan ini?",
+    question: "Pengeluaran bulan ini berapa? Bandingkan dengan bulan lalu",
     color: "text-blue-500"
   },
   {
     icon: PiggyBank,
-    question: "Di kategori mana saya paling boros?",
+    question: "Kategori apa yang paling boros 3 bulan terakhir?",
     color: "text-green-500"
   },
   {
     icon: Target,
-    question: "Berikan tips untuk menghemat pengeluaran",
+    question: "Kasih saran cara ngurangin pengeluaran yang paling efektif",
     color: "text-purple-500"
   },
   {
     icon: Lightbulb,
-    question: "Ada anomali dalam pengeluaran saya?",
+    question: "Ada pola pengeluaran mencurigakan atau tidak biasa?",
     color: "text-amber-500"
   },
 ]
