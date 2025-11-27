@@ -2,9 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Target, BarChart3, Sparkles, Settings } from 'lucide-react';
+import { Home, Target, BarChart3, Sparkles, Camera } from 'lucide-react';
 
-export function BottomNav() {
+interface BottomNavProps {
+  onScanClick?: () => void;
+}
+
+export function BottomNav({ onScanClick }: BottomNavProps) {
   const pathname = usePathname();
 
   return (
@@ -24,6 +28,20 @@ export function BottomNav() {
           </div>
         </Link>
 
+        {/* Scan Struk Button - Center with special styling */}
+        <button
+          onClick={onScanClick}
+          disabled={!onScanClick}
+          className="flex flex-col items-center justify-center gap-1 flex-1 py-2 relative -mt-2"
+        >
+          <div className="flex flex-col items-center justify-center gap-1 transition-all">
+            <div className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
+              <Camera className="h-6 w-6" />
+            </div>
+            <span className="text-xs font-medium text-primary">Scan</span>
+          </div>
+        </button>
+
         <Link href="/advisor" className="flex flex-col items-center justify-center gap-1 flex-1 py-2">
           <div className={`flex flex-col items-center justify-center gap-1 transition-colors ${pathname === '/advisor' ? 'text-primary' : 'text-muted-foreground'}`}>
             <Sparkles className="h-5 w-5" />
@@ -35,13 +53,6 @@ export function BottomNav() {
           <div className={`flex flex-col items-center justify-center gap-1 transition-colors ${pathname === '/reports' ? 'text-primary' : 'text-muted-foreground'}`}>
             <BarChart3 className="h-5 w-5" />
             <span className="text-xs font-medium">Laporan</span>
-          </div>
-        </Link>
-
-        <Link href="/settings" className="flex flex-col items-center justify-center gap-1 flex-1 py-2">
-          <div className={`flex flex-col items-center justify-center gap-1 transition-colors ${pathname === '/settings' ? 'text-primary' : 'text-muted-foreground'}`}>
-            <Settings className="h-5 w-5" />
-            <span className="text-xs font-medium">Setting</span>
           </div>
         </Link>
       </div>

@@ -36,7 +36,6 @@ import {
   CheckCircle2,
   XCircle,
   PlusCircle,
-  Camera,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
@@ -647,7 +646,7 @@ export function DashboardClient({
       </nav>
 
       {/* Bottom Navigation - Mobile Only */}
-      <BottomNav />
+      <BottomNav onScanClick={handleScanClick} />
 
       {/* Main Content */}
       <main className="md:pt-16 pb-20 md:pb-0">
@@ -758,34 +757,18 @@ export function DashboardClient({
               isLoading={false}
             />
 
-            {/* Action Buttons Row */}
-            <div className="flex items-center gap-3">
-              {/* Scan Receipt Button */}
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={handleScanClick}
-                disabled={isScanning || isProcessing}
-                className="gap-2 border-2 hover:bg-primary/10"
-                title="Scan Struk"
-              >
-                <Camera className="h-5 w-5" />
-                Scan Struk
-              </Button>
+            {/* Manual Transaction Button */}
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => setIsManualTransactionOpen(true)}
+              className="gap-2 border-2 border-dashed hover:border-solid hover:bg-primary/10"
+            >
+              <PlusCircle className="h-5 w-5" />
+              Input Manual
+            </Button>
 
-              {/* Manual Transaction Button */}
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => setIsManualTransactionOpen(true)}
-                className="gap-2 border-2 border-dashed hover:border-solid hover:bg-primary/10"
-              >
-                <PlusCircle className="h-5 w-5" />
-                Input Manual
-              </Button>
-            </div>
-
-            {/* Hidden File Input */}
+            {/* Hidden File Input for Scan Receipt */}
             <input
               ref={fileInputRef}
               type="file"
