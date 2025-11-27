@@ -19,6 +19,7 @@ interface TransactionReceiptProps {
     wallet_name?: string
     location?: string | null
     payment_method?: string | null
+    note?: string | null
   } | null
 }
 
@@ -53,6 +54,7 @@ export function TransactionReceipt({
 ${getTypeLabel(data.type)}: ${data.item}
 Kategori: ${data.category}
 ${data.wallet_name ? `Dompet: ${data.wallet_name}` : ''}
+${data.note ? `\nCatatan:\n${data.note}` : ''}
 Total: ${data.type === 'income' ? '+' : '-'} ${formatCurrency(data.amount)}
 Tanggal: ${formatDate(data.date)}
 
@@ -272,6 +274,16 @@ Dicatat dengan HaloDompet 💰
                 <span className="text-zinc-900 dark:text-zinc-100 font-semibold">
                   {data.payment_method}
                 </span>
+              </div>
+            )}
+
+            {/* Note (if available) */}
+            {data.note && (
+              <div className="pt-2">
+                <div className="text-zinc-500 dark:text-zinc-500 mb-1">Catatan:</div>
+                <div className="text-zinc-900 dark:text-zinc-100 text-[11px] leading-relaxed whitespace-pre-wrap bg-zinc-100 dark:bg-zinc-800 rounded p-2 border border-zinc-200 dark:border-zinc-700">
+                  {data.note}
+                </div>
               </div>
             )}
           </div>

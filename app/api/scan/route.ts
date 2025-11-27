@@ -70,7 +70,8 @@ Kamu adalah mesin OCR khusus untuk membaca struk belanja/receipt. Analisis gamba
   "category": "Pilih dari kategori yang tersedia di bawah",
   "type": "expense",
   "location": "Nama toko + cabang jika ada (misal: Alfamart Sudirman)",
-  "payment_method": "Metode pembayaran jika tertera (misal: Cash, Debit BCA, QRIS)"
+  "payment_method": "Metode pembayaran jika tertera (misal: Cash, Debit BCA, QRIS)",
+  "notes_summary": "Rangkuman detail item yang dibeli (jika ada banyak item di struk)"
 }
 
 ## 📊 KATEGORI PENGELUARAN YANG TERSEDIA:
@@ -119,6 +120,21 @@ ${expenseCategories.map((cat, idx) => `${idx + 1}. ${cat.name}`).join('\n')}
 - Jika ada nama bank (BCA, Mandiri, dll), sertakan: "Debit BCA"
 - Jika tidak tertera, gunakan null
 
+### 7. Notes Summary (PENTING untuk Struk Panjang!)
+- **Tujuan:** Field ini untuk menyimpan detail item-item yang dibeli, terutama untuk belanja bulanan/grocery
+- **Kapan mengisi:**
+  * Jika struk memiliki BANYAK item (>3 item)
+  * Jika kamu bisa membaca nama-nama barang di struk
+  * Jika ini struk belanja grocery/supermarket/minimarket
+- **Format:**
+  * List item dengan format: "Nama Item (Rp harga)"
+  * Pisahkan dengan koma atau bullet point
+  * Contoh: "Beras 5kg (Rp 75.000), Minyak Goreng (Rp 35.000), Gula Pasir (Rp 15.000)"
+  * JANGAN tulis semua item jika terlalu banyak (>10), cukup item-item utama/penting
+- **Jika tidak ada detail item atau struk simpel (1-2 item):**
+  * Gunakan null
+  * Nama merchant saja sudah cukup di field "item"
+
 ## ⚠️ CRITICAL RULES:
 
 1. Output HANYA JSON murni - TIDAK BOLEH ada markdown wrapper triple backtick json atau triple backtick
@@ -131,17 +147,20 @@ ${expenseCategories.map((cat, idx) => `${idx + 1}. ${cat.name}`).join('\n')}
 
 ## 📝 CONTOH OUTPUT:
 
-### Contoh 1: Struk Alfamart
-{"item": "Alfamart", "amount": 47500, "date": "${today}", "category": "Belanja Kebutuhan", "type": "expense", "location": "Alfamart Sudirman", "payment_method": "Cash"}
+### Contoh 1: Struk Alfamart (Belanja Bulanan - BANYAK ITEM)
+{"item": "Alfamart", "amount": 247500, "date": "${today}", "category": "Belanja Kebutuhan", "type": "expense", "location": "Alfamart Sudirman", "payment_method": "Cash", "notes_summary": "Beras 5kg (Rp 75.000), Minyak Goreng 2L (Rp 35.000), Gula Pasir 1kg (Rp 15.000), Telur 1kg (Rp 28.000), Mie Instan 10pcs (Rp 25.000), Sabun Mandi (Rp 18.000), dll"}
 
-### Contoh 2: Struk Starbucks
-{"item": "Starbucks", "amount": 85000, "date": "${today}", "category": "Makanan", "type": "expense", "location": "Starbucks Grand Indonesia", "payment_method": "Debit BCA"}
+### Contoh 2: Struk Starbucks (Item Tunggal)
+{"item": "Starbucks", "amount": 85000, "date": "${today}", "category": "Makanan", "type": "expense", "location": "Starbucks Grand Indonesia", "payment_method": "Debit BCA", "notes_summary": null}
 
-### Contoh 3: Struk SPBU
-{"item": "Pertamina", "amount": 50000, "date": "${today}", "category": "Transportasi", "type": "expense", "location": "SPBU Pertamina", "payment_method": "Cash"}
+### Contoh 3: Struk SPBU (Simpel)
+{"item": "Pertamina", "amount": 50000, "date": "${today}", "category": "Transportasi", "type": "expense", "location": "SPBU Pertamina", "payment_method": "Cash", "notes_summary": null}
 
-### Contoh 4: Gambar tidak jelas
-{"error": "Gambar tidak jelas atau bukan struk belanja", "item": null, "amount": 0, "category": "Lainnya", "type": "expense", "date": "${today}", "location": null, "payment_method": null}
+### Contoh 4: Struk Indomaret (Beberapa Item)
+{"item": "Indomaret", "amount": 125000, "date": "${today}", "category": "Belanja Kebutuhan", "type": "expense", "location": "Indomaret Tebet", "payment_method": "QRIS", "notes_summary": "Susu UHT 12pcs (Rp 48.000), Roti Tawar (Rp 15.000), Snack (Rp 35.000), Tissue (Rp 27.000)"}
+
+### Contoh 5: Gambar tidak jelas
+{"error": "Gambar tidak jelas atau bukan struk belanja", "item": null, "amount": 0, "category": "Lainnya", "type": "expense", "date": "${today}", "location": null, "payment_method": null, "notes_summary": null}
 
 ## 🚀 EKSEKUSI:
 Sekarang analisis gambar struk yang diberikan dan ekstrak informasinya dalam format JSON yang tepat!

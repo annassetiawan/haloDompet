@@ -609,15 +609,25 @@ export function DashboardClient({
         throw new Error(errorMsg)
       }
 
-      // Combine location and payment_method into note
+      // Combine notes_summary, location, and payment_method into note
       const noteParts = []
+
+      // Priority 1: Add notes_summary if exists (detail items from receipt)
+      if (data.data.notes_summary) {
+        noteParts.push(data.data.notes_summary)
+      }
+
+      // Priority 2: Add location if exists
       if (data.data.location) {
-        noteParts.push(`Lokasi: ${data.data.location}`)
+        noteParts.push(`📍 ${data.data.location}`)
       }
+
+      // Priority 3: Add payment method if exists
       if (data.data.payment_method) {
-        noteParts.push(`Metode: ${data.data.payment_method}`)
+        noteParts.push(`💳 ${data.data.payment_method}`)
       }
-      const combinedNote = noteParts.length > 0 ? noteParts.join(' • ') : null
+
+      const combinedNote = noteParts.length > 0 ? noteParts.join('\n') : null
 
       // Set scanned data for review
       setScannedData({

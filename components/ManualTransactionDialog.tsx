@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { WalletSelector } from '@/components/WalletSelector'
 import { ArrowDownCircle, ArrowUpCircle, Loader2 } from 'lucide-react'
@@ -32,6 +33,7 @@ export function ManualTransactionDialog({
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState('')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [note, setNote] = useState('')
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -92,6 +94,7 @@ export function ManualTransactionDialog({
       setItem('')
       setAmount('')
       setDate(new Date().toISOString().split('T')[0])
+      setNote('')
       setIsSubmitting(false)
       // Reset category to first expense category
       const expenseCategories = categories.filter(c => c.type === 'expense')
@@ -140,6 +143,7 @@ export function ManualTransactionDialog({
           category,
           date,
           type,
+          note: note.trim() || null,
           wallet_id: selectedWalletId,
         }),
       })
@@ -288,6 +292,21 @@ export function ManualTransactionDialog({
               className="max-w-full"
               required
             />
+          </div>
+
+          {/* Note */}
+          <div className="space-y-2">
+            <Label htmlFor="note">Catatan (Opsional)</Label>
+            <Textarea
+              id="note"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Detail item, lokasi, atau informasi tambahan lainnya..."
+              className="min-h-[80px] resize-none"
+            />
+            <p className="text-xs text-muted-foreground">
+              Gunakan untuk mencatat detail belanja, lokasi toko, dll.
+            </p>
           </div>
 
           {/* Wallet Selector */}
