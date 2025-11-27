@@ -462,7 +462,7 @@ export function DashboardClient({
     // Jika status mengandung kutip (misal: Memproses: "Beli kopi"), itu kata-kata user -> "Anda"
     if (status.includes('"') || status.includes("'")) return 'Anda'
     // Sisanya status sistem
-    return 'Status'
+    return 'Dompie'
   }
 
   const bubbleLabel = getBubbleLabel()
