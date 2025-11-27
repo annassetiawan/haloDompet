@@ -35,8 +35,15 @@ function checkRateLimit(userId: string): boolean {
   return true
 }
 
+// Helper to convert month code to Indonesian month name
+function getMonthName(monthCode: string): string {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+  const [year, month] = monthCode.split('-')
+  return `${months[parseInt(month) - 1]} ${year}`
+}
+
 // Build system prompt
-function buildSystemPrompt(stats: any, categories: CategorySummary[], recentTransactions: any[]): string {
+function buildSystemPrompt(stats: any, categories: CategorySummary[], recentTransactions: any[], monthlyCategories: Map<string, Map<string, number>>): string {
   const highestCategory = categories[0]
 
   return `Kamu adalah Dompie, asisten keuangan pribadi di HaloDompet.
@@ -67,10 +74,22 @@ ${recentTransactions.slice(0, 5).map(t =>
     `- ${t.item}: Rp ${t.amount.toLocaleString('id-ID')} [${t.category}]`
   ).join('\n')}
 
+### Pengeluaran Per Bulan (6 Bulan Terakhir)
+${stats.monthlyData.map((m: any) => {
+  const monthCats = Array.from(monthlyCategories.get(m.month)?.entries() || [])
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+  const catsStr = monthCats.map(([cat, amt]) => `${cat} Rp ${amt.toLocaleString('id-ID')}`).join(', ')
+  return `- ${getMonthName(m.month)}: Total Rp ${m.total.toLocaleString('id-ID')} (${m.count}x)\n  Kategori: ${catsStr || 'Tidak ada'}`
+}).join('\n')}
+
 ## Panduan
 - Data di atas HANYA menampilkan PENGELUARAN (tidak termasuk saldo awal atau adjustment)
 - Pemasukan dan pengeluaran sudah dipisahkan dengan benar
 - Arus Kas Bersih = Pemasukan - Pengeluaran
+- Kamu BISA menjawab pertanyaan tentang pengeluaran bulan tertentu dari data "Pengeluaran Per Bulan"
+- Jika ditanya "pengeluaran bulan X berapa", lihat data bulanan di atas
+- Jika ditanya kategori per bulan, lihat "Terbesar" di data bulanan
 - Jawab dengan data spesifik jika ditanya
 - Berikan 2-3 tips actionable jika diminta saran
 ${highestCategory && highestCategory.percentage > 40 ?
@@ -167,6 +186,49 @@ export async function POST(request: NextRequest) {
       }))
       .sort((a, b) => b.total - a.total)
 
+    // Group by month (last 6 months)
+    const monthlyExpenses = new Map<string, { total: number; count: number; income: number }>()
+    const monthlyCategories = new Map<string, Map<string, number>>()
+
+    // Process expenses by month
+    expenseTransactions.forEach(t => {
+      const monthKey = t.date.substring(0, 7) // YYYY-MM format
+      const existing = monthlyExpenses.get(monthKey) || { total: 0, count: 0, income: 0 }
+      monthlyExpenses.set(monthKey, {
+        total: existing.total + parseFloat(t.amount.toString()),
+        count: existing.count + 1,
+        income: existing.income
+      })
+
+      // Track categories per month
+      if (!monthlyCategories.has(monthKey)) {
+        monthlyCategories.set(monthKey, new Map())
+      }
+      const monthCats = monthlyCategories.get(monthKey)!
+      const catTotal = monthCats.get(t.category) || 0
+      monthCats.set(t.category, catTotal + parseFloat(t.amount.toString()))
+    })
+
+    // Add income to monthly data
+    incomeTransactions.forEach(t => {
+      const monthKey = t.date.substring(0, 7)
+      const existing = monthlyExpenses.get(monthKey) || { total: 0, count: 0, income: 0 }
+      monthlyExpenses.set(monthKey, {
+        ...existing,
+        income: existing.income + parseFloat(t.amount.toString())
+      })
+    })
+
+    // Sort months and get last 6 months
+    const monthlyData = Array.from(monthlyExpenses.entries())
+      .map(([month, data]) => ({
+        month,
+        ...data,
+        netFlow: data.income - data.total
+      }))
+      .sort((a, b) => b.month.localeCompare(a.month))
+      .slice(0, 6)
+
     const stats = {
       totalSpent,
       totalTransactions: totalExpenseTransactions,
@@ -174,7 +236,9 @@ export async function POST(request: NextRequest) {
       totalIncome,
       totalIncomeTransactions,
       netCashFlow: totalIncome - totalSpent,
-      categorySummary: categorySummaryRaw
+      categorySummary: categorySummaryRaw,
+      monthlyData,
+      monthlyCategories
     }
 
     const categories: CategorySummary[] = stats.categorySummary.slice(0, 5).map(cat => ({
@@ -206,7 +270,7 @@ export async function POST(request: NextRequest) {
       ],
     })
 
-    const systemPrompt = buildSystemPrompt(stats, categories, recentTransactions)
+    const systemPrompt = buildSystemPrompt(stats, categories, recentTransactions, stats.monthlyCategories)
 
     // Build history
     const recentHistory = conversationHistory.slice(-10)
