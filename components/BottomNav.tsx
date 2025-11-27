@@ -42,11 +42,11 @@ export function BottomNav({ onScanClick }: BottomNavProps) {
         <button
           onClick={onScanClick}
           disabled={!onScanClick}
-          className="flex flex-col items-center justify-center gap-1 flex-1 py-2 relative -mt-2"
+          className="flex flex-col items-center justify-center gap-1 flex-1 py-2 relative -mt-8"
         >
           <div className="flex flex-col items-center justify-center gap-1 transition-all">
-            <div className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
-              <Camera className="h-6 w-6" />
+            <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-xl hover:shadow-2xl transition-all hover:scale-105 border-4 border-background">
+              <Camera className="h-7 w-7" />
             </div>
           </div>
         </button>
