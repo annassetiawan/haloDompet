@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       voice_text,
       location: location || null,
       payment_method: payment_method || null,
-      note: note || null,
+      notes: note || null,
       wallet_id: targetWalletId,
       type: transactionType,
     })
@@ -251,7 +251,7 @@ export async function PUT(request: NextRequest) {
       date,
       wallet_id: wallet_id || existingTransaction.wallet_id,
       type: type || existingTransaction.type,
-      note: note !== undefined ? note : existingTransaction.note,
+      notes: note !== undefined ? note : existingTransaction.notes,
     })
 
     if (!updatedTransaction) {
