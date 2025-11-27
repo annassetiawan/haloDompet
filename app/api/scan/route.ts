@@ -221,40 +221,12 @@ Sekarang analisis gambar struk yang diberikan dan ekstrak informasinya dalam for
 
     console.log('Extracted transaction data:', jsonData);
 
-    // Simpan ke database transactions
-    const { data: transaction, error: dbError } = await supabase
-      .from('transactions')
-      .insert({
-        user_id: authUser.id,
-        item: jsonData.item || 'Pembelian via Scan',
-        amount: jsonData.amount,
-        category: jsonData.category || 'Lainnya',
-        type: jsonData.type,
-        date: jsonData.date,
-        location: jsonData.location,
-        payment_method: jsonData.payment_method,
-        voice_text: null, // No voice for scanned receipts
-        wallet_id: null, // Default wallet will be used by database
-      })
-      .select()
-      .single();
-
-    if (dbError) {
-      console.error('Database error:', dbError);
-      return NextResponse.json(
-        { error: 'Gagal menyimpan transaksi ke database', details: dbError.message },
-        { status: 500 }
-      );
-    }
-
-    console.log('Transaction saved:', transaction);
-
-    // Return success response with transaction data
+    // Return extracted data without saving to database
+    // User will review and confirm before saving
     return NextResponse.json({
       success: true,
       data: jsonData,
-      transaction: transaction,
-      message: 'Struk berhasil di-scan dan transaksi tersimpan!',
+      message: 'Struk berhasil di-scan! Silakan review sebelum menyimpan.',
     });
 
   } catch (error: any) {
