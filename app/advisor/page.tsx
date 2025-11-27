@@ -16,22 +16,22 @@ import remarkGfm from 'remark-gfm'
 const SUGGESTED_QUESTIONS = [
   {
     icon: TrendingUp,
-    question: "Pengeluaran bulan ini berapa? Bandingkan dengan bulan lalu",
+    question: "Pengeluaran bulan ini vs bulan lalu?",
     color: "text-blue-500"
   },
   {
     icon: PiggyBank,
-    question: "Kategori apa yang paling boros 3 bulan terakhir?",
+    question: "Kategori paling boros 3 bulan ini?",
     color: "text-green-500"
   },
   {
     icon: Target,
-    question: "Kasih saran cara ngurangin pengeluaran yang paling efektif",
+    question: "Tips hemat yang paling efektif?",
     color: "text-purple-500"
   },
   {
     icon: Lightbulb,
-    question: "Ada pola pengeluaran mencurigakan atau tidak biasa?",
+    question: "Ada pengeluaran yang tidak biasa?",
     color: "text-amber-500"
   },
 ]
@@ -212,10 +212,10 @@ export default function AdvisorPage() {
                     key={index}
                     variant="outline"
                     onClick={() => handleSuggestedQuestion(item.question)}
-                    className="h-auto py-3 px-4 justify-start text-left"
+                    className="h-auto py-2.5 px-3 justify-start text-left whitespace-normal min-h-[44px]"
                   >
                     <Icon className={`h-4 w-4 mr-2 flex-shrink-0 ${item.color}`} />
-                    <span className="text-xs">{item.question}</span>
+                    <span className="text-xs leading-relaxed break-words">{item.question}</span>
                   </Button>
                 )
               })}
