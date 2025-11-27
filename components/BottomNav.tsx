@@ -1,28 +1,38 @@
-"use client";
+'use client'
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Home, Target, BarChart3, Sparkles, Camera } from 'lucide-react';
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { Home, Target, BarChart3, Sparkles, Camera } from 'lucide-react'
 
 interface BottomNavProps {
-  onScanClick?: () => void;
+  onScanClick?: () => void
 }
 
 export function BottomNav({ onScanClick }: BottomNavProps) {
-  const pathname = usePathname();
+  const pathname = usePathname()
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t border-border safe-area-bottom">
       <div className="flex items-center justify-around h-16 px-2">
-        <Link href="/" className="flex flex-col items-center justify-center gap-1 flex-1 py-2">
-          <div className={`flex flex-col items-center justify-center gap-1 transition-colors ${pathname === '/' ? 'text-primary' : 'text-muted-foreground'}`}>
+        <Link
+          href="/"
+          className="flex flex-col items-center justify-center gap-1 flex-1 py-2"
+        >
+          <div
+            className={`flex flex-col items-center justify-center gap-1 transition-colors ${pathname === '/' ? 'text-primary' : 'text-muted-foreground'}`}
+          >
             <Home className="h-5 w-5" />
             <span className="text-xs font-medium">Home</span>
           </div>
         </Link>
 
-        <Link href="/budget" className="flex flex-col items-center justify-center gap-1 flex-1 py-2">
-          <div className={`flex flex-col items-center justify-center gap-1 transition-colors ${pathname === '/budget' ? 'text-primary' : 'text-muted-foreground'}`}>
+        <Link
+          href="/budget"
+          className="flex flex-col items-center justify-center gap-1 flex-1 py-2"
+        >
+          <div
+            className={`flex flex-col items-center justify-center gap-1 transition-colors ${pathname === '/budget' ? 'text-primary' : 'text-muted-foreground'}`}
+          >
             <Target className="h-5 w-5" />
             <span className="text-xs font-medium">Budget</span>
           </div>
@@ -38,24 +48,33 @@ export function BottomNav({ onScanClick }: BottomNavProps) {
             <div className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
               <Camera className="h-6 w-6" />
             </div>
-            <span className="text-xs font-medium text-primary">Scan</span>
           </div>
         </button>
 
-        <Link href="/advisor" className="flex flex-col items-center justify-center gap-1 flex-1 py-2">
-          <div className={`flex flex-col items-center justify-center gap-1 transition-colors ${pathname === '/advisor' ? 'text-primary' : 'text-muted-foreground'}`}>
+        <Link
+          href="/advisor"
+          className="flex flex-col items-center justify-center gap-1 flex-1 py-2"
+        >
+          <div
+            className={`flex flex-col items-center justify-center gap-1 transition-colors ${pathname === '/advisor' ? 'text-primary' : 'text-muted-foreground'}`}
+          >
             <Sparkles className="h-5 w-5" />
             <span className="text-xs font-medium">Advisor</span>
           </div>
         </Link>
 
-        <Link href="/reports" className="flex flex-col items-center justify-center gap-1 flex-1 py-2">
-          <div className={`flex flex-col items-center justify-center gap-1 transition-colors ${pathname === '/reports' ? 'text-primary' : 'text-muted-foreground'}`}>
+        <Link
+          href="/reports"
+          className="flex flex-col items-center justify-center gap-1 flex-1 py-2"
+        >
+          <div
+            className={`flex flex-col items-center justify-center gap-1 transition-colors ${pathname === '/reports' ? 'text-primary' : 'text-muted-foreground'}`}
+          >
             <BarChart3 className="h-5 w-5" />
             <span className="text-xs font-medium">Laporan</span>
           </div>
         </Link>
       </div>
     </nav>
-  );
+  )
 }
