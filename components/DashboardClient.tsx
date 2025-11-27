@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -36,6 +36,7 @@ import {
   CheckCircle2,
   XCircle,
   PlusCircle,
+  Camera,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
@@ -110,6 +111,10 @@ export function DashboardClient({
     location?: string | null
     payment_method?: string | null
   } | null>(null)
+
+  // Receipt scan state
+  const [isScanning, setIsScanning] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const router = useRouter()
   const supabase = createClient()
@@ -444,6 +449,113 @@ export function DashboardClient({
     }
   }
 
+  // Handle scan receipt button click
+  const handleScanClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  // Convert file to base64
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = (error) => reject(error)
+    })
+  }
+
+  // Handle file selection for receipt scan
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('File harus berupa gambar')
+      return
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024 // 5MB in bytes
+    if (file.size > maxSize) {
+      toast.error('Ukuran file maksimal 5MB')
+      return
+    }
+
+    setIsScanning(true)
+    setStatus('Memproses gambar struk...')
+
+    try {
+      // Convert image to base64
+      const base64Image = await convertToBase64(file)
+
+      // Send to scan API
+      const response = await fetch('/api/scan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageBase64: base64Image,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        const errorMsg = data.error || 'Gagal membaca struk'
+        throw new Error(errorMsg)
+      }
+
+      // Reload data
+      loadUserProfile()
+      loadWallets()
+      loadRecentTransactions()
+      loadBudgetSummary()
+
+      setStatus('Berhasil! Transaksi tersimpan')
+
+      // Prepare transaction data for receipt
+      const receiptData = {
+        item: data.data.item,
+        amount: data.data.amount,
+        category: data.data.category,
+        type: data.data.type || 'expense',
+        date: data.data.date,
+        location: data.data.location,
+        payment_method: data.data.payment_method,
+      }
+
+      // Show receipt dialog
+      setLastTransactionData(receiptData)
+      setShowReceipt(true)
+
+      toast.success('Struk berhasil di-scan!')
+
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      setStatus(IDLE_STATUS)
+    } catch (error) {
+      console.error('Error scanning receipt:', error)
+      let errorMessage = 'Gagal membaca struk. Coba foto lebih jelas atau gunakan Input Manual.'
+
+      if (error instanceof Error) {
+        errorMessage = error.message
+      }
+
+      toast.error(errorMessage)
+      setStatus('Gagal memproses')
+
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      setStatus(IDLE_STATUS)
+    } finally {
+      setIsScanning(false)
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
+
   // Logic Bubble Active
   const isBubbleActive =
     roastMessage !== null || // Jika ada roast message, bubble aktif
@@ -559,18 +671,19 @@ export function DashboardClient({
                 </p>
               </div>
 
-              {/* Right: Dark Mode Toggle & Logout */}
+              {/* Right: Settings & Dark Mode Toggle */}
               <div className="flex items-center gap-1">
+                <Link href="/settings">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9"
+                    title="Pengaturan"
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </Link>
                 <DarkModeToggle />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleLogout}
-                  className="h-9 w-9"
-                  title="Keluar"
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
               </div>
             </div>
           </div>
@@ -645,16 +758,41 @@ export function DashboardClient({
               isLoading={false}
             />
 
-            {/* Manual Transaction Button */}
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => setIsManualTransactionOpen(true)}
-              className="gap-2 border-2 border-dashed hover:border-solid hover:bg-primary/10"
-            >
-              <PlusCircle className="h-5 w-5" />
-              Input Manual
-            </Button>
+            {/* Action Buttons Row */}
+            <div className="flex items-center gap-3">
+              {/* Scan Receipt Button */}
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={handleScanClick}
+                disabled={isScanning || isProcessing}
+                className="gap-2 border-2 hover:bg-primary/10"
+                title="Scan Struk"
+              >
+                <Camera className="h-5 w-5" />
+                Scan Struk
+              </Button>
+
+              {/* Manual Transaction Button */}
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => setIsManualTransactionOpen(true)}
+                className="gap-2 border-2 border-dashed hover:border-solid hover:bg-primary/10"
+              >
+                <PlusCircle className="h-5 w-5" />
+                Input Manual
+              </Button>
+            </div>
+
+            {/* Hidden File Input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
 
             {/* Status Card */}
             <div className="w-full max-w-md space-y-3">
