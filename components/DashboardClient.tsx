@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -26,6 +26,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Settings,
   LogOut,
@@ -85,9 +86,18 @@ export function DashboardClient({
   // State for AI roast message
   const [roastMessage, setRoastMessage] = useState<string | null>(null)
 
-  // Review dialog state
+  // Review dialog state (for voice recording)
   const [isReviewOpen, setIsReviewOpen] = useState(false)
   const [editedTranscript, setEditedTranscript] = useState('')
+
+  // Review scan dialog state
+  const [isReviewScanOpen, setIsReviewScanOpen] = useState(false)
+  const [scannedData, setScannedData] = useState<{
+    item: string
+    amount: number
+    category: string
+    note: string | null
+  } | null>(null)
 
   // Wallet management state
   const [isAddWalletOpen, setIsAddWalletOpen] = useState(false)
@@ -110,6 +120,10 @@ export function DashboardClient({
     location?: string | null
     payment_method?: string | null
   } | null>(null)
+
+  // Receipt scan state
+  const [isScanning, setIsScanning] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const router = useRouter()
   const supabase = createClient()
@@ -238,6 +252,100 @@ export function DashboardClient({
   const handleCancelTranscript = () => {
     setIsReviewOpen(false)
     setEditedTranscript('')
+    setSelectedWalletId(null)
+    setStatus(IDLE_STATUS)
+  }
+
+  const handleConfirmScan = async () => {
+    if (!scannedData) return
+
+    setIsReviewScanOpen(false)
+    setIsProcessing(true)
+    setStatus('Menyimpan transaksi...')
+
+    try {
+      const transactionResponse = await fetch('/api/transaction', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          item: scannedData.item,
+          amount: scannedData.amount,
+          category: scannedData.category,
+          type: 'expense',
+          date: new Date().toISOString().split('T')[0],
+          voice_text: null,
+          note: scannedData.note,
+          wallet_id: selectedWalletId,
+        }),
+      })
+
+      const transactionData = await transactionResponse.json()
+
+      if (!transactionResponse.ok) {
+        const errorMsg = transactionData.error || 'Gagal menyimpan transaksi'
+        throw new Error(errorMsg)
+      }
+
+      // Reload data
+      loadUserProfile()
+      loadWallets()
+      loadRecentTransactions()
+      loadBudgetSummary()
+
+      setStatus('Berhasil! Transaksi tersimpan')
+
+      // Get wallet name if walletId is provided
+      const selectedWalletName = selectedWalletId
+        ? wallets.find((w) => w.id === selectedWalletId)?.name
+        : undefined
+
+      // Prepare transaction data for receipt
+      const receiptData = {
+        item: scannedData.item,
+        amount: scannedData.amount,
+        category: scannedData.category,
+        type: 'expense' as const,
+        date: new Date().toISOString().split('T')[0],
+        wallet_name: selectedWalletName,
+        location: null,
+        payment_method: null,
+      }
+
+      // Show receipt dialog
+      setLastTransactionData(receiptData)
+      setShowReceipt(true)
+
+      toast.success('Transaksi berhasil disimpan!')
+
+      // Reset scan data and wallet selection
+      setScannedData(null)
+      setSelectedWalletId(null)
+
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      setStatus(IDLE_STATUS)
+    } catch (error) {
+      console.error('Error saving transaction:', error)
+      let errorMessage = 'Gagal menyimpan transaksi. Coba lagi ya'
+
+      if (error instanceof Error) {
+        errorMessage = error.message
+      }
+
+      toast.error(errorMessage)
+      setStatus('Gagal menyimpan')
+
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      setStatus(IDLE_STATUS)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleCancelScan = () => {
+    setIsReviewScanOpen(false)
+    setScannedData(null)
     setSelectedWalletId(null)
     setStatus(IDLE_STATUS)
   }
@@ -444,6 +552,117 @@ export function DashboardClient({
     }
   }
 
+  // Handle scan receipt button click
+  const handleScanClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  // Convert file to base64
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = (error) => reject(error)
+    })
+  }
+
+  // Handle file selection for receipt scan
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('File harus berupa gambar')
+      return
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024 // 5MB in bytes
+    if (file.size > maxSize) {
+      toast.error('Ukuran file maksimal 5MB')
+      return
+    }
+
+    setIsScanning(true)
+    setStatus('Memproses gambar struk...')
+
+    try {
+      // Convert image to base64
+      const base64Image = await convertToBase64(file)
+
+      // Send to scan API
+      const response = await fetch('/api/scan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageBase64: base64Image,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        const errorMsg = data.error || 'Gagal membaca struk'
+        throw new Error(errorMsg)
+      }
+
+      // Combine notes_summary, location, and payment_method into note
+      const noteParts = []
+
+      // Priority 1: Add notes_summary if exists (detail items from receipt)
+      if (data.data.notes_summary) {
+        noteParts.push(data.data.notes_summary)
+      }
+
+      // Priority 2: Add location if exists
+      if (data.data.location) {
+        noteParts.push(`📍 ${data.data.location}`)
+      }
+
+      // Priority 3: Add payment method if exists
+      if (data.data.payment_method) {
+        noteParts.push(`💳 ${data.data.payment_method}`)
+      }
+
+      const combinedNote = noteParts.length > 0 ? noteParts.join('\n') : null
+
+      // Set scanned data for review
+      setScannedData({
+        item: data.data.item || '',
+        amount: data.data.amount || 0,
+        category: data.data.category || 'Lainnya',
+        note: combinedNote,
+      })
+
+      // Open review dialog
+      setIsReviewScanOpen(true)
+      setStatus(IDLE_STATUS)
+    } catch (error) {
+      console.error('Error scanning receipt:', error)
+      let errorMessage = 'Gagal membaca struk. Coba foto lebih jelas atau gunakan Input Manual.'
+
+      if (error instanceof Error) {
+        errorMessage = error.message
+      }
+
+      toast.error(errorMessage)
+      setStatus('Gagal memproses')
+
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      setStatus(IDLE_STATUS)
+    } finally {
+      setIsScanning(false)
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
+
   // Logic Bubble Active
   const isBubbleActive =
     roastMessage !== null || // Jika ada roast message, bubble aktif
@@ -535,7 +754,7 @@ export function DashboardClient({
       </nav>
 
       {/* Bottom Navigation - Mobile Only */}
-      <BottomNav />
+      <BottomNav onScanClick={handleScanClick} />
 
       {/* Main Content */}
       <main className="md:pt-16 pb-20 md:pb-0">
@@ -559,18 +778,19 @@ export function DashboardClient({
                 </p>
               </div>
 
-              {/* Right: Dark Mode Toggle & Logout */}
+              {/* Right: Settings & Dark Mode Toggle */}
               <div className="flex items-center gap-1">
+                <Link href="/settings">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9"
+                    title="Pengaturan"
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </Link>
                 <DarkModeToggle />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleLogout}
-                  className="h-9 w-9"
-                  title="Keluar"
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
               </div>
             </div>
           </div>
@@ -655,6 +875,15 @@ export function DashboardClient({
               <PlusCircle className="h-5 w-5" />
               Input Manual
             </Button>
+
+            {/* Hidden File Input for Scan Receipt */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
 
             {/* Status Card */}
             <div className="w-full max-w-md space-y-3">
@@ -817,6 +1046,117 @@ export function DashboardClient({
           loadBudgetSummary()
         }}
       />
+
+      {/* Review Scan Dialog */}
+      <Dialog open={isReviewScanOpen} onOpenChange={setIsReviewScanOpen}>
+        <DialogContent className="w-[95%] sm:max-w-md overflow-x-hidden rounded-xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Review Hasil Scan</DialogTitle>
+            <DialogDescription>
+              Periksa dan edit hasil scan struk sebelum menyimpan transaksi.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-4">
+            <div className="space-y-2">
+              <label
+                htmlFor="scan-item"
+                className="text-sm font-medium text-foreground"
+              >
+                Nama Merchant:
+              </label>
+              <Input
+                id="scan-item"
+                value={scannedData?.item || ''}
+                onChange={(e) => setScannedData(prev => prev ? { ...prev, item: e.target.value } : null)}
+                placeholder="Contoh: Alfamart"
+                className="w-full"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="scan-amount"
+                className="text-sm font-medium text-foreground"
+              >
+                Jumlah (Rp):
+              </label>
+              <Input
+                id="scan-amount"
+                type="number"
+                value={scannedData?.amount || 0}
+                onChange={(e) => setScannedData(prev => prev ? { ...prev, amount: Number(e.target.value) } : null)}
+                placeholder="0"
+                className="w-full"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="scan-category"
+                className="text-sm font-medium text-foreground"
+              >
+                Kategori:
+              </label>
+              <Input
+                id="scan-category"
+                value={scannedData?.category || ''}
+                onChange={(e) => setScannedData(prev => prev ? { ...prev, category: e.target.value } : null)}
+                placeholder="Contoh: Makanan"
+                className="w-full"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="scan-note"
+                className="text-sm font-medium text-foreground"
+              >
+                Catatan (Opsional):
+              </label>
+              <Textarea
+                id="scan-note"
+                value={scannedData?.note || ''}
+                onChange={(e) => setScannedData(prev => prev ? { ...prev, note: e.target.value } : null)}
+                placeholder="Detail item, lokasi, metode pembayaran, dll..."
+                className="min-h-[100px] resize-none"
+              />
+              <p className="text-xs text-muted-foreground">
+                Info tambahan seperti detail belanja, lokasi toko, metode pembayaran, dll.
+              </p>
+            </div>
+
+            {/* Wallet Selector */}
+            <WalletSelector
+              wallets={wallets}
+              selectedWalletId={selectedWalletId}
+              onSelectWallet={setSelectedWalletId}
+              isLoading={false}
+            />
+
+            <p className="text-xs text-muted-foreground bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-lg p-2">
+              💡 Hasil scan mungkin tidak 100% akurat. Silakan periksa dan edit jika diperlukan.
+            </p>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={handleCancelScan}
+              className="gap-2"
+            >
+              <XCircle className="h-4 w-4" />
+              Batal
+            </Button>
+            <Button
+              onClick={handleConfirmScan}
+              disabled={!scannedData?.item || !scannedData?.amount}
+              className="gap-2"
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              Simpan
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Transaction Receipt Dialog */}
       <TransactionReceipt

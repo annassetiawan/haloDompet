@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { item, amount, category, date, voice_text, location, payment_method, wallet_id, type } = body
+    const { item, amount, category, date, voice_text, location, payment_method, wallet_id, type, note } = body
 
     // Validation
     if (!item || !amount || !category || !date) {
@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
       voice_text,
       location: location || null,
       payment_method: payment_method || null,
+      notes: note || null,
       wallet_id: targetWalletId,
       type: transactionType,
     })
@@ -217,7 +218,7 @@ export async function PUT(request: NextRequest) {
 
     // Parse request body
     const body = await request.json()
-    const { item, amount, category, date, wallet_id, type } = body
+    const { item, amount, category, date, wallet_id, type, note } = body
 
     // Validation
     if (!item || !amount || !category || !date) {
@@ -250,6 +251,7 @@ export async function PUT(request: NextRequest) {
       date,
       wallet_id: wallet_id || existingTransaction.wallet_id,
       type: type || existingTransaction.type,
+      notes: note !== undefined ? note : existingTransaction.notes,
     })
 
     if (!updatedTransaction) {
