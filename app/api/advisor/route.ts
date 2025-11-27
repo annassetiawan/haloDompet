@@ -51,26 +51,30 @@ function buildSystemPrompt(stats: any, categories: CategorySummary[], recentTran
 
 ## Data Keuangan User
 
-### Ringkasan
-- Total: ${stats.totalTransactions} transaksi
-- Pengeluaran: Rp ${stats.totalSpent.toLocaleString('id-ID')}
-- Rata-rata: Rp ${stats.averageTransaction.toLocaleString('id-ID')}/transaksi
+### Ringkasan Keuangan
+- Pemasukan: Rp ${stats.totalIncome.toLocaleString('id-ID')} (${stats.totalIncomeTransactions} transaksi)
+- Pengeluaran: Rp ${stats.totalSpent.toLocaleString('id-ID')} (${stats.totalTransactions} transaksi)
+- Arus Kas Bersih: Rp ${stats.netCashFlow.toLocaleString('id-ID')} ${stats.netCashFlow >= 0 ? '✅' : '⚠️'}
+- Rata-rata Pengeluaran: Rp ${stats.averageTransaction.toLocaleString('id-ID')}/transaksi
 
-### Top Kategori
+### Top Kategori Pengeluaran
 ${categories.map((cat, i) =>
     `${i + 1}. ${cat.category}: Rp ${cat.total.toLocaleString('id-ID')} (${cat.percentage.toFixed(1)}%)`
   ).join('\n')}
 
-### Transaksi Terakhir
+### Transaksi Pengeluaran Terakhir
 ${recentTransactions.slice(0, 5).map(t =>
     `- ${t.item}: Rp ${t.amount.toLocaleString('id-ID')} [${t.category}]`
   ).join('\n')}
 
 ## Panduan
+- Data di atas HANYA menampilkan PENGELUARAN (tidak termasuk saldo awal atau adjustment)
+- Pemasukan dan pengeluaran sudah dipisahkan dengan benar
+- Arus Kas Bersih = Pemasukan - Pengeluaran
 - Jawab dengan data spesifik jika ditanya
 - Berikan 2-3 tips actionable jika diminta saran
 ${highestCategory && highestCategory.percentage > 40 ?
-    `- ⚠️ Kategori "${highestCategory.category}" = ${highestCategory.percentage.toFixed(0)}% dari total (cukup tinggi)` : ''}
+    `- ⚠️ Kategori "${highestCategory.category}" = ${highestCategory.percentage.toFixed(0)}% dari total pengeluaran (cukup tinggi)` : ''}
 - Jangan mengarang data yang tidak ada
 - Format: "Rp X.XXX.XXX"`
 }
@@ -126,11 +130,52 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Fetch data
-    const [transactions, stats] = await Promise.all([
-      getTransactions(user.id, { limit: 50 }),
-      getTransactionStats(user.id)
-    ])
+    // Fetch data - separate income and expenses for accurate AI analysis
+    const supabaseClient = await createClient()
+
+    // Fetch all transactions first
+    const allTransactions = await getTransactions(user.id, { limit: 100 })
+
+    // Separate transactions by type
+    const expenseTransactions = allTransactions.filter(t => t.type === 'expense')
+    const incomeTransactions = allTransactions.filter(t => t.type === 'income')
+
+    // Calculate expense stats
+    const totalSpent = expenseTransactions.reduce((sum, t) => sum + parseFloat(t.amount.toString()), 0)
+    const totalExpenseTransactions = expenseTransactions.length
+    const averageExpense = totalExpenseTransactions > 0 ? totalSpent / totalExpenseTransactions : 0
+
+    // Calculate income stats
+    const totalIncome = incomeTransactions.reduce((sum, t) => sum + parseFloat(t.amount.toString()), 0)
+    const totalIncomeTransactions = incomeTransactions.length
+
+    // Group by category (expenses only)
+    const categoryMap = new Map<string, { total: number; count: number }>()
+    expenseTransactions.forEach(t => {
+      const existing = categoryMap.get(t.category) || { total: 0, count: 0 }
+      categoryMap.set(t.category, {
+        total: existing.total + parseFloat(t.amount.toString()),
+        count: existing.count + 1,
+      })
+    })
+
+    const categorySummaryRaw = Array.from(categoryMap.entries())
+      .map(([category, data]) => ({
+        category,
+        total: data.total,
+        count: data.count,
+      }))
+      .sort((a, b) => b.total - a.total)
+
+    const stats = {
+      totalSpent,
+      totalTransactions: totalExpenseTransactions,
+      averageTransaction: averageExpense,
+      totalIncome,
+      totalIncomeTransactions,
+      netCashFlow: totalIncome - totalSpent,
+      categorySummary: categorySummaryRaw
+    }
 
     const categories: CategorySummary[] = stats.categorySummary.slice(0, 5).map(cat => ({
       category: cat.category,
@@ -139,7 +184,7 @@ export async function POST(request: NextRequest) {
       percentage: stats.totalSpent > 0 ? (cat.total / stats.totalSpent) * 100 : 0
     }))
 
-    const recentTransactions = transactions.slice(0, 10).map(t => ({
+    const recentTransactions = expenseTransactions.slice(0, 10).map(t => ({
       item: t.item,
       amount: t.amount,
       category: t.category,
