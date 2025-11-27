@@ -26,6 +26,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Settings,
   LogOut,
@@ -1112,15 +1113,15 @@ export function DashboardClient({
               >
                 Catatan (Opsional):
               </label>
-              <Input
+              <Textarea
                 id="scan-note"
                 value={scannedData?.note || ''}
                 onChange={(e) => setScannedData(prev => prev ? { ...prev, note: e.target.value } : null)}
-                placeholder="Lokasi, metode pembayaran, dll"
-                className="w-full"
+                placeholder="Detail item, lokasi, metode pembayaran, dll..."
+                className="min-h-[100px] resize-none"
               />
               <p className="text-xs text-muted-foreground">
-                Info tambahan seperti lokasi toko, metode pembayaran, dll.
+                Info tambahan seperti detail belanja, lokasi toko, metode pembayaran, dll.
               </p>
             </div>
 
