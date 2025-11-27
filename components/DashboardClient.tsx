@@ -95,8 +95,7 @@ export function DashboardClient({
     item: string
     amount: number
     category: string
-    location: string | null
-    payment_method: string | null
+    note: string | null
   } | null>(null)
 
   // Wallet management state
@@ -276,8 +275,7 @@ export function DashboardClient({
           type: 'expense',
           date: new Date().toISOString().split('T')[0],
           voice_text: null,
-          location: scannedData.location,
-          payment_method: scannedData.payment_method,
+          note: scannedData.note,
           wallet_id: selectedWalletId,
         }),
       })
@@ -310,8 +308,8 @@ export function DashboardClient({
         type: 'expense' as const,
         date: new Date().toISOString().split('T')[0],
         wallet_name: selectedWalletName,
-        location: scannedData.location,
-        payment_method: scannedData.payment_method,
+        location: null,
+        payment_method: null,
       }
 
       // Show receipt dialog
@@ -611,13 +609,22 @@ export function DashboardClient({
         throw new Error(errorMsg)
       }
 
+      // Combine location and payment_method into note
+      const noteParts = []
+      if (data.data.location) {
+        noteParts.push(`Lokasi: ${data.data.location}`)
+      }
+      if (data.data.payment_method) {
+        noteParts.push(`Metode: ${data.data.payment_method}`)
+      }
+      const combinedNote = noteParts.length > 0 ? noteParts.join(' • ') : null
+
       // Set scanned data for review
       setScannedData({
         item: data.data.item || '',
         amount: data.data.amount || 0,
         category: data.data.category || 'Lainnya',
-        location: data.data.location || null,
-        payment_method: data.data.payment_method || null,
+        note: combinedNote,
       })
 
       // Open review dialog
@@ -1031,20 +1038,20 @@ export function DashboardClient({
 
       {/* Review Scan Dialog */}
       <Dialog open={isReviewScanOpen} onOpenChange={setIsReviewScanOpen}>
-        <DialogContent className="w-[95%] sm:max-w-md overflow-x-hidden rounded-xl">
+        <DialogContent className="w-[95%] sm:max-w-md overflow-x-hidden rounded-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Review Hasil Scan</DialogTitle>
             <DialogDescription>
               Periksa dan edit hasil scan struk sebelum menyimpan transaksi.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-3 py-4">
             <div className="space-y-2">
               <label
                 htmlFor="scan-item"
                 className="text-sm font-medium text-foreground"
               >
-                Nama Merchant/Item:
+                Nama Merchant:
               </label>
               <Input
                 id="scan-item"
@@ -1090,34 +1097,21 @@ export function DashboardClient({
 
             <div className="space-y-2">
               <label
-                htmlFor="scan-location"
+                htmlFor="scan-note"
                 className="text-sm font-medium text-foreground"
               >
-                Lokasi (Opsional):
+                Catatan (Opsional):
               </label>
               <Input
-                id="scan-location"
-                value={scannedData?.location || ''}
-                onChange={(e) => setScannedData(prev => prev ? { ...prev, location: e.target.value } : null)}
-                placeholder="Contoh: Alfamart Sudirman"
+                id="scan-note"
+                value={scannedData?.note || ''}
+                onChange={(e) => setScannedData(prev => prev ? { ...prev, note: e.target.value } : null)}
+                placeholder="Lokasi, metode pembayaran, dll"
                 className="w-full"
               />
-            </div>
-
-            <div className="space-y-2">
-              <label
-                htmlFor="scan-payment"
-                className="text-sm font-medium text-foreground"
-              >
-                Metode Pembayaran (Opsional):
-              </label>
-              <Input
-                id="scan-payment"
-                value={scannedData?.payment_method || ''}
-                onChange={(e) => setScannedData(prev => prev ? { ...prev, payment_method: e.target.value } : null)}
-                placeholder="Contoh: Cash, QRIS"
-                className="w-full"
-              />
+              <p className="text-xs text-muted-foreground">
+                Info tambahan seperti lokasi toko, metode pembayaran, dll.
+              </p>
             </div>
 
             {/* Wallet Selector */}
@@ -1128,8 +1122,8 @@ export function DashboardClient({
               isLoading={false}
             />
 
-            <p className="text-xs text-muted-foreground">
-              Hasil scan mungkin tidak 100% akurat. Silakan periksa dan edit jika diperlukan.
+            <p className="text-xs text-muted-foreground bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-lg p-2">
+              💡 Hasil scan mungkin tidak 100% akurat. Silakan periksa dan edit jika diperlukan.
             </p>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
