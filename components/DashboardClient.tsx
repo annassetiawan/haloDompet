@@ -38,6 +38,11 @@ const BudgetProgress = dynamic(() => import('@/components/BudgetProgress').then(
     </div>
   ),
 })
+
+// OPTIMIZED: Lazy load PWA Help Button
+const PWAHelpButton = dynamic(() => import('@/components/PWAHelpButton').then(mod => ({ default: mod.PWAHelpButton })), {
+  ssr: false,
+})
 import {
   Dialog,
   DialogContent,
@@ -1210,6 +1215,9 @@ export function DashboardClient({
         onOpenChange={setShowReceipt}
         data={lastTransactionData}
       />
+
+      {/* PWA Help Button - Mobile Only */}
+      <PWAHelpButton />
     </div>
   )
 }

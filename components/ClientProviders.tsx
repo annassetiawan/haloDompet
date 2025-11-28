@@ -11,17 +11,10 @@ const Toaster = dynamic(
   { ssr: false }
 )
 
-// Lazy load PWA Install Banner
-const PWAInstallBannerLazy = dynamic(
-  () => import('@/components/PWAInstallBannerLazy').then((mod) => ({ default: mod.PWAInstallBannerLazy })),
-  { ssr: false }
-)
-
 export function ClientProviders() {
   return (
     <>
       <Toaster richColors position="top-center" />
-      <PWAInstallBannerLazy />
     </>
   )
 }
