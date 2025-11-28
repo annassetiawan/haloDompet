@@ -1,20 +1,9 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
-import dynamic from 'next/dynamic'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Analytics } from '@vercel/analytics/next'
+import { ClientProviders } from '@/components/ClientProviders'
 import './globals.css'
-
-// PHASE 2: Lazy load non-critical UI components
-const Toaster = dynamic(
-  () => import('sonner').then((mod) => ({ default: mod.Toaster })),
-  { ssr: false }
-)
-
-const PWAInstallBannerLazy = dynamic(
-  () => import('@/components/PWAInstallBannerLazy').then((mod) => ({ default: mod.PWAInstallBannerLazy })),
-  { ssr: false }
-)
 
 // OPTIMIZED: Font loading strategy untuk better LCP
 const geistSans = Geist({
@@ -147,10 +136,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
       >
         {children}
-        <Toaster richColors position="top-center" />
+        <ClientProviders />
         <SpeedInsights />
         <Analytics />
-        <PWAInstallBannerLazy />
       </body>
     </html>
   )
