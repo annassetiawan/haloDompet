@@ -1,10 +1,20 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
-import { Toaster } from 'sonner'
+import dynamic from 'next/dynamic'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Analytics } from '@vercel/analytics/next'
-import { PWAInstallBannerLazy } from '@/components/PWAInstallBannerLazy'
 import './globals.css'
+
+// PHASE 2: Lazy load non-critical UI components
+const Toaster = dynamic(
+  () => import('sonner').then((mod) => ({ default: mod.Toaster })),
+  { ssr: false }
+)
+
+const PWAInstallBannerLazy = dynamic(
+  () => import('@/components/PWAInstallBannerLazy').then((mod) => ({ default: mod.PWAInstallBannerLazy })),
+  { ssr: false }
+)
 
 // OPTIMIZED: Font loading strategy untuk better LCP
 const geistSans = Geist({
@@ -62,11 +72,27 @@ export default function RootLayout({
           fetchPriority="high"
         />
 
-        {/* Preconnect to external domains for faster resource loading */}
+        {/* PHASE 2: Optimized resource hints for faster loading */}
+        {/* Critical: Font loading */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+
+        {/* Critical: Supabase API - Preconnect for faster database calls */}
+        {process.env.NEXT_PUBLIC_SUPABASE_URL && (
+          <>
+            <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
+            <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
+          </>
+        )}
+
+        {/* Analytics and monitoring - DNS prefetch only (non-blocking) */}
         <link rel="dns-prefetch" href="https://vercel.live" />
-        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+        <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
+
+        {/* CDN resources (only in dev) */}
+        {process.env.NODE_ENV === 'development' && (
+          <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+        )}
         <script
           dangerouslySetInnerHTML={{
             __html: `

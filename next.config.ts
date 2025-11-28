@@ -34,8 +34,18 @@ const nextConfig: NextConfig = {
 
   experimental: {
     turbopackUseSystemTlsCerts: true,
-    // Optimize package imports to reduce bundle size
-    optimizePackageImports: ['lucide-react', 'date-fns', '@supabase/supabase-js'],
+    // PHASE 2: Optimize package imports to reduce bundle size
+    // Only import what's needed from these packages
+    optimizePackageImports: [
+      'lucide-react',
+      'date-fns',
+      '@supabase/supabase-js',
+      'framer-motion',
+      'recharts',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-select',
+    ],
   },
 };
 
