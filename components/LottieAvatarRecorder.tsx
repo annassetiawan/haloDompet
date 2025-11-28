@@ -1,12 +1,24 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { isSpeechRecognitionSupported, isIOSDevice } from '@/lib/utils'
-import { LottieAvatar, LottieAvatarState } from './LottieAvatar'
+import type { LottieAvatarState } from './LottieAvatar'
+import { AvatarPlaceholder } from './AvatarPlaceholder'
 import { WebSpeechRecorder } from './WebSpeechRecorder'
 import { MediaRecorderButton } from './MediaRecorderButton'
 import { IOSMediaRecorder } from './iOSMediaRecorder'
 import { WebAudioRecorder } from './WebAudioRecorder'
+
+// OPTIMIZED: Lazy load Lottie Avatar (100KB+ library) untuk improve LCP
+// Placeholder SVG (< 5KB) ditampilkan first untuk fast LCP
+const LottieAvatar = dynamic(
+  () => import('./LottieAvatar').then(mod => ({ default: mod.LottieAvatar })),
+  {
+    ssr: false,
+    loading: () => <AvatarPlaceholder />,
+  }
+)
 
 interface LottieAvatarRecorderProps {
   onTranscript: (text: string) => void
@@ -73,21 +85,12 @@ export function LottieAvatarRecorder({
     }
   }
 
-  // Show skeleton while loading
-  if (isLoading) {
+  // Show placeholder while loading or on server
+  // OPTIMIZED: Use same placeholder for consistent LCP
+  if (isLoading || !isClient) {
     return (
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-40 h-40 rounded-full bg-muted animate-pulse" />
-        <div className="w-32 h-5 rounded bg-muted animate-pulse" />
-      </div>
-    )
-  }
-
-  // Don't render anything on server
-  if (!isClient) {
-    return (
-      <div className="flex flex-col items-center">
-        <div className="h-40 w-40" />
+      <div className="relative">
+        <AvatarPlaceholder />
       </div>
     )
   }

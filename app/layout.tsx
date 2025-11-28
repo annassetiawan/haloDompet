@@ -6,22 +6,24 @@ import { Analytics } from '@vercel/analytics/next'
 import { PWAInstallBannerLazy } from '@/components/PWAInstallBannerLazy'
 import './globals.css'
 
+// OPTIMIZED: Font loading strategy untuk better LCP
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
   display: 'swap',
-  preload: true,
+  preload: true, // Keep preload for main font only
   fallback: ['system-ui', 'arial'],
-  adjustFontFallback: false,
+  adjustFontFallback: true, // Enable to reduce CLS on font swap
 })
 
+// OPTIMIZED: Monospace font tidak di-preload (hanya untuk code blocks)
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
-  display: 'swap',
-  preload: true,
-  fallback: ['ui-monospace', 'monospace'],
-  adjustFontFallback: false,
+  display: 'optional', // Use optional for non-critical font
+  preload: false, // No preload untuk reduce blocking resources
+  fallback: ['ui-monospace', 'Courier New', 'monospace'],
+  adjustFontFallback: true, // Enable to reduce CLS
 })
 
 export const metadata: Metadata = {
@@ -51,6 +53,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* OPTIMIZED: Preload critical LCP asset (avatar placeholder) */}
+        <link
+          rel="preload"
+          href="/avatar-placeholder.svg"
+          as="image"
+          type="image/svg+xml"
+          fetchPriority="high"
+        />
+
         {/* Preconnect to external domains for faster resource loading */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -69,15 +80,12 @@ export default function RootLayout({
             `,
           }}
         />
-        {/* Eruda mobile debugger - Only load in development or when debug=true in URL */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                const hasDebugParam = window.location.search.includes('debug=true');
-
-                if (isDev || hasDebugParam) {
+        {/* OPTIMIZED: Eruda mobile debugger - Only in development to reduce production overhead */}
+        {process.env.NODE_ENV === 'development' && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function() {
                   var script = document.createElement('script');
                   script.src = 'https://cdn.jsdelivr.net/npm/eruda';
                   script.onload = function() {
@@ -87,11 +95,11 @@ export default function RootLayout({
                     }
                   };
                   document.head.appendChild(script);
-                }
-              })();
-            `,
-          }}
-        />
+                })();
+              `,
+            }}
+          />
+        )}
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
