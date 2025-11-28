@@ -47,10 +47,6 @@ export function PWAInstallBanner() {
       /iPad|iPhone|iPod/.test(navigator.userAgent)
     setIsIOS(iOS)
 
-    console.log('🔧 PWA Dialog - Dev Mode:', isDev)
-    console.log('📱 PWA Dialog - iOS Device:', iOS)
-    console.log('🌐 PWA Dialog - User Agent:', navigator.userAgent)
-
     // Cek authentication status
     const checkAuth = async () => {
       const supabase = createClient()
@@ -59,7 +55,6 @@ export function PWAInstallBanner() {
       } = await supabase.auth.getUser()
       const isAuth = !!user
       setIsAuthenticated(isAuth)
-      console.log('🔐 PWA Dialog - Authenticated:', isAuth)
     }
 
     checkAuth()
@@ -69,23 +64,14 @@ export function PWAInstallBanner() {
       const dismissed = localStorage.getItem('pwa-install-dismissed')
       if (dismissed) {
         setIsDismissed(true)
-        console.log('❌ PWA Dialog - Dismissed in localStorage')
       }
     }
   }, [])
 
   useEffect(() => {
-    console.log('🔄 PWA Dialog - Second useEffect triggered', {
-      isDevMode,
-      isAuthenticated,
-      isInstallable,
-      isDismissed,
-    })
-
     // Di dev mode: skip auth check untuk testing
     // Di production: HANYA tampilkan jika user sudah login
     if (!isDevMode && !isAuthenticated) {
-      console.log('⏸️  PWA Dialog - Waiting for authentication (not in dev mode)')
       return
     }
 
@@ -93,28 +79,16 @@ export function PWAInstallBanner() {
     // Di production: hanya tampilkan jika installable dan belum dismissed
     const shouldShow = isDevMode || (isInstallable && !isDismissed)
 
-    console.log('🎯 PWA Dialog - Should Show:', shouldShow, {
-      isDevMode,
-      isInstallable,
-      isDismissed,
-      isAuthenticated,
-    })
-
     if (shouldShow) {
       const delay = isDevMode ? 1000 : 2000
-      console.log(`⏱️  PWA Dialog - Setting timer for ${delay}ms`)
 
       const timer = setTimeout(() => {
-        console.log('✅ PWA Dialog - Timer fired! Opening dialog...')
         setIsOpen(true)
       }, delay)
 
       return () => {
-        console.log('🧹 PWA Dialog - Cleaning up timer')
         clearTimeout(timer)
       }
-    } else {
-      console.log('❌ PWA Dialog - Not showing (shouldShow = false)')
     }
   }, [isInstallable, isDismissed, isDevMode, isAuthenticated])
 
@@ -162,25 +136,14 @@ export function PWAInstallBanner() {
   // Di dev mode: skip auth check untuk testing
   // Di production: jangan render jika user belum login
   if (!isDevMode && !isAuthenticated) {
-    console.log('🚫 PWA Dialog - Not rendering (not authenticated)', {
-      isDevMode,
-      isAuthenticated,
-    })
     return null
   }
 
   // Di dev mode: selalu render untuk testing (termasuk di iOS!)
   // Di production: jangan render jika tidak installable atau sudah dismissed
   if (!isDevMode && (!isInstallable || isDismissed)) {
-    console.log('🚫 PWA Dialog - Not rendering (not installable or dismissed)', {
-      isDevMode,
-      isInstallable,
-      isDismissed,
-    })
     return null
   }
-
-  console.log('🎨 PWA Dialog - Rendering component!', { isOpen })
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
