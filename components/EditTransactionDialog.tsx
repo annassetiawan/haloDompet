@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { WalletSelector } from '@/components/WalletSelector'
 import { Loader2 } from 'lucide-react'
@@ -32,6 +33,7 @@ export function EditTransactionDialog({
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState('')
   const [date, setDate] = useState('')
+  const [note, setNote] = useState('')
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -68,6 +70,7 @@ export function EditTransactionDialog({
       setAmount(transaction.amount.toString())
       setCategory(transaction.category)
       setDate(transaction.date.split('T')[0]) // Extract date part
+      setNote(transaction.notes || '')
       setSelectedWalletId(transaction.wallet_id || null)
     }
   }, [transaction, open])
@@ -79,6 +82,7 @@ export function EditTransactionDialog({
       setAmount('')
       setCategory('')
       setDate('')
+      setNote('')
       setSelectedWalletId(null)
       setIsSubmitting(false)
     }
@@ -127,6 +131,7 @@ export function EditTransactionDialog({
           amount: amountNum,
           category,
           date,
+          note: note.trim() || null,
           wallet_id: selectedWalletId,
           type: transaction.type || 'expense',
         }),
@@ -237,6 +242,18 @@ export function EditTransactionDialog({
               max={new Date().toISOString().split('T')[0]}
               className="max-w-full"
               required
+            />
+          </div>
+
+          {/* Notes */}
+          <div className="space-y-2">
+            <Label htmlFor="edit-note">Catatan (Opsional)</Label>
+            <Textarea
+              id="edit-note"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Detail item, lokasi, atau informasi tambahan lainnya..."
+              className="min-h-[80px] resize-none"
             />
           </div>
 

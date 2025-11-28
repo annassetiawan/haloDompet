@@ -2,18 +2,26 @@ import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { SpeedInsights } from '@vercel/speed-insights/next'
-import { PWAInstallBanner } from '@/components/PWAInstallBanner'
 import { Analytics } from '@vercel/analytics/next'
+import { PWAInstallBannerLazy } from '@/components/PWAInstallBannerLazy'
 import './globals.css'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+  fallback: ['system-ui', 'arial'],
+  adjustFontFallback: false,
 })
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+  fallback: ['ui-monospace', 'monospace'],
+  adjustFontFallback: false,
 })
 
 export const metadata: Metadata = {
@@ -43,6 +51,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Preconnect to external domains for faster resource loading */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://vercel.live" />
+        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -87,7 +100,7 @@ export default function RootLayout({
         <Toaster richColors position="top-center" />
         <SpeedInsights />
         <Analytics />
-        <PWAInstallBanner />
+        <PWAInstallBannerLazy />
       </body>
     </html>
   )
