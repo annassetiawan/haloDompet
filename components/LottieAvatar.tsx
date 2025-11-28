@@ -14,6 +14,8 @@ export type LottieAvatarState =
   | 'processing'
   | 'success'
   | 'error'
+  // Image scanning state
+  | 'scanning'     // Sedang scan/analyze gambar struk
   // Sentiment-based states for EXPENSE
   | 'proud'        // Pengeluaran hemat/cerdas (warteg, transport umum)
   | 'concerned'    // Pengeluaran boros tier sedang (30k-100k lifestyle)
@@ -57,6 +59,11 @@ export function LottieAvatar({
         return avatarSuccessAnimation
       case 'error':
         return avatarErrorAnimation
+
+      // Image scanning state
+      case 'scanning':
+        // TODO: Ganti dengan avatar-scanning.json saat sudah ada
+        return avatarProcessingAnimation // Placeholder: gunakan processing (analyzing)
 
       // Sentiment-based states for EXPENSE
       case 'proud':
