@@ -112,7 +112,7 @@ export default function OnboardingPage() {
         }
 
         // Redirect to main app with welcome message
-        toast.success('Selamat datang di HaloDompet! Trial 30 hari aktif. 🎉');
+        toast.success('Selamat datang di HaloDompet! 🎉');
         setTimeout(() => router.push('/'), 500);
       } else {
         console.error('❌ Failed to verify saved data');

@@ -180,7 +180,7 @@ export function DashboardClient({
     if (!hasSeenWelcomeToast) {
       // Show welcome message
       toast.success('Selamat datang di HaloDompet!', {
-        description: 'Trial 30 hari aktif. Mulai catat pengeluaran Anda dengan suara.',
+        description: 'Mulai catat pengeluaran Anda dengan suara.',
         duration: 6000,
       })
 
