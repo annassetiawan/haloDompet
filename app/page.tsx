@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getWallets, getTotalBalance, getAssetGrowth, getTransactions, getUserProfile } from '@/lib/db'
 import { getUserBudgetSummary } from '@/lib/budget'
-import { isTrialExpired } from '@/lib/trial'
 import { DashboardClient } from '@/components/DashboardClient'
 import { LandingPage } from '@/components/landing/LandingPage'
 import type { User } from '@supabase/supabase-js'
@@ -54,9 +53,10 @@ export default async function DashboardPage() {
   //   redirect('/onboarding')
   // }
 
-  if (isTrialExpired(userProfile)) {
-    redirect('/trial-expired')
-  }
+  // Trial system disabled - all users have unlimited access
+  // if (isTrialExpired(userProfile)) {
+  //   redirect('/trial-expired')
+  // }
 
   // Stream the rest of the data with Suspense
   return (
