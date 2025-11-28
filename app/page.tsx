@@ -9,19 +9,13 @@ import { LandingPage } from '@/components/landing/LandingPage'
 import type { User } from '@supabase/supabase-js'
 import type { User as UserProfile } from '@/types'
 
-// Component to fetch and render critical data (wallets, balance)
+// OPTIMIZED: Component to fetch ONLY critical data (wallets, balance) for LCP
 async function DashboardCriticalData({ user, userProfile }: { user: User; userProfile: UserProfile }) {
-  // Fetch critical data first (wallets and balance - user sees these immediately)
+  // Fetch ONLY critical data for LCP (wallets and balance - user sees these immediately)
   const [wallets, totalBalance, growthPercentage] = await Promise.all([
     getWallets(user.id),
     getTotalBalance(user.id),
     getAssetGrowth(user.id),
-  ])
-
-  // Fetch non-critical data (transactions, budget - can be streamed later)
-  const [recentTransactions, budgetSummary] = await Promise.all([
-    getTransactions(user.id, { limit: 5 }),
-    getUserBudgetSummary(user.id)
   ])
 
   return (
@@ -31,8 +25,6 @@ async function DashboardCriticalData({ user, userProfile }: { user: User; userPr
       initialWallets={wallets}
       initialTotalBalance={totalBalance}
       initialGrowthPercentage={growthPercentage}
-      initialTransactions={recentTransactions}
-      initialBudgetSummary={budgetSummary}
     />
   )
 }
