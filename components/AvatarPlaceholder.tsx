@@ -16,8 +16,7 @@ export function AvatarPlaceholder({
     <div
       onClick={disabled ? undefined : onClick}
       className={`
-        cursor-pointer transition-all duration-300
-        w-40 h-40 flex items-center justify-center
+        avatar-container cursor-pointer transition-all duration-300
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}
         ${className}
       `}
@@ -31,7 +30,7 @@ export function AvatarPlaceholder({
         width={160}
         height={160}
         fetchPriority="high"
-        style={{ width: '160px', height: '160px' }}
+        decoding="async"
       />
     </div>
   )

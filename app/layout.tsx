@@ -93,6 +93,22 @@ export default function RootLayout({
         {process.env.NODE_ENV === 'development' && (
           <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         )}
+
+        {/* PHASE 3: Performance optimization meta tags */}
+        <meta name="format-detection" content="telephone=no" />
+        <meta httpEquiv="x-dns-prefetch-control" content="on" />
+
+        {/* PHASE 3: Critical CSS inline untuk instant above-fold rendering */}
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            body{margin:0;font-family:system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;background:#fff}
+            .dark body{background:#0a0a0a;color:#fafafa}
+            .avatar-container{width:10rem;height:10rem;margin:0 auto;display:flex;align-items:center;justify-content:center}
+            .avatar-container img{width:100%;height:100%;max-width:10rem;max-height:10rem}
+            @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+          `
+        }} />
+
         <script
           dangerouslySetInnerHTML={{
             __html: `
