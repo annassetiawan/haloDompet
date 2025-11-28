@@ -63,13 +63,16 @@ export default function AdminPanel() {
   const loadUsers = async () => {
     try {
       setIsLoading(true)
-      const { data, error } = await supabase
-        .from('users')
-        .select('id, email, account_status, trial_ends_at, trial_started_at, created_at')
-        .order('created_at', { ascending: false })
 
-      if (error) throw error
-      setUsers(data || [])
+      // Fetch users from admin API endpoint (bypasses RLS)
+      const response = await fetch('/api/admin/users')
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to fetch users')
+      }
+
+      setUsers(result.users || [])
     } catch (error) {
       console.error('Error loading users:', error)
       toast.error('Gagal memuat daftar user')
