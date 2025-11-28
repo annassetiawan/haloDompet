@@ -5,6 +5,20 @@ import Lottie from 'lottie-react'
 // OPTIMIZED: Only import idle animation upfront for faster LCP
 import avatarIdleAnimation from '@/public/animations/avatar-idle.json'
 
+// Lazy imports untuk animasi lain - akan di-load saat dibutuhkan
+let avatarListeningAnimation: any
+let avatarProcessingAnimation: any
+let avatarSuccessAnimation: any
+let avatarErrorAnimation: any
+
+// Dynamic import saat runtime
+if (typeof window !== 'undefined') {
+  import('@/public/animations/avatar-listening.json').then(m => avatarListeningAnimation = m.default).catch(() => {})
+  import('@/public/animations/avatar-processing.json').then(m => avatarProcessingAnimation = m.default).catch(() => {})
+  import('@/public/animations/avatar-success.json').then(m => avatarSuccessAnimation = m.default).catch(() => {})
+  import('@/public/animations/avatar-error.json').then(m => avatarErrorAnimation = m.default).catch(() => {})
+}
+
 export type LottieAvatarState =
   // Basic states
   | 'idle'
@@ -103,43 +117,43 @@ export function LottieAvatar({
       case 'idle':
         return avatarIdleAnimation
       case 'listening':
-        return avatarListeningAnimation
+        return avatarListeningAnimation || avatarIdleAnimation
       case 'processing':
-        return avatarProcessingAnimation
+        return avatarProcessingAnimation || avatarIdleAnimation
       case 'success':
-        return avatarSuccessAnimation
+        return avatarSuccessAnimation || avatarIdleAnimation
       case 'error':
-        return avatarErrorAnimation
+        return avatarErrorAnimation || avatarIdleAnimation
 
       // Image scanning state
       case 'scanning':
         // TODO: Ganti dengan avatar-scanning.json saat sudah ada
-        return avatarProcessingAnimation // Placeholder: gunakan processing (analyzing)
+        return avatarProcessingAnimation || avatarIdleAnimation // Placeholder: gunakan processing (analyzing)
 
       // Sentiment-based states for EXPENSE
       case 'proud':
         // TODO: Ganti dengan avatar-proud.json saat sudah ada
-        return avatarSuccessAnimation // Placeholder: gunakan success (positif)
+        return avatarSuccessAnimation || avatarIdleAnimation // Placeholder: gunakan success (positif)
       case 'concerned':
         // TODO: Ganti dengan avatar-concerned.json saat sudah ada
-        return avatarProcessingAnimation // Placeholder: gunakan processing (ragu-ragu)
+        return avatarProcessingAnimation || avatarIdleAnimation // Placeholder: gunakan processing (ragu-ragu)
       case 'shocked':
         // TODO: Ganti dengan avatar-shocked.json saat sudah ada
-        return avatarErrorAnimation // Placeholder: gunakan error (negatif kuat)
+        return avatarErrorAnimation || avatarIdleAnimation // Placeholder: gunakan error (negatif kuat)
       case 'disappointed':
         // TODO: Ganti dengan avatar-disappointed.json saat sudah ada
-        return avatarErrorAnimation // Placeholder: gunakan error (negatif)
+        return avatarErrorAnimation || avatarIdleAnimation // Placeholder: gunakan error (negatif)
 
       // Sentiment-based states for INCOME
       case 'excited':
         // TODO: Ganti dengan avatar-excited.json saat sudah ada
-        return avatarSuccessAnimation // Placeholder: gunakan success (positif kuat)
+        return avatarSuccessAnimation || avatarIdleAnimation // Placeholder: gunakan success (positif kuat)
       case 'celebrating':
         // TODO: Ganti dengan avatar-celebrating.json saat sudah ada
-        return avatarSuccessAnimation // Placeholder: gunakan success (positif kuat)
+        return avatarSuccessAnimation || avatarIdleAnimation // Placeholder: gunakan success (positif kuat)
       case 'motivated':
         // TODO: Ganti dengan avatar-motivated.json saat sudah ada
-        return avatarSuccessAnimation // Placeholder: gunakan success (positif)
+        return avatarSuccessAnimation || avatarIdleAnimation // Placeholder: gunakan success (positif)
 
       default:
         return avatarIdleAnimation
