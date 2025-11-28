@@ -1,27 +1,28 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
-import { Toaster } from 'sonner'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Analytics } from '@vercel/analytics/next'
-import { PWAInstallBannerLazy } from '@/components/PWAInstallBannerLazy'
+import { ClientProviders } from '@/components/ClientProviders'
 import './globals.css'
 
+// OPTIMIZED: Font loading strategy untuk better LCP
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
   display: 'swap',
-  preload: true,
+  preload: true, // Keep preload for main font only
   fallback: ['system-ui', 'arial'],
-  adjustFontFallback: false,
+  adjustFontFallback: true, // Enable to reduce CLS on font swap
 })
 
+// OPTIMIZED: Monospace font tidak di-preload (hanya untuk code blocks)
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
-  display: 'swap',
-  preload: true,
-  fallback: ['ui-monospace', 'monospace'],
-  adjustFontFallback: false,
+  display: 'optional', // Use optional for non-critical font
+  preload: false, // No preload untuk reduce blocking resources
+  fallback: ['ui-monospace', 'Courier New', 'monospace'],
+  adjustFontFallback: true, // Enable to reduce CLS
 })
 
 export const metadata: Metadata = {
@@ -51,11 +52,52 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Preconnect to external domains for faster resource loading */}
+        {/* OPTIMIZED: Preload critical LCP asset (avatar placeholder) */}
+        <link
+          rel="preload"
+          href="/avatar-placeholder.svg"
+          as="image"
+          type="image/svg+xml"
+          fetchPriority="high"
+        />
+
+        {/* PHASE 2: Optimized resource hints for faster loading */}
+        {/* Critical: Font loading */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+
+        {/* Critical: Supabase API - Preconnect for faster database calls */}
+        {process.env.NEXT_PUBLIC_SUPABASE_URL && (
+          <>
+            <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
+            <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
+          </>
+        )}
+
+        {/* Analytics and monitoring - DNS prefetch only (non-blocking) */}
         <link rel="dns-prefetch" href="https://vercel.live" />
-        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+        <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
+
+        {/* CDN resources (only in dev) */}
+        {process.env.NODE_ENV === 'development' && (
+          <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+        )}
+
+        {/* PHASE 3: Performance optimization meta tags */}
+        <meta name="format-detection" content="telephone=no" />
+        <meta httpEquiv="x-dns-prefetch-control" content="on" />
+
+        {/* PHASE 3: Critical CSS inline untuk instant above-fold rendering */}
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            body{margin:0;font-family:system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;background:#fff}
+            .dark body{background:#0a0a0a;color:#fafafa}
+            .avatar-container{width:10rem;height:10rem;margin:0 auto;display:flex;align-items:center;justify-content:center}
+            .avatar-container img{width:100%;height:100%;max-width:10rem;max-height:10rem}
+            @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+          `
+        }} />
+
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -69,15 +111,12 @@ export default function RootLayout({
             `,
           }}
         />
-        {/* Eruda mobile debugger - Only load in development or when debug=true in URL */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                const hasDebugParam = window.location.search.includes('debug=true');
-
-                if (isDev || hasDebugParam) {
+        {/* OPTIMIZED: Eruda mobile debugger - Only in development to reduce production overhead */}
+        {process.env.NODE_ENV === 'development' && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function() {
                   var script = document.createElement('script');
                   script.src = 'https://cdn.jsdelivr.net/npm/eruda';
                   script.onload = function() {
@@ -87,20 +126,19 @@ export default function RootLayout({
                     }
                   };
                   document.head.appendChild(script);
-                }
-              })();
-            `,
-          }}
-        />
+                })();
+              `,
+            }}
+          />
+        )}
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
       >
         {children}
-        <Toaster richColors position="top-center" />
+        <ClientProviders />
         <SpeedInsights />
         <Analytics />
-        <PWAInstallBannerLazy />
       </body>
     </html>
   )
