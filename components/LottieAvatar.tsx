@@ -1,11 +1,9 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Lottie from 'lottie-react'
+// OPTIMIZED: Only import idle animation upfront for faster LCP
 import avatarIdleAnimation from '@/public/animations/avatar-idle.json'
-import avatarListeningAnimation from '@/public/animations/avatar-listening.json'
-import avatarProcessingAnimation from '@/public/animations/avatar-processing.json'
-import avatarSuccessAnimation from '@/public/animations/avatar-success.json'
-import avatarErrorAnimation from '@/public/animations/avatar-error.json'
 
 export type LottieAvatarState =
   // Basic states
@@ -37,54 +35,63 @@ export function LottieAvatar({
   className = '',
   disabled = false,
 }: LottieAvatarProps) {
+  // OPTIMIZED: State for lazy-loaded animations
+  const [animationData, setAnimationData] = useState<any>(avatarIdleAnimation)
+  const [isLoading, setIsLoading] = useState(false)
+
+  // OPTIMIZED: Lazy load animations only when needed
+  useEffect(() => {
+    const loadAnimation = async () => {
+      setIsLoading(true)
+      try {
+        switch (state) {
+          case 'idle':
+            setAnimationData(avatarIdleAnimation)
+            break
+          case 'listening':
+            const listening = await import('@/public/animations/avatar-listening.json')
+            setAnimationData(listening.default)
+            break
+          case 'processing':
+            const processing = await import('@/public/animations/avatar-processing.json')
+            setAnimationData(processing.default)
+            break
+          case 'success':
+          case 'proud':
+          case 'excited':
+          case 'celebrating':
+          case 'motivated':
+            const success = await import('@/public/animations/avatar-success.json')
+            setAnimationData(success.default)
+            break
+          case 'error':
+          case 'shocked':
+          case 'disappointed':
+            const error = await import('@/public/animations/avatar-error.json')
+            setAnimationData(error.default)
+            break
+          case 'concerned':
+            const concerned = await import('@/public/animations/avatar-processing.json')
+            setAnimationData(concerned.default)
+            break
+          default:
+            setAnimationData(avatarIdleAnimation)
+        }
+      } catch (err) {
+        console.error('Error loading animation:', err)
+        setAnimationData(avatarIdleAnimation)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadAnimation()
+  }, [state])
+
   const handleClick = () => {
     if (!disabled) {
       console.log('Avatar clicked, state:', state)
       onClick?.()
-    }
-  }
-
-  const getAnimationData = () => {
-    switch (state) {
-      // Basic states
-      case 'idle':
-        return avatarIdleAnimation
-      case 'listening':
-        return avatarListeningAnimation
-      case 'processing':
-        return avatarProcessingAnimation
-      case 'success':
-        return avatarSuccessAnimation
-      case 'error':
-        return avatarErrorAnimation
-
-      // Sentiment-based states for EXPENSE
-      case 'proud':
-        // TODO: Ganti dengan avatar-proud.json saat sudah ada
-        return avatarSuccessAnimation // Placeholder: gunakan success (positif)
-      case 'concerned':
-        // TODO: Ganti dengan avatar-concerned.json saat sudah ada
-        return avatarProcessingAnimation // Placeholder: gunakan processing (ragu-ragu)
-      case 'shocked':
-        // TODO: Ganti dengan avatar-shocked.json saat sudah ada
-        return avatarErrorAnimation // Placeholder: gunakan error (negatif kuat)
-      case 'disappointed':
-        // TODO: Ganti dengan avatar-disappointed.json saat sudah ada
-        return avatarErrorAnimation // Placeholder: gunakan error (negatif)
-
-      // Sentiment-based states for INCOME
-      case 'excited':
-        // TODO: Ganti dengan avatar-excited.json saat sudah ada
-        return avatarSuccessAnimation // Placeholder: gunakan success (positif kuat)
-      case 'celebrating':
-        // TODO: Ganti dengan avatar-celebrating.json saat sudah ada
-        return avatarSuccessAnimation // Placeholder: gunakan success (positif kuat)
-      case 'motivated':
-        // TODO: Ganti dengan avatar-motivated.json saat sudah ada
-        return avatarSuccessAnimation // Placeholder: gunakan success (positif)
-
-      default:
-        return avatarIdleAnimation
     }
   }
 
@@ -110,13 +117,13 @@ export function LottieAvatar({
       className={`
         cursor-pointer transition-all duration-300
         w-40 h-40 flex items-center justify-center
-        ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}
+        ${disabled || isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}
 
         ${className}
       `}
     >
       <Lottie
-        animationData={getAnimationData()}
+        animationData={animationData}
         loop={true}
         autoplay={true}
         className="w-full h-full"

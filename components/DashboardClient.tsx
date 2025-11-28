@@ -3,20 +3,41 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase/client'
 import { WalletCarousel } from '@/components/WalletCarousel'
 import { WalletSelector } from '@/components/WalletSelector'
-import { AddWalletDialog } from '@/components/AddWalletDialog'
-import { EditWalletDialog } from '@/components/EditWalletDialog'
-import { ManualTransactionDialog } from '@/components/ManualTransactionDialog'
 import { TransactionCard } from '@/components/TransactionCard'
 import { DarkModeToggle } from '@/components/DarkModeToggle'
 import { LottieAvatarRecorder } from '@/components/LottieAvatarRecorder'
 import { BottomNav } from '@/components/BottomNav'
-import { TransactionReceipt } from '@/components/TransactionReceipt'
-import { BudgetProgress } from '@/components/BudgetProgress'
 import { Button } from '@/components/ui/button'
 import { isEarlyAdopter } from '@/lib/trial'
+
+// OPTIMIZED: Lazy load dialog components (below-the-fold)
+const AddWalletDialog = dynamic(() => import('@/components/AddWalletDialog').then(mod => ({ default: mod.AddWalletDialog })), {
+  ssr: false,
+})
+const EditWalletDialog = dynamic(() => import('@/components/EditWalletDialog').then(mod => ({ default: mod.EditWalletDialog })), {
+  ssr: false,
+})
+const ManualTransactionDialog = dynamic(() => import('@/components/ManualTransactionDialog').then(mod => ({ default: mod.ManualTransactionDialog })), {
+  ssr: false,
+})
+const TransactionReceipt = dynamic(() => import('@/components/TransactionReceipt').then(mod => ({ default: mod.TransactionReceipt })), {
+  ssr: false,
+})
+
+// OPTIMIZED: Lazy load BudgetProgress (below-the-fold)
+const BudgetProgress = dynamic(() => import('@/components/BudgetProgress').then(mod => ({ default: mod.BudgetProgress })), {
+  ssr: false,
+  loading: () => (
+    <div className="space-y-3">
+      <div className="h-5 w-32 bg-muted rounded animate-pulse" />
+      <div className="h-24 w-full bg-muted rounded-xl animate-pulse" />
+    </div>
+  ),
+})
 import {
   Dialog,
   DialogContent,
@@ -52,8 +73,9 @@ interface DashboardClientProps {
   initialWallets: Wallet[]
   initialTotalBalance: number
   initialGrowthPercentage: number
-  initialTransactions: Transaction[]
-  initialBudgetSummary: BudgetSummary[]
+  // OPTIMIZED: Make transactions and budget optional for faster LCP
+  initialTransactions?: Transaction[]
+  initialBudgetSummary?: BudgetSummary[]
 }
 
 export function DashboardClient({
@@ -62,8 +84,8 @@ export function DashboardClient({
   initialWallets,
   initialTotalBalance,
   initialGrowthPercentage,
-  initialTransactions,
-  initialBudgetSummary,
+  initialTransactions = [],
+  initialBudgetSummary = [],
 }: DashboardClientProps) {
   // State Management
   const [user] = useState<User>(initialUser)
@@ -73,6 +95,7 @@ export function DashboardClient({
   const [growthPercentage, setGrowthPercentage] = useState<number>(initialGrowthPercentage)
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>(initialTransactions)
   const [budgetSummary, setBudgetSummary] = useState<BudgetSummary[]>(initialBudgetSummary)
+  const [isLoadingNonCritical, setIsLoadingNonCritical] = useState(initialTransactions.length === 0)
 
   // Ubah initial state menggunakan IDLE_STATUS
   const [status, setStatus] = useState(IDLE_STATUS)
@@ -127,6 +150,27 @@ export function DashboardClient({
 
   const router = useRouter()
   const supabase = createClient()
+
+  // OPTIMIZED: Lazy load non-critical data (transactions, budget) after initial render
+  useEffect(() => {
+    // Only load if we don't have initial data
+    if (initialTransactions.length === 0) {
+      const loadNonCriticalData = async () => {
+        try {
+          await Promise.all([
+            loadRecentTransactions(),
+            loadBudgetSummary()
+          ])
+        } catch (error) {
+          console.error('Error loading non-critical data:', error)
+        } finally {
+          setIsLoadingNonCritical(false)
+        }
+      }
+
+      loadNonCriticalData()
+    }
+  }, []) // Run once on mount
 
   // Show welcome toast for new users
   useEffect(() => {
@@ -908,13 +952,28 @@ export function DashboardClient({
             </div>
           </div>
 
-          {/* Budget Progress Widget */}
+          {/* Budget Progress Widget - OPTIMIZED with dynamic loading */}
           <div className="animate-slide-up">
             <BudgetProgress budgets={budgetSummary} />
           </div>
 
-          {/* Recent Transactions */}
-          {recentTransactions.length > 0 && (
+          {/* Recent Transactions - OPTIMIZED with skeleton */}
+          {isLoadingNonCritical ? (
+            <div className="space-y-4 animate-slide-up">
+              <div className="flex items-center justify-between">
+                <div className="h-6 w-36 bg-muted rounded animate-pulse" />
+                <div className="h-9 w-28 bg-muted rounded-md animate-pulse" />
+              </div>
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="h-20 w-full bg-muted rounded-xl animate-pulse"
+                  />
+                ))}
+              </div>
+            </div>
+          ) : recentTransactions.length > 0 ? (
             <div className="space-y-4 animate-slide-up">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-normal text-foreground">
@@ -938,10 +997,7 @@ export function DashboardClient({
                 ))}
               </div>
             </div>
-          )}
-
-          {/* Empty State */}
-          {recentTransactions.length === 0 && (
+          ) : (
             <div className="text-center py-12 space-y-3">
               <div className="w-16 h-16 mx-auto rounded-full bg-muted/50 flex items-center justify-center">
                 <History className="h-8 w-8 text-muted-foreground" />
