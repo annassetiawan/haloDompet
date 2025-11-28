@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react'
-import { Eye, EyeOff, Plus, Wallet as WalletIcon, MoreVertical, Edit, Star, TrendingUp, TrendingDown, ChevronLeft, ChevronRight, DollarSign } from 'lucide-react'
+import { Eye, EyeOff, Plus, Wallet as WalletIcon, MoreVertical, Edit, Star, TrendingUp, TrendingDown, ChevronLeft, ChevronRight, DollarSign, CreditCard } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -105,187 +105,175 @@ export function WalletCarousel({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
+      {/* Header Section - Blibli Style */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h2 className="text-xl font-semibold text-foreground">Dompet Saya</h2>
-          <button
-            onClick={() => setIsVisible(!isVisible)}
-            className="p-2 rounded-full hover:bg-muted/20 transition-all hover:scale-110"
-          >
-            {isVisible ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
-          </button>
-        </div>
-        {onAddWallet && (
-          <Button variant="ghost" size="sm" onClick={onAddWallet} className="gap-2 text-sm font-medium hover:scale-105 transition-transform">
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Tambah Dompet</span>
-            <span className="sm:hidden">Tambah</span>
-          </Button>
-        )}
+        <h2 className="text-lg font-semibold text-foreground">Atur pembayaran</h2>
+        <button
+          className="text-sm text-blue-600 font-medium hover:text-blue-700 transition-colors flex items-center gap-1"
+          onClick={() => {/* Handle see all */}}
+        >
+          Lihat semua
+          <ChevronRight className="h-3.5 w-3.5" />
+        </button>
       </div>
 
-      <div className="relative group">
-        {canScrollLeft && (
-          <Button variant="ghost" size="icon" onClick={scrollLeftHandler} className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-background/80 backdrop-blur-sm shadow-lg border border-border/50">
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-        )}
-        {canScrollRight && (
-          <Button variant="ghost" size="icon" onClick={scrollRightHandler} className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-background/80 backdrop-blur-sm shadow-lg border border-border/50">
-            <ChevronRight className="h-5 w-5" />
-          </Button>
-        )}
+      {/* Carousel Container - Blibli Style */}
+      <div ref={scrollContainerRef} className="w-full overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
+        <div className="flex gap-3 snap-x snap-mandatory">
 
-        <div ref={scrollContainerRef} className="w-full overflow-x-auto pb-3 scrollbar-hide">
-          {/* items-stretch: KUNCI agar semua kartu tingginya sama */}
-          <div className="flex gap-4 snap-x snap-mandatory px-1 items-stretch">
-
-            {/* --- TOTAL ASET CARD --- */}
-            <div className="w-80 flex-shrink-0 snap-start">
-              {/* UPDATED: Gunakan h-full di sini agar mengikuti tinggi tetangganya */}
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[2px] h-full transition-all duration-300 hover:scale-[1.02]">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-3xl" />
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
-
-                {/* Inner Content: justify-between agar spasi atas-bawah rapi */}
-                <div className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-4 backdrop-blur-xl h-full flex flex-col justify-between">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-xl flex items-center justify-center shadow-lg">
-                        <WalletIcon className="h-5 w-5 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-white/90 text-sm font-medium">Total Aset</p>
-                        <p className="text-white/60 text-[10px]">{wallets.length} dompet aktif</p>
-                      </div>
-                    </div>
-                    {growthPercentage === 0 ? (
-                      <div className="flex items-center gap-1 bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">
-                        <span className="text-[10px] text-white font-medium">-</span>
-                      </div>
-                    ) : growthPercentage > 0 ? (
-                      <div className="flex items-center gap-1 bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">
-                        <TrendingUp className="h-3 w-3 text-white" />
-                        <span className="text-[10px] text-white font-medium">
-                          +{growthPercentage.toFixed(1)}%
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1 bg-rose-500/30 px-2 py-1 rounded-full backdrop-blur-sm">
-                        <TrendingDown className="h-3 w-3 text-white" />
-                        <span className="text-[10px] text-white font-medium">
-                          {growthPercentage.toFixed(1)}%
-                        </span>
-                      </div>
-                    )}
+          {/* Card 1: Kartu Kredit atau Debit */}
+          <div className="min-w-[280px] sm:min-w-[340px] flex-shrink-0 snap-start">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-700 via-slate-600 to-slate-500 p-4 transition-transform hover:scale-[1.02]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                    <CreditCard className="h-6 w-6 text-white" />
                   </div>
-
                   <div>
-                    <p className={`${getBalanceFontSize(totalBalance)} font-bold text-white tracking-tight leading-none`}>
-                      {isVisible ? formatCurrency(totalBalance) : maskedAmount(totalBalance)}
-                    </p>
+                    <h3 className="text-white font-semibold text-sm">Kartu kredit atau debit</h3>
                   </div>
-
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/40 to-transparent" />
                 </div>
+                <Button
+                  size="sm"
+                  className="bg-white text-slate-700 hover:bg-white/90 font-medium rounded-full px-5 h-8"
+                  onClick={onAddWallet}
+                >
+                  Buka
+                </Button>
               </div>
             </div>
+          </div>
 
-            {/* --- INDIVIDUAL WALLET CARDS --- */}
-            {wallets.map((wallet) => (
-              <div key={wallet.id} className="w-80 flex-shrink-0 snap-start">
-                <div
-                  className="relative overflow-hidden rounded-2xl p-4 text-white h-full flex flex-col justify-between hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
-                  style={{
-                    background: `linear-gradient(135deg, ${wallet.color || '#10b981'} 0%, ${getSecondaryColor(wallet.color || '#10b981')} 100%)`
-                  }}
-                >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10" />
-                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full blur-xl" />
+          {/* Individual Wallet Cards - Blibli PayLater Style */}
+          {wallets.map((wallet, index) => {
+            const gradientStyles = [
+              // Blue-Green gradient (Blibli Tiket PayLater style)
+              'from-blue-500 via-blue-400 to-emerald-400',
+              // Cyan gradient (BCA Blibli Card style)
+              'from-cyan-400 via-cyan-300 to-blue-300',
+              // Purple gradient
+              'from-purple-500 via-purple-400 to-pink-400',
+              // Orange gradient
+              'from-orange-500 via-orange-400 to-yellow-400',
+              // Pink gradient
+              'from-pink-500 via-pink-400 to-rose-400',
+            ]
 
-                  <div className="relative z-10 flex flex-col justify-between h-full gap-2">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="text-[10px] font-medium text-white/80 uppercase tracking-wider mb-1">
-                          {wallet.is_default ? 'Utama' : 'Dompet'}
-                        </p>
-                        <h3 className="text-base font-bold text-white">{wallet.name}</h3>
+            const gradientClass = gradientStyles[index % gradientStyles.length]
+
+            return (
+              <div key={wallet.id} className="min-w-[280px] sm:min-w-[340px] flex-shrink-0 snap-start">
+                <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${gradientClass} p-4 transition-transform hover:scale-[1.02]`}>
+                  {/* Decorative Elements */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl" />
+                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/5 rounded-full blur-2xl" />
+
+                  {/* Card Content */}
+                  <div className="relative z-10 flex items-center justify-between">
+                    <div className="flex items-center gap-3 flex-1">
+                      {/* Icon/Logo Area */}
+                      <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+                        <span className="text-2xl">{wallet.icon || '💳'}</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="bg-white/20 p-1.5 rounded-lg backdrop-blur-sm">
-                          <span className="text-lg">{wallet.icon || '💰'}</span>
-                        </div>
-                        {onEditWallet && (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-white/80 hover:text-white hover:bg-white/20 backdrop-blur-sm">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem
-                                onClick={() => setSelectedWalletForBalance(wallet)}
-                                className="cursor-pointer"
-                              >
-                                <DollarSign className="mr-2 h-4 w-4" /> Sesuaikan Saldo
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => onEditWallet(wallet)} className="cursor-pointer">
-                                <Edit className="mr-2 h-4 w-4" /> Edit Dompet
-                              </DropdownMenuItem>
-                              {!wallet.is_default && (
-                                <DropdownMenuItem onClick={() => onEditWallet(wallet)} className="cursor-pointer">
-                                  <Star className="mr-2 h-4 w-4" /> Jadikan Utama
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+
+                      {/* Wallet Info */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-white font-semibold text-sm mb-0.5 truncate">
+                          {wallet.name}
+                        </h3>
+                        <p className="text-white/80 text-xs">
+                          {isVisible ? formatCurrency(wallet.balance) : maskedAmount(wallet.balance)}
+                        </p>
+                        {wallet.is_default && (
+                          <span className="inline-block mt-1 text-[10px] text-white/70 bg-white/20 px-2 py-0.5 rounded-full">
+                            Utama
+                          </span>
                         )}
                       </div>
                     </div>
 
-                    <div>
-                      <p className="text-[10px] text-white/70 mb-0.5">Saldo Aktif</p>
-                      <p className={`${getBalanceFontSize(wallet.balance)} font-bold text-white leading-none`}>
-                        {isVisible ? formatCurrency(wallet.balance) : maskedAmount(wallet.balance)}
-                      </p>
-                    </div>
+                    {/* Action Button */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          size="sm"
+                          className="bg-white text-slate-700 hover:bg-white/90 font-medium rounded-full px-5 h-8 flex-shrink-0"
+                        >
+                          Buka
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuItem
+                          onClick={() => setSelectedWalletForBalance(wallet)}
+                          className="cursor-pointer"
+                        >
+                          <DollarSign className="mr-2 h-4 w-4" /> Sesuaikan Saldo
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        {onEditWallet && (
+                          <DropdownMenuItem onClick={() => onEditWallet(wallet)} className="cursor-pointer">
+                            <Edit className="mr-2 h-4 w-4" /> Edit Dompet
+                          </DropdownMenuItem>
+                        )}
+                        {!wallet.is_default && onEditWallet && (
+                          <DropdownMenuItem onClick={() => onEditWallet(wallet)} className="cursor-pointer">
+                            <Star className="mr-2 h-4 w-4" /> Jadikan Utama
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
+
+                  {/* Credit Card Chip (for visual interest) */}
+                  {index === 0 && (
+                    <div className="absolute bottom-3 left-4">
+                      <div className="w-10 h-8 rounded bg-gradient-to-br from-yellow-200/40 to-yellow-300/40 backdrop-blur-sm" />
+                    </div>
+                  )}
                 </div>
               </div>
-            ))}
+            )
+          })}
 
-            {/* --- ADD WALLET CARD --- */}
-            {onAddWallet && wallets.length < 5 && (
-              <div className="w-80 flex-shrink-0 snap-start">
-                <Card
-                  className="h-full min-h-[140px] border-2 border-dashed border-border/50 rounded-3xl bg-gradient-to-br from-muted/30 to-muted/10 hover:from-muted/40 hover:to-muted/20 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:border-primary/30 group"
-                  onClick={onAddWallet}
-                >
-                  <div className="p-4 h-full flex flex-col items-center justify-center gap-3 text-muted-foreground">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-muted/60 to-muted/40 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Plus className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                    <div className="text-center">
-                      <p className="font-semibold text-foreground text-sm">Tambah Dompet</p>
-                    </div>
+          {/* Add Wallet Card */}
+          {onAddWallet && wallets.length < 5 && (
+            <div className="min-w-[280px] sm:min-w-[340px] flex-shrink-0 snap-start">
+              <button
+                onClick={onAddWallet}
+                className="w-full h-full rounded-2xl border-2 border-dashed border-border/50 bg-muted/30 hover:bg-muted/40 p-4 transition-all hover:scale-[1.02] hover:border-primary/50"
+              >
+                <div className="flex items-center justify-center gap-3 h-full min-h-[64px]">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Plus className="h-5 w-5 text-primary" />
                   </div>
-                </Card>
-              </div>
-            )}
-          </div>
+                  <span className="font-medium text-foreground">Tambah Dompet</span>
+                </div>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Scroll Indicators Mobile */}
-      {wallets.length > 0 && (
-        <div className="flex justify-center gap-1.5 md:hidden">
-          {[...Array(Math.min(wallets.length + 1, 5))].map((_, i) => (
-            <div key={i} className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30" />
-          ))}
-        </div>
-      )}
+      {/* Balance Visibility Toggle (bottom right corner) */}
+      <div className="flex justify-end">
+        <button
+          onClick={() => setIsVisible(!isVisible)}
+          className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          {isVisible ? (
+            <>
+              <EyeOff className="h-3.5 w-3.5" />
+              <span>Sembunyikan saldo</span>
+            </>
+          ) : (
+            <>
+              <Eye className="h-3.5 w-3.5" />
+              <span>Tampilkan saldo</span>
+            </>
+          )}
+        </button>
+      </div>
 
       {/* Edit Balance Dialog */}
       {selectedWalletForBalance && (
