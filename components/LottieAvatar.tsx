@@ -12,6 +12,8 @@ export type LottieAvatarState =
   | 'processing'
   | 'success'
   | 'error'
+  // Image scanning state
+  | 'scanning'     // Sedang scan/analyze gambar struk
   // Sentiment-based states for EXPENSE
   | 'proud'        // Pengeluaran hemat/cerdas (warteg, transport umum)
   | 'concerned'    // Pengeluaran boros tier sedang (30k-100k lifestyle)
@@ -92,6 +94,55 @@ export function LottieAvatar({
     if (!disabled) {
       console.log('Avatar clicked, state:', state)
       onClick?.()
+    }
+  }
+
+  const getAnimationData = () => {
+    switch (state) {
+      // Basic states
+      case 'idle':
+        return avatarIdleAnimation
+      case 'listening':
+        return avatarListeningAnimation
+      case 'processing':
+        return avatarProcessingAnimation
+      case 'success':
+        return avatarSuccessAnimation
+      case 'error':
+        return avatarErrorAnimation
+
+      // Image scanning state
+      case 'scanning':
+        // TODO: Ganti dengan avatar-scanning.json saat sudah ada
+        return avatarProcessingAnimation // Placeholder: gunakan processing (analyzing)
+
+      // Sentiment-based states for EXPENSE
+      case 'proud':
+        // TODO: Ganti dengan avatar-proud.json saat sudah ada
+        return avatarSuccessAnimation // Placeholder: gunakan success (positif)
+      case 'concerned':
+        // TODO: Ganti dengan avatar-concerned.json saat sudah ada
+        return avatarProcessingAnimation // Placeholder: gunakan processing (ragu-ragu)
+      case 'shocked':
+        // TODO: Ganti dengan avatar-shocked.json saat sudah ada
+        return avatarErrorAnimation // Placeholder: gunakan error (negatif kuat)
+      case 'disappointed':
+        // TODO: Ganti dengan avatar-disappointed.json saat sudah ada
+        return avatarErrorAnimation // Placeholder: gunakan error (negatif)
+
+      // Sentiment-based states for INCOME
+      case 'excited':
+        // TODO: Ganti dengan avatar-excited.json saat sudah ada
+        return avatarSuccessAnimation // Placeholder: gunakan success (positif kuat)
+      case 'celebrating':
+        // TODO: Ganti dengan avatar-celebrating.json saat sudah ada
+        return avatarSuccessAnimation // Placeholder: gunakan success (positif kuat)
+      case 'motivated':
+        // TODO: Ganti dengan avatar-motivated.json saat sudah ada
+        return avatarSuccessAnimation // Placeholder: gunakan success (positif)
+
+      default:
+        return avatarIdleAnimation
     }
   }
 
