@@ -26,6 +26,12 @@ export function PWAInstallBanner() {
   const [isDevMode, setIsDevMode] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isIOS, setIsIOS] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Prevent hydration mismatch by waiting for client-side mount
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   useEffect(() => {
     // Deteksi development mode
@@ -146,6 +152,11 @@ export function PWAInstallBanner() {
       localStorage.setItem('pwa-install-dismissed', dismissedUntil.toString())
       setIsDismissed(true)
     }
+  }
+
+  // Prevent hydration mismatch - don't render until mounted on client
+  if (!isMounted) {
+    return null
   }
 
   // Di dev mode: skip auth check untuk testing
