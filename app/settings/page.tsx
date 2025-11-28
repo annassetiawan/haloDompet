@@ -716,42 +716,34 @@ export default function SettingsPage() {
             </Button>
 
             {/* Danger Zone */}
-            <div className="bg-red-500/5 dark:bg-red-500/10 border-2 border-red-500/20 rounded-2xl p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <AlertTriangle className="h-5 w-5 text-red-500" />
-                <h2 className="text-lg font-semibold text-red-600 dark:text-red-400">
-                  Zona Bahaya
-                </h2>
-              </div>
-
-              <div className="space-y-4">
-                <div className="p-4 rounded-lg border border-red-500/20 bg-background/50">
-                  <h3 className="font-medium text-foreground mb-2">Reset Semua Data</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Menghapus semua transaksi dan mereset saldo dompet ke 0. Tindakan ini tidak dapat dibatalkan.
-                  </p>
-                  <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-4">
-                    <AlertCircle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                    <div className="text-xs text-muted-foreground">
-                      <p className="font-medium text-amber-600 dark:text-amber-400 mb-1">Perhatian:</p>
-                      <ul className="list-disc list-inside space-y-1">
-                        <li>Semua transaksi akan dihapus permanen</li>
-                        <li>Saldo semua dompet akan direset ke 0</li>
-                        <li>Akun Anda tidak akan dihapus</li>
-                        <li>Anda tetap dapat menggunakan aplikasi setelah reset</li>
-                      </ul>
-                    </div>
-                  </div>
-                  <Button
-                    onClick={handleResetData}
-                    variant="destructive"
-                    className="w-full gap-2 bg-red-500 hover:bg-red-600"
-                  >
-                    <Trash2 className="h-4 w-4" />
+            <div className="bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 rounded-xl p-5">
+              <div className="flex items-start gap-3 mb-4">
+                <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h2 className="text-base font-semibold text-red-600 dark:text-red-400 mb-1">
                     Reset Semua Data
-                  </Button>
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Hapus semua transaksi dan reset saldo ke 0. Tidak dapat dibatalkan.
+                  </p>
                 </div>
               </div>
+
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-4">
+                <AlertCircle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-muted-foreground">
+                  <strong className="text-amber-600 dark:text-amber-400">Peringatan:</strong> Semua transaksi dan saldo akan dihapus permanen. Akun tetap aktif setelah reset.
+                </p>
+              </div>
+
+              <Button
+                onClick={handleResetData}
+                variant="destructive"
+                className="w-full gap-2 bg-red-500 hover:bg-red-600"
+              >
+                <Trash2 className="h-4 w-4" />
+                Reset Semua Data
+              </Button>
             </div>
 
             {/* Logout Button - Mobile */}
