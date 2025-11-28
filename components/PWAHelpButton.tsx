@@ -44,14 +44,14 @@ export function PWAHelpButton() {
             {/* Title & Description */}
             <div className="space-y-3 px-2">
               <DialogTitle className="text-xl">Tentang HaloDompet</DialogTitle>
-              <DialogDescription className="text-left text-sm leading-relaxed space-y-3">
-                <p>
+              <DialogDescription className="text-left text-sm leading-relaxed">
+                <span className="block mb-3">
                   <strong className="text-foreground">HaloDompet adalah Progressive Web App (PWA)</strong> -
                   aplikasi web modern yang bisa diinstall ke home screen perangkat Anda.
-                </p>
+                </span>
 
-                <div className="space-y-2">
-                  <p className="font-semibold text-foreground">Cara Install:</p>
+                <span className="block space-y-2 mb-3">
+                  <span className="block font-semibold text-foreground">Cara Install:</span>
                   {isIOS ? (
                     <ol className="list-decimal list-inside space-y-1 text-xs">
                       <li>Tap tombol <strong>Share</strong> (ikon kotak dengan panah) di Safari</li>
@@ -65,16 +65,16 @@ export function PWAHelpButton() {
                       <li>Tap <strong>"Install"</strong> untuk konfirmasi</li>
                     </ol>
                   )}
-                </div>
+                </span>
 
-                <div className="space-y-1">
-                  <p className="font-semibold text-foreground">Keuntungan:</p>
+                <span className="block space-y-1">
+                  <span className="block font-semibold text-foreground">Keuntungan:</span>
                   <ul className="list-disc list-inside space-y-0.5 text-xs">
                     <li>Akses lebih cepat dari home screen</li>
                     <li>Pengalaman seperti aplikasi native</li>
                     <li>Bisa dibuka tanpa membuka browser</li>
                   </ul>
-                </div>
+                </span>
               </DialogDescription>
             </div>
           </DialogHeader>
