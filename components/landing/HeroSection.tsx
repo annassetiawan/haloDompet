@@ -2,10 +2,14 @@
 
 import Link from 'next/link'
 import { ArrowRight, PlayCircle } from 'lucide-react'
+import { LightRays } from './LightRays'
 
 export function HeroSection() {
   return (
-    <section className="min-h-screen flex flex-col justify-center items-center text-center px-6 pt-32 pb-16 relative">
+    <section className="min-h-screen flex flex-col justify-center items-center text-center px-6 pt-32 pb-16 relative overflow-hidden">
+      {/* Light Rays Background Effect */}
+      <LightRays color="violet" opacity={0.12} />
+
       {/* Gradient Glow Background */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[150%] h-full bg-gradient-radial from-violet-600/15 via-transparent to-transparent pointer-events-none" />
 
