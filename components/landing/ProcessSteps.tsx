@@ -23,14 +23,14 @@ export function ProcessSteps() {
   return (
     <section
       id="features"
-      className="py-24 border-y border-white/5 bg-[#0A0A0A]"
+      className="py-20 md:py-32 border-y border-zinc-800/50 relative"
     >
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-16 max-w-2xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-semibold text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
             Workflow super simpel.
           </h2>
-          <p className="text-zinc-400">
+          <p className="text-zinc-400 leading-relaxed">
             Kami menghilangkan friksi dalam mencatat keuangan. Dari suara
             menjadi data insight dalam hitungan detik.
           </p>
@@ -42,14 +42,14 @@ export function ProcessSteps() {
 
           {steps.map((step, idx) => (
             <div key={idx} className="relative z-10 group">
-              <div className="w-16 h-16 mx-auto bg-[#0A0A0A] border border-zinc-800 rounded-2xl flex items-center justify-center text-zinc-400 group-hover:border-violet-500/50 group-hover:text-violet-400 transition-all duration-500 shadow-lg mb-6">
+              <div className="w-16 h-16 mx-auto bg-zinc-900/50 border border-zinc-800/50 rounded-2xl flex items-center justify-center text-zinc-400 group-hover:border-violet-500/50 group-hover:text-violet-400 transition-all duration-300 shadow-lg mb-6">
                 {step.icon}
               </div>
               <div className="text-center px-4">
-                <h3 className="text-lg font-medium text-white mb-2">
+                <h3 className="text-lg font-semibold text-white mb-2">
                   {step.title}
                 </h3>
-                <p className="text-sm text-zinc-500 leading-relaxed">
+                <p className="text-sm text-zinc-400 leading-relaxed">
                   {step.desc}
                 </p>
               </div>

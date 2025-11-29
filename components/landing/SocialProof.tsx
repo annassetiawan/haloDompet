@@ -50,9 +50,9 @@ export function SocialProof() {
   ]
 
   return (
-    <section id="reviews" className="py-32">
+    <section id="reviews" className="py-20 md:py-32 relative">
       <div className="max-w-5xl mx-auto px-6">
-        <h2 className="text-3xl font-semibold text-white mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-12">
           Apa kata early users?
         </h2>
 
@@ -60,7 +60,7 @@ export function SocialProof() {
           {reviews.map((review) => (
             <div
               key={review.id}
-              className={`bg-zinc-900/30 border border-white/5 p-6 rounded-2xl hover:border-white/10 transition-colors ${review.span || 'col-span-1'}`}
+              className={`bg-zinc-900/50 border border-zinc-800/50 p-6 rounded-2xl hover:border-zinc-700 transition-all duration-300 hover:-translate-y-1 ${review.span || 'col-span-1'}`}
             >
               <div className="flex items-center gap-3 mb-4">
                 <img

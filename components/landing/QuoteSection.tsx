@@ -2,7 +2,7 @@
 
 export function QuoteSection() {
   return (
-    <section id="tentang" className="py-20 md:py-32 px-6 text-center">
+    <section id="tentang" className="py-20 md:py-32 px-6 text-center relative">
       <div className="max-w-4xl mx-auto">
         {/* Quote Text */}
         <p className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight mb-12">
@@ -14,7 +14,7 @@ export function QuoteSection() {
         </p>
 
         {/* Dompie Says */}
-        <div className="inline-flex items-center gap-4 bg-zinc-900/50 border border-zinc-800/50 px-4 py-3 rounded-full">
+        <div className="inline-flex items-center gap-4 bg-zinc-900/50 border border-zinc-800/50 px-4 py-3 rounded-full hover:border-zinc-700 transition-colors">
           {/* Mini Dompie Avatar */}
           <div className="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center">
             <div className="flex gap-1.5">
