@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Geist, Geist_Mono, Plus_Jakarta_Sans, Space_Mono } from 'next/font/google'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Analytics } from '@vercel/analytics/next'
 import { ClientProviders } from '@/components/ClientProviders'
@@ -23,6 +23,24 @@ const geistMono = Geist_Mono({
   preload: false, // No preload untuk reduce blocking resources
   fallback: ['ui-monospace', 'Courier New', 'monospace'],
   adjustFontFallback: true, // Enable to reduce CLS
+})
+
+// Plus Jakarta Sans for landing page
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: '--font-plus-jakarta',
+  subsets: ['latin'],
+  display: 'swap',
+  weight: ['400', '500', '600', '700', '800'],
+  fallback: ['system-ui', 'arial'],
+})
+
+// Space Mono for landing page code/labels
+const spaceMono = Space_Mono({
+  variable: '--font-space-mono',
+  subsets: ['latin'],
+  display: 'optional',
+  weight: ['400', '700'],
+  fallback: ['ui-monospace', 'Courier New', 'monospace'],
 })
 
 export const metadata: Metadata = {
@@ -133,7 +151,7 @@ export default function RootLayout({
         )}
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
+        className={`${geistSans.variable} ${geistMono.variable} ${plusJakartaSans.variable} ${spaceMono.variable} antialiased font-sans`}
       >
         {children}
         <ClientProviders />
