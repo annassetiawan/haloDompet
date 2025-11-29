@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono, Plus_Jakarta_Sans, Space_Mono } from 'next/font/google'
+import { Geist, Geist_Mono, Plus_Jakarta_Sans, Space_Mono, Fraunces } from 'next/font/google'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Analytics } from '@vercel/analytics/next'
 import { ClientProviders } from '@/components/ClientProviders'
@@ -41,6 +41,15 @@ const spaceMono = Space_Mono({
   display: 'optional',
   weight: ['400', '700'],
   fallback: ['ui-monospace', 'Courier New', 'monospace'],
+})
+
+// Fraunces for landing page headings (serif)
+const fraunces = Fraunces({
+  variable: '--font-fraunces',
+  subsets: ['latin'],
+  display: 'swap',
+  weight: ['300', '400', '500', '600', '700'],
+  fallback: ['Georgia', 'serif'],
 })
 
 export const metadata: Metadata = {
@@ -151,7 +160,7 @@ export default function RootLayout({
         )}
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${plusJakartaSans.variable} ${spaceMono.variable} antialiased font-sans`}
+        className={`${geistSans.variable} ${geistMono.variable} ${plusJakartaSans.variable} ${spaceMono.variable} ${fraunces.variable} antialiased font-sans`}
       >
         {children}
         <ClientProviders />

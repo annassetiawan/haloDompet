@@ -14,8 +14,14 @@ const config: Config = {
         mono: ["var(--font-geist-mono)", "monospace"],
         jakarta: ["var(--font-plus-jakarta)", "sans-serif"],
         'space-mono': ["var(--font-space-mono)", "monospace"],
+        serif: ["var(--font-fraunces)", "serif"],
       },
       colors: {
+        violet: {
+          400: '#A78BFA',
+          500: '#8B5CF6',
+          600: '#7C3AED',
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
