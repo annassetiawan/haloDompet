@@ -12,9 +12,8 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-geist-sans)", "sans-serif"],
         mono: ["var(--font-geist-mono)", "monospace"],
-        outfit: ["var(--font-outfit)", "sans-serif"],
-        manrope: ["var(--font-manrope)", "sans-serif"],
-        jetbrains: ["var(--font-jetbrains)", "monospace"],
+        jakarta: ["var(--font-plus-jakarta)", "sans-serif"],
+        'space-mono': ["var(--font-space-mono)", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -49,29 +48,6 @@ const config: Config = {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
-        },
-        // Modern Fintech color palette
-        fintech: {
-          purple: {
-            DEFAULT: '#a855f7',
-            light: '#c084fc',
-            dark: '#7c3aed',
-          },
-          pink: {
-            DEFAULT: '#ec4899',
-            light: '#f472b6',
-            dark: '#db2777',
-          },
-          teal: {
-            DEFAULT: '#14b8a6',
-            light: '#2dd4bf',
-            dark: '#0d9488',
-          },
-          cyan: {
-            DEFAULT: '#06b6d4',
-            light: '#22d3ee',
-            dark: '#0891b2',
-          },
         },
       },
       borderRadius: {
