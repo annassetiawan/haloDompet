@@ -1,28 +1,30 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { DM_Sans, Plus_Jakarta_Sans } from 'next/font/google'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Analytics } from '@vercel/analytics/next'
 import { ClientProviders } from '@/components/ClientProviders'
 import './globals.css'
 
-// OPTIMIZED: Font loading strategy untuk better LCP
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+// Heading font - DM Sans (modern, distinctive)
+const dmSans = DM_Sans({
+  variable: '--font-heading',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
   display: 'swap',
-  preload: true, // Keep preload for main font only
-  fallback: ['system-ui', 'arial'],
-  adjustFontFallback: true, // Enable to reduce CLS on font swap
+  preload: true,
+  fallback: ['system-ui', 'sans-serif'],
+  adjustFontFallback: true,
 })
 
-// OPTIMIZED: Monospace font tidak di-preload (hanya untuk code blocks)
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+// Body font - Plus Jakarta Sans (Indonesian-designed, beautiful)
+const jakartaSans = Plus_Jakarta_Sans({
+  variable: '--font-body',
   subsets: ['latin'],
-  display: 'optional', // Use optional for non-critical font
-  preload: false, // No preload untuk reduce blocking resources
-  fallback: ['ui-monospace', 'Courier New', 'monospace'],
-  adjustFontFallback: true, // Enable to reduce CLS
+  weight: ['300', '400', '500', '600', '700'],
+  display: 'swap',
+  preload: true,
+  fallback: ['system-ui', 'sans-serif'],
+  adjustFontFallback: true,
 })
 
 export const metadata: Metadata = {
@@ -133,7 +135,7 @@ export default function RootLayout({
         )}
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
+        className={`${dmSans.variable} ${jakartaSans.variable} antialiased font-body`}
       >
         {children}
         <ClientProviders />

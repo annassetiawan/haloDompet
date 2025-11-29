@@ -29,50 +29,55 @@ export function LiveDemoSection() {
   return (
     <section id="demo" className="py-20 md:py-32 relative overflow-hidden">
       {/* Background Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] pointer-events-none opacity-30" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-teal-500/15 rounded-full blur-[120px] pointer-events-none opacity-50" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/30 to-transparent" />
 
-      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
         {/* Text Side */}
         <div className="order-2 lg:order-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            <span className="text-xs font-medium text-zinc-300">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 backdrop-blur-sm mb-6">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span className="text-sm font-semibold text-emerald-300">
               Live Interactive Demo
             </span>
           </div>
-          <h2 className="text-3xl md:text-5xl font-semibold text-white mb-6 leading-tight">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
             Ngomong doang,
             <br />
-            <span className="text-zinc-500">langsung kecatet.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">langsung kecatet.</span>
           </h2>
-          <p className="text-lg text-zinc-400 mb-8 leading-relaxed">
+          <p className="text-lg text-slate-300 mb-8 leading-relaxed">
             Gak perlu buka excel, gak perlu ngetik manual. Cukup rekam suara
             kamu kayak lagi kirim VN ke temen. AI HaloDompet bakal ekstrak item,
             harga, kategori, dan dompet yang dipakai.
           </p>
 
           <div className="space-y-4">
-            <div className="flex items-start gap-4">
-              <div className="mt-1 w-6 h-6 rounded-full bg-violet-500/10 flex items-center justify-center text-violet-400">
-                <CheckCircle2 size={14} />
+            <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 hover:border-teal-500/30 transition-all duration-300">
+              <div className="mt-1 w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center text-teal-400 flex-shrink-0">
+                <CheckCircle2 size={18} />
               </div>
-              <p className="text-zinc-400 text-sm leading-relaxed">
-                <strong className="text-white block mb-1">
+              <div>
+                <p className="text-white font-semibold mb-1">
                   Smart Extraction
-                </strong>
-                Mendeteksi otomatis "Makan siang 25 ribu pakai Gopay".
-              </p>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="mt-1 w-6 h-6 rounded-full bg-violet-500/10 flex items-center justify-center text-violet-400">
-                <Wallet size={14} />
+                </p>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Mendeteksi otomatis "Makan siang 25 ribu pakai Gopay".
+                </p>
               </div>
-              <p className="text-zinc-400 text-sm leading-relaxed">
-                <strong className="text-white block mb-1">
+            </div>
+            <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 hover:border-emerald-500/30 transition-all duration-300">
+              <div className="mt-1 w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                <Wallet size={18} />
+              </div>
+              <div>
+                <p className="text-white font-semibold mb-1">
                   Multi-Wallet Support
-                </strong>
-                Otomatis memotong saldo sesuai dompet yang disebutkan.
-              </p>
+                </p>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Otomatis memotong saldo sesuai dompet yang disebutkan.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -123,7 +128,7 @@ export function LiveDemoSection() {
                   </button>
                 </div>
 
-                <div className="relative h-32 rounded-2xl overflow-hidden bg-gradient-to-br from-purple-500 via-purple-600 to-pink-500 p-4 shadow-lg">
+                <div className="relative h-32 rounded-2xl overflow-hidden bg-gradient-to-br from-teal-500 via-emerald-500 to-cyan-500 p-4 shadow-lg">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
@@ -223,7 +228,7 @@ export function LiveDemoSection() {
                 {state === 'processing' && (
                   <div className="text-center space-y-4">
                     <Loader2
-                      className="animate-spin text-violet-500 mx-auto"
+                      className="animate-spin text-teal-400 mx-auto"
                       size={48}
                     />
                     <p className="text-sm text-zinc-400">
@@ -235,7 +240,7 @@ export function LiveDemoSection() {
                 {state === 'success' && result && (
                   <div className="w-full animate-in zoom-in duration-300">
                     <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 shadow-xl relative overflow-hidden">
-                      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-violet-500 to-indigo-500"></div>
+                      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-500 to-emerald-500"></div>
 
                       <div className="flex items-start justify-between mb-4">
                         <div className="bg-zinc-800 p-2 rounded-lg text-zinc-300">
@@ -262,7 +267,7 @@ export function LiveDemoSection() {
                         </div>
                         <div className="flex justify-between text-xs">
                           <span className="text-zinc-500">Wallet</span>
-                          <span className="text-violet-300 capitalize">
+                          <span className="text-teal-300 capitalize">
                             {result.wallet}
                           </span>
                         </div>
@@ -311,7 +316,7 @@ export function LiveDemoSection() {
               {/* Bottom Nav Mock */}
               <div className="absolute bottom-0 left-0 right-0 h-16 border-t border-zinc-800/50 flex items-center justify-around px-6 bg-black/50 backdrop-blur-sm">
                 {/* Home */}
-                <div className="flex flex-col items-center gap-1 text-violet-500">
+                <div className="flex flex-col items-center gap-1 text-teal-400">
                   <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
                   </svg>

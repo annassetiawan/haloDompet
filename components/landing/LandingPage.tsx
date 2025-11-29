@@ -21,7 +21,7 @@ const Footer = dynamic(() => import('./Footer').then(mod => ({ default: mod.Foot
 
 export function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-[#0F172A] to-slate-900 text-white">
       <Navbar />
       <HeroSection />
       <LiveDemoSection />
