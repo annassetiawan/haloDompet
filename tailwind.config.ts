@@ -12,6 +12,8 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-geist-sans)", "sans-serif"],
         mono: ["var(--font-geist-mono)", "monospace"],
+        jakarta: ["var(--font-plus-jakarta)", "sans-serif"],
+        'space-mono': ["var(--font-space-mono)", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",
