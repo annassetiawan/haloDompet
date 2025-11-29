@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono, Plus_Jakarta_Sans, Space_Mono } from 'next/font/google'
+import { Geist, Geist_Mono, Outfit, Manrope, JetBrains_Mono } from 'next/font/google'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Analytics } from '@vercel/analytics/next'
 import { ClientProviders } from '@/components/ClientProviders'
@@ -25,18 +25,27 @@ const geistMono = Geist_Mono({
   adjustFontFallback: true, // Enable to reduce CLS
 })
 
-// Plus Jakarta Sans for landing page
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: '--font-plus-jakarta',
+// Outfit for landing page headings (Clash Display alternative - geometric, bold, premium)
+const outfit = Outfit({
+  variable: '--font-outfit',
+  subsets: ['latin'],
+  display: 'swap',
+  weight: ['400', '500', '600', '700', '800', '900'],
+  fallback: ['system-ui', 'arial'],
+})
+
+// Manrope for landing page body (Satoshi alternative - clean, modern, legible)
+const manrope = Manrope({
+  variable: '--font-manrope',
   subsets: ['latin'],
   display: 'swap',
   weight: ['400', '500', '600', '700', '800'],
   fallback: ['system-ui', 'arial'],
 })
 
-// Space Mono for landing page code/labels
-const spaceMono = Space_Mono({
-  variable: '--font-space-mono',
+// JetBrains Mono for code/technical labels
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-jetbrains',
   subsets: ['latin'],
   display: 'optional',
   weight: ['400', '700'],
@@ -151,7 +160,7 @@ export default function RootLayout({
         )}
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${plusJakartaSans.variable} ${spaceMono.variable} antialiased font-sans`}
+        className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} ${manrope.variable} ${jetbrainsMono.variable} antialiased font-sans`}
       >
         {children}
         <ClientProviders />
