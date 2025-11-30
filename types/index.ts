@@ -79,3 +79,16 @@ export interface ExtractedTransaction {
 }
 
 export type TransactionMode = 'simple' | 'webhook'
+
+// Landing Page Types
+export interface NavLinkProps {
+  href: string
+  children: React.ReactNode
+}
+
+export interface FeatureCardProps {
+  title: string
+  description: string
+  icon: React.ReactNode
+  className?: string
+}
