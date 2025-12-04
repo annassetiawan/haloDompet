@@ -10,13 +10,25 @@ let avatarListeningAnimation: any
 let avatarProcessingAnimation: any
 let avatarSuccessAnimation: any
 let avatarErrorAnimation: any
+let avatarShockedAnimation: any
 
 // Dynamic import saat runtime
 if (typeof window !== 'undefined') {
-  import('@/public/animations/avatar-listening.json').then(m => avatarListeningAnimation = m.default).catch(() => {})
-  import('@/public/animations/avatar-processing.json').then(m => avatarProcessingAnimation = m.default).catch(() => {})
-  import('@/public/animations/avatar-success.json').then(m => avatarSuccessAnimation = m.default).catch(() => {})
-  import('@/public/animations/avatar-error.json').then(m => avatarErrorAnimation = m.default).catch(() => {})
+  import('@/public/animations/avatar-listening.json')
+    .then((m) => (avatarListeningAnimation = m.default))
+    .catch(() => {})
+  import('@/public/animations/avatar-processing.json')
+    .then((m) => (avatarProcessingAnimation = m.default))
+    .catch(() => {})
+  import('@/public/animations/avatar-success.json')
+    .then((m) => (avatarSuccessAnimation = m.default))
+    .catch(() => {})
+  import('@/public/animations/avatar-error.json')
+    .then((m) => (avatarErrorAnimation = m.default))
+    .catch(() => {})
+  import('@/public/animations/avatar-shocked.json')
+    .then((m) => (avatarShockedAnimation = m.default))
+    .catch(() => {})
 }
 
 export type LottieAvatarState =
@@ -27,16 +39,16 @@ export type LottieAvatarState =
   | 'success'
   | 'error'
   // Image scanning state
-  | 'scanning'     // Sedang scan/analyze gambar struk
+  | 'scanning' // Sedang scan/analyze gambar struk
   // Sentiment-based states for EXPENSE
-  | 'proud'        // Pengeluaran hemat/cerdas (warteg, transport umum)
-  | 'concerned'    // Pengeluaran boros tier sedang (30k-100k lifestyle)
-  | 'shocked'      // Pengeluaran sangat boros (>200k lifestyle)
+  | 'proud' // Pengeluaran hemat/cerdas (warteg, transport umum)
+  | 'concerned' // Pengeluaran boros tier sedang (30k-100k lifestyle)
+  | 'shocked' // Pengeluaran sangat boros (>200k lifestyle)
   | 'disappointed' // Pengeluaran berulang yang buruk
   // Sentiment-based states for INCOME
-  | 'excited'      // Gaji/income besar
-  | 'celebrating'  // Bonus/windfall/THR
-  | 'motivated'    // Side hustle/freelance income
+  | 'excited' // Gaji/income besar
+  | 'celebrating' // Bonus/windfall/THR
+  | 'motivated' // Side hustle/freelance income
 
 interface LottieAvatarProps {
   state?: LottieAvatarState
@@ -65,29 +77,53 @@ export function LottieAvatar({
             setAnimationData(avatarIdleAnimation)
             break
           case 'listening':
-            const listening = await import('@/public/animations/avatar-listening.json')
+            const listening = await import(
+              '@/public/animations/avatar-listening.json'
+            )
             setAnimationData(listening.default)
             break
           case 'processing':
-            const processing = await import('@/public/animations/avatar-processing.json')
+            const processing = await import(
+              '@/public/animations/avatar-processing.json'
+            )
             setAnimationData(processing.default)
             break
           case 'success':
+          case 'scanning':
+            const scanning = await import(
+              '@/public/animations/avatar-scanning.json'
+            )
+            setAnimationData(scanning.default)
+            break
           case 'proud':
           case 'excited':
           case 'celebrating':
           case 'motivated':
-            const success = await import('@/public/animations/avatar-success.json')
+            const success = await import(
+              '@/public/animations/avatar-success.json'
+            )
             setAnimationData(success.default)
             break
           case 'error':
-          case 'shocked':
-          case 'disappointed':
             const error = await import('@/public/animations/avatar-error.json')
             setAnimationData(error.default)
             break
+          case 'shocked':
+            const shocked = await import(
+              '@/public/animations/avatar-shocked.json'
+            )
+            setAnimationData(shocked.default)
+            break
+          case 'disappointed':
+            const disappointed = await import(
+              '@/public/animations/avatar-error.json'
+            )
+            setAnimationData(disappointed.default)
+            break
           case 'concerned':
-            const concerned = await import('@/public/animations/avatar-processing.json')
+            const concerned = await import(
+              '@/public/animations/avatar-processing.json'
+            )
             setAnimationData(concerned.default)
             break
           default:
@@ -139,7 +175,7 @@ export function LottieAvatar({
         return avatarProcessingAnimation || avatarIdleAnimation // Placeholder: gunakan processing (ragu-ragu)
       case 'shocked':
         // TODO: Ganti dengan avatar-shocked.json saat sudah ada
-        return avatarErrorAnimation || avatarIdleAnimation // Placeholder: gunakan error (negatif kuat)
+        return avatarShockedAnimation || avatarIdleAnimation // Placeholder: gunakan error (negatif kuat)
       case 'disappointed':
         // TODO: Ganti dengan avatar-disappointed.json saat sudah ada
         return avatarErrorAnimation || avatarIdleAnimation // Placeholder: gunakan error (negatif)
@@ -194,7 +230,6 @@ export function LottieAvatar({
         className="w-full h-full"
         style={{ width: '160px', height: '160px' }}
       />
-
       {/* Label State untuk debugging/development
       {process.env.NODE_ENV === 'development' && (
         <div className="text-xs text-center text-gray-500 mt-2 absolute -bottom-6">

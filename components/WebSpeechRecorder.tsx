@@ -148,7 +148,7 @@ export function WebSpeechRecorder({
 
       toast.error(errorMsg)
       onError?.(errorMsg)
-      onStatusChange?.("Siap merekam")
+      onStatusChange?.(`Error: ${errorMsg}`)
     }
 
     recognition.onend = () => {
@@ -197,6 +197,7 @@ export function WebSpeechRecorder({
       toast.error(errorMsg)
       onError?.(errorMsg)
       setIsListening(false)
+      onStatusChange?.(`Error: ${errorMsg}`)
       setIsProcessing(false)
     }
   }

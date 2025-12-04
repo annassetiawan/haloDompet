@@ -92,3 +92,18 @@ export interface FeatureCardProps {
   icon: React.ReactNode
   className?: string
 }
+
+// types/index.ts (Saran penambahan)
+
+export interface AIProcessResult {
+  transaction: ExtractedTransaction
+  sentiment:
+    | 'proud'
+    | 'concerned'
+    | 'shocked'
+    | 'disappointed'
+    | 'excited'
+    | 'celebrating'
+    | 'motivated'
+  message: string
+}

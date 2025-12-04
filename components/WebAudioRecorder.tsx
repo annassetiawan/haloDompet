@@ -180,7 +180,7 @@ export function WebAudioRecorder({
 
       toast.error(errorMsg)
       onError?.(errorMsg)
-      onStatusChange?.("Siap merekam")
+      onStatusChange?.(`Error: ${errorMsg}`)
     }
   }
 
@@ -282,7 +282,7 @@ export function WebAudioRecorder({
       const errorMsg = error instanceof Error ? error.message : 'Gagal memproses audio'
       toast.error(errorMsg)
       onError?.(errorMsg)
-      onStatusChange?.("Siap merekam")
+      onStatusChange?.(`Error: ${errorMsg}`)
     } finally {
       setIsProcessing(false)
     }

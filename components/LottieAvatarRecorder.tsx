@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
@@ -13,11 +13,11 @@ import { WebAudioRecorder } from './WebAudioRecorder'
 // OPTIMIZED: Lazy load Lottie Avatar (100KB+ library) untuk improve LCP
 // Placeholder SVG (< 5KB) ditampilkan first untuk fast LCP
 const LottieAvatar = dynamic(
-  () => import('./LottieAvatar').then(mod => ({ default: mod.LottieAvatar })),
+  () => import('./LottieAvatar').then((mod) => ({ default: mod.LottieAvatar })),
   {
     ssr: false,
     loading: () => <AvatarPlaceholder />,
-  }
+  },
 )
 
 interface LottieAvatarRecorderProps {
@@ -25,6 +25,8 @@ interface LottieAvatarRecorderProps {
   onError?: (error: string) => void
   onStatusChange?: (status: string) => void
   isLoading?: boolean
+  // TAMBAHAN: Prop untuk menerima sentiment dari parent component
+  sentiment?: LottieAvatarState
 }
 
 export function LottieAvatarRecorder({
@@ -32,9 +34,12 @@ export function LottieAvatarRecorder({
   onError,
   onStatusChange,
   isLoading = false,
+  sentiment, // Destructure prop baru
 }: LottieAvatarRecorderProps) {
   const [isClient, setIsClient] = useState(false)
-  const [recorderType, setRecorderType] = useState<'webspeech' | 'ios' | 'mediarecorder' | 'webaudio'>('mediarecorder')
+  const [recorderType, setRecorderType] = useState<
+    'webspeech' | 'ios' | 'mediarecorder' | 'webaudio'
+  >('mediarecorder')
   const [avatarState, setAvatarState] = useState<LottieAvatarState>('idle')
 
   useEffect(() => {
@@ -53,6 +58,17 @@ export function LottieAvatarRecorder({
     }
   }, [])
 
+  useEffect(() => {
+    if (sentiment) {
+      setAvatarState(sentiment)
+    } else {
+      // TAMBAHAN PENTING:
+      // Saat parent menghapus sentiment (setelah 5 detik),
+      // kita harus memaksa avatar kembali ke 'idle'.
+      setAvatarState('idle')
+    }
+  }, [sentiment])
+
   // Map status text to avatar state
   const handleInternalStatusChange = (status: string) => {
     onStatusChange?.(status)
@@ -63,12 +79,23 @@ export function LottieAvatarRecorder({
     } else if (status.includes('Memproses') || status.includes('Mengirim')) {
       setAvatarState('processing')
     } else if (status.includes('Terdeteksi') || status.includes('Berhasil')) {
-      setAvatarState('success')
-      // Reset to idle after 2 seconds
-      setTimeout(() => setAvatarState('idle'), 2000)
-    } else if (status.includes('Gagal') || status.includes('kesalahan') || status.includes('Error')) {
+      if (sentiment) {
+        setAvatarState(sentiment)
+      } else {
+        // PERUBAHAN DI SINI:
+        // Jika ada sentiment yang dikirim dari parent (hasil AI), gunakan itu.
+        // Jika tidak, fallback ke 'success' biasa.
+        setAvatarState(sentiment || 'success')
+      }
+
+      // Reset to idle after 3 seconds (sedikit diperlama biar animasinya kelihatan)
+      setTimeout(() => setAvatarState('idle'), 3000)
+    } else if (
+      status.includes('Gagal') ||
+      status.includes('kesalahan') ||
+      status.includes('Error')
+    ) {
       setAvatarState('error')
-      // Reset to idle after 2 seconds
       setTimeout(() => setAvatarState('idle'), 2000)
     } else {
       setAvatarState('idle')
@@ -79,7 +106,9 @@ export function LottieAvatarRecorder({
     // Trigger click on the hidden recorder component (client-side only)
     if (typeof document === 'undefined') return
 
-    const hiddenButton = document.querySelector('.hidden-recorder-button label') as HTMLElement
+    const hiddenButton = document.querySelector(
+      '.hidden-recorder-button label',
+    ) as HTMLElement
     if (hiddenButton) {
       hiddenButton.click()
     }

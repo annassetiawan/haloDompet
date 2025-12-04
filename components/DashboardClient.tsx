@@ -15,34 +15,70 @@ import { Button } from '@/components/ui/button'
 import { isEarlyAdopter } from '@/lib/trial'
 
 // OPTIMIZED: Lazy load dialog components (below-the-fold)
-const AddWalletDialog = dynamic(() => import('@/components/AddWalletDialog').then(mod => ({ default: mod.AddWalletDialog })), {
-  ssr: false,
-})
-const EditWalletDialog = dynamic(() => import('@/components/EditWalletDialog').then(mod => ({ default: mod.EditWalletDialog })), {
-  ssr: false,
-})
-const ManualTransactionDialog = dynamic(() => import('@/components/ManualTransactionDialog').then(mod => ({ default: mod.ManualTransactionDialog })), {
-  ssr: false,
-})
-const TransactionReceipt = dynamic(() => import('@/components/TransactionReceipt').then(mod => ({ default: mod.TransactionReceipt })), {
-  ssr: false,
-})
+const AddWalletDialog = dynamic(
+  () =>
+    import('@/components/AddWalletDialog').then((mod) => ({
+      default: mod.AddWalletDialog,
+    })),
+  {
+    ssr: false,
+  },
+)
+const EditWalletDialog = dynamic(
+  () =>
+    import('@/components/EditWalletDialog').then((mod) => ({
+      default: mod.EditWalletDialog,
+    })),
+  {
+    ssr: false,
+  },
+)
+const ManualTransactionDialog = dynamic(
+  () =>
+    import('@/components/ManualTransactionDialog').then((mod) => ({
+      default: mod.ManualTransactionDialog,
+    })),
+  {
+    ssr: false,
+  },
+)
+const TransactionReceipt = dynamic(
+  () =>
+    import('@/components/TransactionReceipt').then((mod) => ({
+      default: mod.TransactionReceipt,
+    })),
+  {
+    ssr: false,
+  },
+)
 
 // OPTIMIZED: Lazy load BudgetProgress (below-the-fold)
-const BudgetProgress = dynamic(() => import('@/components/BudgetProgress').then(mod => ({ default: mod.BudgetProgress })), {
-  ssr: false,
-  loading: () => (
-    <div className="space-y-3">
-      <div className="h-5 w-32 bg-muted rounded animate-pulse" />
-      <div className="h-24 w-full bg-muted rounded-xl animate-pulse" />
-    </div>
-  ),
-})
+const BudgetProgress = dynamic(
+  () =>
+    import('@/components/BudgetProgress').then((mod) => ({
+      default: mod.BudgetProgress,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="space-y-3">
+        <div className="h-5 w-32 bg-muted rounded animate-pulse" />
+        <div className="h-24 w-full bg-muted rounded-xl animate-pulse" />
+      </div>
+    ),
+  },
+)
 
 // OPTIMIZED: Lazy load PWA Help Button
-const PWAHelpButton = dynamic(() => import('@/components/PWAHelpButton').then(mod => ({ default: mod.PWAHelpButton })), {
-  ssr: false,
-})
+const PWAHelpButton = dynamic(
+  () =>
+    import('@/components/PWAHelpButton').then((mod) => ({
+      default: mod.PWAHelpButton,
+    })),
+  {
+    ssr: false,
+  },
+)
 import {
   Dialog,
   DialogContent,
@@ -94,25 +130,34 @@ export function DashboardClient({
 }: DashboardClientProps) {
   // State Management
   const [user] = useState<User>(initialUser)
-  const [userProfile, setUserProfile] = useState<UserProfile>(initialUserProfile)
+  const [userProfile, setUserProfile] =
+    useState<UserProfile>(initialUserProfile)
   const [wallets, setWallets] = useState<Wallet[]>(initialWallets)
   const [totalBalance, setTotalBalance] = useState<number>(initialTotalBalance)
-  const [growthPercentage, setGrowthPercentage] = useState<number>(initialGrowthPercentage)
-  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>(initialTransactions)
-  const [budgetSummary, setBudgetSummary] = useState<BudgetSummary[]>(initialBudgetSummary)
-  const [isLoadingNonCritical, setIsLoadingNonCritical] = useState(initialTransactions.length === 0)
+  const [growthPercentage, setGrowthPercentage] = useState<number>(
+    initialGrowthPercentage,
+  )
+  const [recentTransactions, setRecentTransactions] =
+    useState<Transaction[]>(initialTransactions)
+  const [budgetSummary, setBudgetSummary] =
+    useState<BudgetSummary[]>(initialBudgetSummary)
+  const [isLoadingNonCritical, setIsLoadingNonCritical] = useState(
+    initialTransactions.length === 0,
+  )
 
   // Ubah initial state menggunakan IDLE_STATUS
   const [status, setStatus] = useState(IDLE_STATUS)
   const [webhookUrl, setWebhookUrl] = useState(
     initialUserProfile?.mode === 'webhook' && initialUserProfile?.webhook_url
       ? initialUserProfile.webhook_url
-      : ''
+      : '',
   )
   const [isProcessing, setIsProcessing] = useState(false)
 
   // State for AI roast message
   const [roastMessage, setRoastMessage] = useState<string | null>(null)
+
+  const [aiSentiment, setAiSentiment] = useState<any>(undefined)
 
   // Review dialog state (for voice recording)
   const [isReviewOpen, setIsReviewOpen] = useState(false)
@@ -162,10 +207,7 @@ export function DashboardClient({
     if (initialTransactions.length === 0) {
       const loadNonCriticalData = async () => {
         try {
-          await Promise.all([
-            loadRecentTransactions(),
-            loadBudgetSummary()
-          ])
+          await Promise.all([loadRecentTransactions(), loadBudgetSummary()])
         } catch (error) {
           console.error('Error loading non-critical data:', error)
         } finally {
@@ -362,6 +404,8 @@ export function DashboardClient({
       setScannedData(null)
       setSelectedWalletId(null)
 
+
+
       await new Promise((resolve) => setTimeout(resolve, 2000))
       setStatus(IDLE_STATUS)
     } catch (error) {
@@ -374,6 +418,9 @@ export function DashboardClient({
 
       toast.error(errorMessage)
       setStatus('Gagal menyimpan')
+
+      setAiSentiment('error')
+      setTimeout(() => setAiSentiment(undefined), 3000)
 
       await new Promise((resolve) => setTimeout(resolve, 2000))
       setStatus(IDLE_STATUS)
@@ -503,6 +550,14 @@ export function DashboardClient({
 
       // Extract roast message from AI response
       const aiRoastMessage = processData.data?.roast_message || null
+
+      const detectedSentiment = processData.data?.sentiment || 'success'
+      if (detectedSentiment) {
+        setAiSentiment(detectedSentiment)
+        // Reset sentiment kembali ke idle setelah 8 detik agar animasi tidak stuck
+        setTimeout(() => setAiSentiment(undefined), 8000)
+      }
+
       if (aiRoastMessage) {
         console.log('🤑 AI Roast:', aiRoastMessage)
       }
@@ -570,6 +625,8 @@ export function DashboardClient({
         }, 8000)
       }
 
+
+
       await new Promise((resolve) => setTimeout(resolve, 2000))
       setStatus(IDLE_STATUS)
     } catch (error) {
@@ -582,6 +639,9 @@ export function DashboardClient({
 
       toast.error(errorMessage)
       setStatus('Gagal memproses')
+
+      setAiSentiment('error')
+      setTimeout(() => setAiSentiment(undefined), 3000)
 
       // Reset after showing error
       await new Promise((resolve) => setTimeout(resolve, 2000))
@@ -607,7 +667,9 @@ export function DashboardClient({
   }
 
   // Handle file selection for receipt scan
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0]
     if (!file) return
 
@@ -682,7 +744,8 @@ export function DashboardClient({
       setStatus(IDLE_STATUS)
     } catch (error) {
       console.error('Error scanning receipt:', error)
-      let errorMessage = 'Gagal membaca struk. Coba foto lebih jelas atau gunakan Input Manual.'
+      let errorMessage =
+        'Gagal membaca struk. Coba foto lebih jelas atau gunakan Input Manual.'
 
       if (error instanceof Error) {
         errorMessage = error.message
@@ -690,6 +753,9 @@ export function DashboardClient({
 
       toast.error(errorMessage)
       setStatus('Gagal memproses')
+
+      setAiSentiment('error')
+      setTimeout(() => setAiSentiment(undefined), 3000)
 
       await new Promise((resolve) => setTimeout(resolve, 2000))
       setStatus(IDLE_STATUS)
@@ -718,7 +784,7 @@ export function DashboardClient({
     if (roastMessage) return 'Dompie'
     if (status === IDLE_STATUS) return 'Saran'
     // Jika status mengandung kutip (misal: Memproses: "Beli kopi"), itu kata-kata user -> "Anda"
-    if (status.includes('"') || status.includes("'")) return 'Anda'
+    if (status.includes('"') || status.includes("'")) return 'Dompie'
     // Sisanya status sistem
     return 'Dompie'
   }
@@ -854,11 +920,13 @@ export function DashboardClient({
               }`}
             >
               {/* Label Bubble Dynamic */}
-              <span className={`absolute -top-2.5 left-4 bg-white dark:bg-gray-800 text-[9px] font-bold px-1.5 py-px rounded-full shadow-sm border uppercase tracking-wider ${
-                roastMessage
-                  ? 'border-indigo-100 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400'
-                  : 'border-gray-100 dark:border-gray-700 text-gray-400 dark:text-gray-500'
-              }`}>
+              <span
+                className={`absolute -top-2.5 left-4 bg-white dark:bg-gray-800 text-[9px] font-bold px-1.5 py-px rounded-full shadow-sm border uppercase tracking-wider ${
+                  roastMessage
+                    ? 'border-indigo-100 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400'
+                    : 'border-gray-100 dark:border-gray-700 text-gray-400 dark:text-gray-500'
+                }`}
+              >
                 {bubbleLabel}
               </span>
 
@@ -902,6 +970,13 @@ export function DashboardClient({
               onTranscript={handleTranscript}
               onStatusChange={handleStatusChange}
               isLoading={false}
+              sentiment={
+                isProcessing
+                  ? 'processing' // 1. Jika sedang loading API/Simpan -> PROCESSING
+                  : isScanning
+                    ? 'scanning' // 2. Jika sedang scan struk -> SCANNING
+                    : aiSentiment // 3. Jika selesai & ada hasil -> EMOSI (Shocked/Proud/dll)
+              }
             />
 
             {/* Manual Transaction Button */}
@@ -1118,7 +1193,11 @@ export function DashboardClient({
               <Input
                 id="scan-item"
                 value={scannedData?.item || ''}
-                onChange={(e) => setScannedData(prev => prev ? { ...prev, item: e.target.value } : null)}
+                onChange={(e) =>
+                  setScannedData((prev) =>
+                    prev ? { ...prev, item: e.target.value } : null,
+                  )
+                }
                 placeholder="Contoh: Alfamart"
                 className="w-full"
               />
@@ -1135,7 +1214,11 @@ export function DashboardClient({
                 id="scan-amount"
                 type="number"
                 value={scannedData?.amount || 0}
-                onChange={(e) => setScannedData(prev => prev ? { ...prev, amount: Number(e.target.value) } : null)}
+                onChange={(e) =>
+                  setScannedData((prev) =>
+                    prev ? { ...prev, amount: Number(e.target.value) } : null,
+                  )
+                }
                 placeholder="0"
                 className="w-full"
               />
@@ -1151,7 +1234,11 @@ export function DashboardClient({
               <Input
                 id="scan-category"
                 value={scannedData?.category || ''}
-                onChange={(e) => setScannedData(prev => prev ? { ...prev, category: e.target.value } : null)}
+                onChange={(e) =>
+                  setScannedData((prev) =>
+                    prev ? { ...prev, category: e.target.value } : null,
+                  )
+                }
                 placeholder="Contoh: Makanan"
                 className="w-full"
               />
@@ -1167,12 +1254,17 @@ export function DashboardClient({
               <Textarea
                 id="scan-note"
                 value={scannedData?.note || ''}
-                onChange={(e) => setScannedData(prev => prev ? { ...prev, note: e.target.value } : null)}
+                onChange={(e) =>
+                  setScannedData((prev) =>
+                    prev ? { ...prev, note: e.target.value } : null,
+                  )
+                }
                 placeholder="Detail item, lokasi, metode pembayaran, dll..."
                 className="min-h-[100px] resize-none"
               />
               <p className="text-xs text-muted-foreground">
-                Info tambahan seperti detail belanja, lokasi toko, metode pembayaran, dll.
+                Info tambahan seperti detail belanja, lokasi toko, metode
+                pembayaran, dll.
               </p>
             </div>
 
@@ -1185,7 +1277,8 @@ export function DashboardClient({
             />
 
             <p className="text-xs text-muted-foreground bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-lg p-2">
-              💡 Hasil scan mungkin tidak 100% akurat. Silakan periksa dan edit jika diperlukan.
+              💡 Hasil scan mungkin tidak 100% akurat. Silakan periksa dan edit
+              jika diperlukan.
             </p>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
