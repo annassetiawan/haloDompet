@@ -179,7 +179,7 @@ export function MediaRecorderButton({
         toast.error(errorMsg)
         onError?.(errorMsg)
         setIsRecording(false)
-        onStatusChange?.("Siap merekam")
+      onStatusChange?.(`Error: ${errorMsg}`)
 
         // Stop all tracks
         mediaStream.getTracks().forEach(track => track.stop())
@@ -218,7 +218,7 @@ export function MediaRecorderButton({
 
       toast.error(errorMsg)
       onError?.(errorMsg)
-      onStatusChange?.("Siap merekam")
+      onStatusChange?.(`Error: ${errorMsg}`)
     }
   }
 
@@ -283,7 +283,7 @@ export function MediaRecorderButton({
         const transcript = data.text
         onStatusChange?.(`Terdeteksi: "${transcript}"`)
         onTranscript(transcript)
-        onStatusChange?.("Siap merekam")
+          onStatusChange?.("Siap merekam")
       } else {
         throw new Error(data.details || data.error || 'Gagal memproses audio')
       }
@@ -292,7 +292,7 @@ export function MediaRecorderButton({
       const errorMsg = error instanceof Error ? error.message : 'Gagal memproses audio'
       toast.error(errorMsg)
       onError?.(errorMsg)
-      onStatusChange?.("Siap merekam")
+      onStatusChange?.(`Error: ${errorMsg}`)
     } finally {
       setIsProcessing(false)
     }

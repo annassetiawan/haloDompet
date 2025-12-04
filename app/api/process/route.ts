@@ -1,60 +1,59 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { createClient } from '@/lib/supabase/server';
-import { getCategories } from '@/lib/db';
+import { NextRequest, NextResponse } from 'next/server'
+import { GoogleGenerativeAI } from '@google/generative-ai'
+import { createClient } from '@/lib/supabase/server'
+import { getCategories } from '@/lib/db'
 
 // Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
 export async function POST(request: NextRequest) {
   try {
-    const { text, webhookUrl } = await request.json();
+    const { text, webhookUrl } = await request.json()
 
     // Validasi input - hanya text yang wajib, webhookUrl optional
     if (!text) {
-      return NextResponse.json(
-        { error: 'Text harus diisi' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Text harus diisi' }, { status: 400 })
     }
 
     // Validasi Gemini API Key
     if (!process.env.GEMINI_API_KEY) {
       return NextResponse.json(
         { error: 'GEMINI_API_KEY belum diset. Tambahkan di .env.local' },
-        { status: 500 }
-      );
+        { status: 500 },
+      )
     }
 
     // Get authenticated user
-    const supabase = await createClient();
-    const { data: { user: authUser } } = await supabase.auth.getUser();
+    const supabase = await createClient()
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser()
 
     if (!authUser) {
       return NextResponse.json(
         { error: 'Unauthorized. Please login first.' },
-        { status: 401 }
-      );
+        { status: 401 },
+      )
     }
 
     // Fetch dynamic categories from database
-    const expenseCategories = await getCategories(authUser.id, 'expense');
-    const incomeCategories = await getCategories(authUser.id, 'income');
+    const expenseCategories = await getCategories(authUser.id, 'expense')
+    const incomeCategories = await getCategories(authUser.id, 'income')
 
     // Build category lists for prompt
-    const expenseCategoryList = expenseCategories.map(c => c.name).join(', ');
-    const incomeCategoryList = incomeCategories.map(c => c.name).join(', ');
+    const expenseCategoryList = expenseCategories.map((c) => c.name).join(', ')
+    const incomeCategoryList = incomeCategories.map((c) => c.name).join(', ')
 
     // Panggil Gemini API untuk ekstraksi JSON
     // Menggunakan Gemini 2.5 Flash Lite (model terbaru yang tersedia)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' })
 
     // Get tanggal hari ini
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0]
 
-    console.log('Processing text:', text);
-    console.log('Expense categories:', expenseCategoryList);
-    console.log('Income categories:', incomeCategoryList);
+    console.log('Processing text:', text)
+    console.log('Expense categories:', expenseCategoryList)
+    console.log('Income categories:', incomeCategoryList)
 
     const prompt = `
 # SISTEM PROMPT: Dompie - AI Financial Assistant HaloDompet
@@ -93,8 +92,22 @@ Ekstrak dan analisis transaksi keuangan dari input natural language user:
   "location": "string | null - nama tempat transaksi",
   "payment_method": "string | null - metode pembayaran",
   "wallet_name": "string | null - nama dompet/rekening",
-  "roast_message": "string - komentar Dompie yang personal"
+  "roast_message": "string - komentar Dompie yang personal",
+  "sentiment": "string - PILIH SATU: 'proud', 'concerned', 'shocked', 'disappointed', 'excited', 'celebrating', 'motivated', 'error'"
 }
+
+## 🎭 LOGIKA SENTIMENT (PENTING!)
+Tentukan field "sentiment" berdasarkan aturan ini:
+
+1. **'proud'**: Pengeluaran hemat, cerdas, kebutuhan pokok, atau sedekah. (Contoh: Warteg, TransJakarta, Donasi).
+2. **'concerned'**: Pengeluaran lifestyle menengah yang agak impulsif. (Contoh: Kopi 50rb, Snack mahal).
+3. **'shocked'**: Pengeluaran SANGAT BOROS/MEWAH atau tidak masuk akal. (Contoh: Fine dining, Barang branded, Judi).
+4. **'disappointed'**: Pengeluaran buruk berulang atau denda. (Contoh: Biaya admin, Denda telat bayar).
+5. **'excited'**: Pemasukan rutin/gaji.
+6. **'celebrating'**: Pemasukan bonus besar/rejeki nomplok.
+7. **'motivated'**: Pemasukan dari side hustle/kerja keras.
+
+8. **'error'**: Informasi KURANG LENGKAP (misal: cuma nama barang tanpa harga, atau sebaliknya). Roast message harus nanya detail yang kurang.
 
 ## 🔍 DETEKSI TIPE TRANSAKSI
 
@@ -324,59 +337,66 @@ Sekarang proses input ini:
 - Use Dompie's sarcastic but caring personality
 
 GO! 🚀
-`;
+`
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
+    const result = await model.generateContent(prompt)
+    const response = await result.response
 
     // Check if response was blocked
     if (!response || !response.candidates || response.candidates.length === 0) {
-      console.error('Gemini response blocked or empty:', JSON.stringify(response));
+      console.error(
+        'Gemini response blocked or empty:',
+        JSON.stringify(response),
+      )
       return NextResponse.json(
         {
-          error: 'AI tidak dapat memproses input. Coba dengan kalimat yang lebih sederhana.',
-          details: 'Response was blocked or empty'
+          error:
+            'AI tidak dapat memproses input. Coba dengan kalimat yang lebih sederhana.',
+          details: 'Response was blocked or empty',
         },
-        { status: 500 }
-      );
+        { status: 500 },
+      )
     }
 
-    let extractedText = response.text();
+    let extractedText = response.text()
 
-    console.log('Gemini raw response:', extractedText);
+    console.log('Gemini raw response:', extractedText)
 
     // Bersihkan response dari markdown code blocks jika ada
-    extractedText = extractedText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    extractedText = extractedText
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim()
 
-    console.log('Cleaned response:', extractedText);
+    console.log('Cleaned response:', extractedText)
 
     // Parse JSON
-    let jsonData;
+    let jsonData
     try {
-      jsonData = JSON.parse(extractedText);
+      jsonData = JSON.parse(extractedText)
     } catch (parseError) {
-      console.error('Error parsing Gemini response:', extractedText);
+      console.error('Error parsing Gemini response:', extractedText)
       return NextResponse.json(
         {
           error: 'Gagal mengekstrak JSON dari response AI',
-          aiResponse: extractedText
+          aiResponse: extractedText,
         },
-        { status: 500 }
-      );
+        { status: 500 },
+      )
     }
 
     // Validasi dan enforce tanggal hari ini
     // Override apapun tanggal yang diberikan Gemini dengan tanggal hari ini
-    jsonData.date = today;
+    jsonData.date = today
 
     // Tambahkan timestamp
-    jsonData.timestamp = new Date().toISOString();
-    jsonData.originalText = text;
+    jsonData.timestamp = new Date().toISOString()
+    jsonData.originalText = text
 
-    console.log('Extracted JSON:', jsonData);
+    console.log('Extracted JSON:', jsonData)
 
     // Kirim ke n8n webhook (hanya jika webhookUrl ada - untuk mode webhook)
-    let webhookData = null;
+    let webhookData = null
     if (webhookUrl) {
       try {
         const webhookResponse = await fetch(webhookUrl, {
@@ -385,19 +405,19 @@ GO! 🚀
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(jsonData),
-        });
+        })
 
         if (!webhookResponse.ok) {
-          const errorText = await webhookResponse.text();
-          console.error('Webhook error:', errorText);
+          const errorText = await webhookResponse.text()
+          console.error('Webhook error:', errorText)
           // Jangan return error, karena data sudah berhasil di-extract
           // User tetap bisa simpan ke database
-          console.warn('Webhook failed but continuing...');
+          console.warn('Webhook failed but continuing...')
         } else {
-          webhookData = await webhookResponse.json().catch(() => ({}));
+          webhookData = await webhookResponse.json().catch(() => ({}))
         }
       } catch (webhookError) {
-        console.error('Webhook request failed:', webhookError);
+        console.error('Webhook request failed:', webhookError)
         // Continue anyway - webhook optional
       }
     }
@@ -410,65 +430,84 @@ GO! 🚀
       message: webhookUrl
         ? 'Data berhasil diproses dan dikirim ke webhook!'
         : 'Data berhasil diproses!',
-    });
-
+    })
   } catch (error: any) {
-    console.error('API Error:', error);
+    console.error('API Error:', error)
     console.error('Error details:', {
       message: error.message,
       stack: error.stack,
-      name: error.name
-    });
+      name: error.name,
+    })
 
     // Check for specific Gemini API errors
-    const errorMessage = error.message || '';
+    const errorMessage = error.message || ''
 
     // Model not found
-    if (errorMessage.includes('404') || errorMessage.includes('not found') || errorMessage.includes('is not found')) {
+    if (
+      errorMessage.includes('404') ||
+      errorMessage.includes('not found') ||
+      errorMessage.includes('is not found')
+    ) {
       return NextResponse.json(
         {
           error: 'Model AI tidak tersedia',
-          details: 'Model yang digunakan tidak tersedia di API key Anda. Silakan cek model yang tersedia atau perbarui kode.',
-          errorType: 'ModelNotFound'
+          details:
+            'Model yang digunakan tidak tersedia di API key Anda. Silakan cek model yang tersedia atau perbarui kode.',
+          errorType: 'ModelNotFound',
         },
-        { status: 404 }
-      );
+        { status: 404 },
+      )
     }
 
     // Service overloaded / unavailable
-    if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('Service Unavailable')) {
+    if (
+      errorMessage.includes('503') ||
+      errorMessage.includes('overloaded') ||
+      errorMessage.includes('Service Unavailable')
+    ) {
       return NextResponse.json(
         {
           error: 'Server AI sedang penuh',
-          details: 'Model Gemini sedang overload. Tunggu beberapa detik lalu coba lagi, atau ganti ke model lain.',
-          errorType: 'ServiceOverloaded'
+          details:
+            'Model Gemini sedang overload. Tunggu beberapa detik lalu coba lagi, atau ganti ke model lain.',
+          errorType: 'ServiceOverloaded',
         },
-        { status: 503 }
-      );
+        { status: 503 },
+      )
     }
 
     // Rate limit / quota exceeded
-    if (errorMessage.includes('429') || errorMessage.includes('quota') || errorMessage.includes('Too Many Requests')) {
+    if (
+      errorMessage.includes('429') ||
+      errorMessage.includes('quota') ||
+      errorMessage.includes('Too Many Requests')
+    ) {
       return NextResponse.json(
         {
           error: 'Gemini API quota terlampaui',
-          details: 'API key Anda telah mencapai batas gratis. Silakan cek https://ai.google.dev/gemini-api/docs/quota atau ganti dengan API key baru.',
-          errorType: 'QuotaExceeded'
+          details:
+            'API key Anda telah mencapai batas gratis. Silakan cek https://ai.google.dev/gemini-api/docs/quota atau ganti dengan API key baru.',
+          errorType: 'QuotaExceeded',
         },
-        { status: 429 }
-      );
+        { status: 429 },
+      )
     }
 
     // API key invalid
-    if (errorMessage.includes('API key') || errorMessage.includes('401') || errorMessage.includes('403')) {
+    if (
+      errorMessage.includes('API key') ||
+      errorMessage.includes('401') ||
+      errorMessage.includes('403')
+    ) {
       return NextResponse.json(
         {
           error: 'Gemini API key tidak valid',
-          details: 'Periksa GEMINI_API_KEY di file .env.local Anda. Dapatkan API key baru di https://aistudio.google.com/apikey',
-          errorType: 'InvalidAPIKey'
+          details:
+            'Periksa GEMINI_API_KEY di file .env.local Anda. Dapatkan API key baru di https://aistudio.google.com/apikey',
+          errorType: 'InvalidAPIKey',
         },
-        { status: 401 }
-      );
+        { status: 401 },
+      )
     }
 
     // Generic error
@@ -476,9 +515,9 @@ GO! 🚀
       {
         error: 'Internal server error',
         details: error.message,
-        errorType: error.name
+        errorType: error.name,
       },
-      { status: 500 }
-    );
+      { status: 500 },
+    )
   }
 }
