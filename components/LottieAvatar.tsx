@@ -89,6 +89,11 @@ export function LottieAvatar({
             setAnimationData(processing.default)
             break
           case 'success':
+            const success = await import(
+              '@/public/animations/avatar-success.json'
+            )
+            setAnimationData(success.default)
+            break
           case 'scanning':
             const scanning = await import(
               '@/public/animations/avatar-scanning.json'
@@ -99,10 +104,10 @@ export function LottieAvatar({
           case 'excited':
           case 'celebrating':
           case 'motivated':
-            const success = await import(
+            const motivated = await import(
               '@/public/animations/avatar-success.json'
             )
-            setAnimationData(success.default)
+            setAnimationData(motivated.default)
             break
           case 'error':
             const error = await import('@/public/animations/avatar-error.json')

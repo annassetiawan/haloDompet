@@ -122,7 +122,7 @@ export const Hero: React.FC = () => {
               loop={true}
               autoplay={true}
               // 3. Hapus h-[300px], ganti dengan h-full atau w-full agar mengikuti container
-              className="w-full h-auto max-h-full drop-shadow-2xl"
+              className="w-2/3 md:w-full mx-auto h-auto max-h-full drop-shadow-2xl"
             />
           </div>
         </div>
