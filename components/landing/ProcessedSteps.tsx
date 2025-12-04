@@ -25,7 +25,7 @@ export function ProcessedSteps() {
     <section
       id="features"
       // PERUBAHAN 1: Tambahkan 'relative' dan 'overflow-hidden' di sini
-      className="py-24 border-y border-white/5 bg-[#0A0A0A] relative overflow-hidden"
+      className="py-24 border-y border-white/5 bg-[#050505] relative overflow-hidden"
     >
       {/* PERUBAHAN 2: Tambahkan elemen background glow ini */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[150%] h-full bg-gradient-radial from-violet-900/20 via-transparent to-transparent pointer-events-none" />
@@ -33,10 +33,10 @@ export function ProcessedSteps() {
       <div className="max-w-6xl mx-auto px-6 relative z-10">
         <div className="text-center mb-16 max-w-2xl mx-auto">
           {/* Jangan lupa font-serif yang tadi */}
-          <h2 className="text-3xl md:text-4xl font-semibold font-serif text-white mb-4">
+          <h2 className="text-4xl md:text-5xl font-serif text-white mb-6">
             Workflow super simpel.
           </h2>
-          <p className="text-zinc-400">
+          <p className="text-white/60 text-lg">
             Kami menghilangkan friksi dalam mencatat keuangan. Dari suara
             menjadi data insight dalam hitungan detik.
           </p>
@@ -48,7 +48,7 @@ export function ProcessedSteps() {
 
           {steps.map((step, idx) => (
             <div key={idx} className="relative z-10 group">
-              <div className="w-16 h-16 mx-auto bg-[#0A0A0A] border border-zinc-800 rounded-2xl flex items-center justify-center text-zinc-400 group-hover:border-violet-500/50 group-hover:text-violet-400 transition-all duration-500 shadow-lg mb-6">
+              <div className="w-16 h-16 mx-auto bg-[#050505] border border-zinc-800 rounded-2xl flex items-center justify-center text-zinc-400 group-hover:border-violet-500/50 group-hover:text-violet-400 transition-all duration-500 shadow-lg mb-6">
                 {step.icon}
               </div>
               <div className="text-center px-4">

@@ -30,15 +30,23 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     if (!authUser) {
-      return NextResponse.json(
-        { error: 'Unauthorized. Please login first.' },
-        { status: 401 },
-      )
+      // Allow demo requests (no auth)
+      // We will check authUser later to decide whether to save to DB
+      console.log('Processing unauthenticated request (Demo Mode)')
     }
 
     // Fetch dynamic categories from database
-    const expenseCategories = await getCategories(authUser.id, 'expense')
-    const incomeCategories = await getCategories(authUser.id, 'income')
+    let expenseCategories: any[] = []
+    let incomeCategories: any[] = []
+    
+    if (authUser) {
+      expenseCategories = await getCategories(authUser.id, 'expense')
+      incomeCategories = await getCategories(authUser.id, 'income')
+    } else {
+      // Default categories for demo
+      expenseCategories = [{ name: 'Makanan' }, { name: 'Transportasi' }, { name: 'Hiburan' }, { name: 'Belanja' }]
+      incomeCategories = [{ name: 'Gaji' }, { name: 'Bonus' }]
+    }
 
     // Build category lists for prompt
     const expenseCategoryList = expenseCategories.map((c) => c.name).join(', ')
@@ -430,6 +438,7 @@ GO! 🚀
       message: webhookUrl
         ? 'Data berhasil diproses dan dikirim ke webhook!'
         : 'Data berhasil diproses!',
+      isDemo: !authUser,
     })
   } catch (error: any) {
     console.error('API Error:', error)
