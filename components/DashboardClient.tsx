@@ -12,6 +12,15 @@ import { DarkModeToggle } from '@/components/DarkModeToggle'
 import { LottieAvatarRecorder } from '@/components/LottieAvatarRecorder'
 import { BottomNav } from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog'
+import { TransferForm } from '@/components/transaction/TransferForm'
 import { isEarlyAdopter } from '@/lib/trial'
 
 // OPTIMIZED: Lazy load dialog components (below-the-fold)
@@ -79,14 +88,7 @@ const PWAHelpButton = dynamic(
     ssr: false,
   },
 )
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -99,6 +101,8 @@ import {
   CheckCircle2,
   XCircle,
   PlusCircle,
+  Wallet as WalletIcon,
+
 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
@@ -180,9 +184,13 @@ export function DashboardClient({
 
   // Manual transaction dialog state
   const [isManualTransactionOpen, setIsManualTransactionOpen] = useState(false)
+  const [isTransferOpen, setIsTransferOpen] = useState(false)
+  const [selectedSourceWalletId, setSelectedSourceWalletId] = useState<string | undefined>(undefined)
 
   // Transaction receipt state
   const [showReceipt, setShowReceipt] = useState(false)
+
+
   const [lastTransactionData, setLastTransactionData] = useState<{
     item: string
     amount: number
@@ -291,6 +299,33 @@ export function DashboardClient({
     } catch (error) {
       console.error('Error loading budget summary:', error)
     }
+  }
+
+  const handleManualTransactionSuccess = () => {
+    setIsManualTransactionOpen(false)
+    loadRecentTransactions()
+    loadWallets()
+    loadBudgetSummary()
+    toast.success('Transaksi berhasil disimpan')
+  }
+
+  const handleTransferSuccess = () => {
+    setIsTransferOpen(false)
+    setSelectedSourceWalletId(undefined)
+    loadRecentTransactions()
+    loadWallets()
+    toast.success('Transfer berhasil!')
+  }
+
+  const handleTransfer = (wallet: Wallet) => {
+    setSelectedSourceWalletId(wallet.id)
+    setIsTransferOpen(true)
+  }
+
+  const handleBalanceUpdate = () => {
+    loadWallets()
+    loadBudgetSummary()
+    loadRecentTransactions()
   }
 
   const handleLogout = async () => {
@@ -794,6 +829,8 @@ export function DashboardClient({
   // Content bubble: prioritaskan roast message jika ada, kalau tidak tampilkan status
   const bubbleContent = roastMessage || status
 
+
+
   return (
     <div className="min-h-screen bg-background">
       {/* Top Navigation - Desktop Only */}
@@ -868,23 +905,30 @@ export function DashboardClient({
           <div className="md:hidden bg-[#f5f5f5] dark:bg-muted/20 px-6 py-4 -mx-4">
             <div className="flex justify-between items-center">
               {/* Left: App Title & Greeting */}
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight">
-                  HaloDompet
-                </h1>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  Hai,{' '}
-                  <span className="font-medium">
-                    {user?.user_metadata?.full_name?.split(' ')[0] ||
-                      user?.user_metadata?.name?.split(' ')[0] ||
-                      user?.email?.split('@')[0]}
-                  </span>{' '}
-                  👋
-                </p>
+              <div className="flex items-center gap-3">
+                {/* Placeholder Logo */}
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+                  <WalletIcon className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold tracking-tight text-foreground">
+                    HaloDompet
+                  </h1>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Hai,{' '}
+                    <span className="font-medium">
+                      {user?.user_metadata?.full_name?.split(' ')[0] ||
+                        user?.user_metadata?.name?.split(' ')[0] ||
+                        user?.email?.split('@')[0]}
+                    </span>{' '}
+                    👋
+                  </p>
+                </div>
               </div>
 
-              {/* Right: Settings & Dark Mode Toggle */}
+              {/* Right: Dark Mode Toggle & Settings */}
               <div className="flex items-center gap-1">
+                <DarkModeToggle />
                 <Link href="/settings">
                   <Button
                     variant="ghost"
@@ -892,10 +936,9 @@ export function DashboardClient({
                     className="h-9 w-9"
                     title="Pengaturan"
                   >
-                    <Settings className="h-4 w-4" />
+                    <Settings className="h-5 w-5" />
                   </Button>
                 </Link>
-                <DarkModeToggle />
               </div>
             </div>
           </div>
@@ -908,6 +951,8 @@ export function DashboardClient({
             isLoading={false}
             onAddWallet={handleAddWallet}
             onEditWallet={handleEditWallet}
+            onTransfer={handleTransfer}
+            onBalanceUpdate={handleBalanceUpdate}
           />
 
           {/* Area Chat Bubble Status */}
@@ -980,15 +1025,19 @@ export function DashboardClient({
             />
 
             {/* Manual Transaction Button */}
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => setIsManualTransactionOpen(true)}
-              className="gap-2 border-2 border-dashed hover:border-solid hover:bg-primary/10"
-            >
-              <PlusCircle className="h-5 w-5" />
-              Input Manual
-            </Button>
+            <div className="flex gap-3">
+
+
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => setIsManualTransactionOpen(true)}
+                className="gap-2 border-2 border-dashed hover:border-solid hover:bg-primary/10"
+              >
+                <PlusCircle className="h-5 w-5" />
+                Input Manual
+              </Button>
+            </div>
 
             {/* Hidden File Input for Scan Receipt */}
             <input
@@ -1164,14 +1213,26 @@ export function DashboardClient({
       <ManualTransactionDialog
         open={isManualTransactionOpen}
         onOpenChange={setIsManualTransactionOpen}
+        onSuccess={handleManualTransactionSuccess}
         wallets={wallets}
-        isLoadingWallets={false}
-        onSuccess={() => {
-          loadWallets()
-          loadRecentTransactions()
-          loadBudgetSummary()
-        }}
       />
+
+      <Dialog open={isTransferOpen} onOpenChange={setIsTransferOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Transfer Antar Dompet</DialogTitle>
+          </DialogHeader>
+          <TransferForm
+            wallets={wallets}
+            onSuccess={handleTransferSuccess}
+            onCancel={() => {
+              setIsTransferOpen(false)
+              setSelectedSourceWalletId(undefined)
+            }}
+            defaultSourceWalletId={selectedSourceWalletId}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Review Scan Dialog */}
       <Dialog open={isReviewScanOpen} onOpenChange={setIsReviewScanOpen}>

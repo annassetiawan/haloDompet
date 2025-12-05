@@ -126,10 +126,12 @@ export default function ReportsPage() {
     }
   }
 
-  // Calculate statistics - EXPENSE transactions (exclude 'adjustment')
-  const expenseTransactions = transactions.filter((t) => t.type === 'expense')
+  // Calculate statistics - EXPENSE transactions (exclude 'adjustment' and 'Transfer Keluar')
+  const expenseTransactions = transactions.filter(
+    (t) => t.type === 'expense' && t.category !== 'Transfer Keluar',
+  )
   const previousExpenseTransactions = previousMonthTransactions.filter(
-    (t) => t.type === 'expense',
+    (t) => t.type === 'expense' && t.category !== 'Transfer Keluar',
   )
 
   const totalSpent = expenseTransactions.reduce(
@@ -151,10 +153,12 @@ export default function ReportsPage() {
       ? previousTotalSpent / previousExpenseTransactions.length
       : 0
 
-  // Calculate statistics - INCOME transactions
-  const incomeTransactions = transactions.filter((t) => t.type === 'income')
+  // Calculate statistics - INCOME transactions (exclude 'Transfer Masuk')
+  const incomeTransactions = transactions.filter(
+    (t) => t.type === 'income' && t.category !== 'Transfer Masuk',
+  )
   const previousIncomeTransactions = previousMonthTransactions.filter(
-    (t) => t.type === 'income',
+    (t) => t.type === 'income' && t.category !== 'Transfer Masuk',
   )
 
   const totalIncome = incomeTransactions.reduce(
@@ -524,7 +528,7 @@ export default function ReportsPage() {
 
   return (
     <>
-      <main className="relative min-h-screen flex flex-col p-4 md:p-8 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
+      <main className="relative min-h-screen flex flex-col p-4 md:p-8 pb-24 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
         <div className="relative z-10 w-full max-w-4xl mx-auto space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between animate-slide-down">
@@ -829,8 +833,8 @@ export default function ReportsPage() {
                   </div>
 
                   {/* Content - Chart */}
-                  <div className="p-4 md:p-6 w-full">
-                    <div className="w-full h-[250px] md:h-[350px]">
+                  <div className="py-4 md:py-6 w-full">
+                    <div className="w-full h-[350px]">
                       <ChartContainer
                         config={monthlyComparisonConfig}
                         className="h-full w-full aspect-auto min-w-[100%]"
@@ -853,6 +857,7 @@ export default function ReportsPage() {
                               tick={{ fill: 'hsl(var(--muted-foreground))' }}
                             />
                             <YAxis
+                              width={45}
                               className="text-xs"
                               tick={{ fill: 'hsl(var(--muted-foreground))' }}
                               tickFormatter={(value) =>
@@ -894,6 +899,8 @@ export default function ReportsPage() {
                       </ChartContainer>
                     </div>
 
+                  </div>
+
                     {/* Footer */}
                     <div className="p-4 border-t border-border flex items-center gap-2 text-xs text-muted-foreground">
                       <Wallet className="h-4 w-4" />
@@ -903,7 +910,6 @@ export default function ReportsPage() {
                           : `Bulan ini defisit ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(Math.abs(netBalance))} - Kurangi pengeluaran!`}
                       </span>
                     </div>
-                  </div>
                 </div>
 
                 {/* Bar Chart - Top Categories (Horizontal) */}
@@ -926,72 +932,86 @@ export default function ReportsPage() {
                   </div>
 
                   {/* Content - Chart */}
-                  <div className="p-4 md:p-6 w-full">
-                    <div className="w-full h-[250px] md:h-[350px]">
-                      <ChartContainer
-                        config={barChartConfig}
-                        className="h-full w-full aspect-auto min-w-[100%]"
-                      >
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart
-                            data={barChartData}
-                            layout="vertical"
-                            margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
-                          >
-                            <CartesianGrid
-                              strokeDasharray="3 3"
-                              className="stroke-muted"
-                              horizontal={false}
-                            />
-                            <XAxis
-                              type="number"
-                              className="text-xs"
-                              tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                              tickFormatter={(value) =>
-                                new Intl.NumberFormat('id-ID', {
-                                  notation: 'compact',
-                                  compactDisplay: 'short',
-                                }).format(value)
-                              }
-                            />
-                            <YAxis
-                              type="category"
-                              dataKey="category"
-                              width={100}
-                              className="text-xs"
-                              tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                            />
-                            <ChartTooltip
-                              content={
-                                <ChartTooltipContent
-                                  labelFormatter={(value: any) => value}
-                                  formatter={(value: any, name: any) => [
-                                    new Intl.NumberFormat('id-ID', {
-                                      style: 'currency',
-                                      currency: 'IDR',
-                                      minimumFractionDigits: 0,
-                                    }).format(value as number),
-                                    'Total',
-                                  ]}
-                                />
-                              }
-                            />
-                            <Bar dataKey="amount" radius={[0, 8, 8, 0]}>
-                              {barChartData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.fill} />
-                              ))}
-                            </Bar>
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </ChartContainer>
-                    </div>
+                  <div className="py-4 md:py-6 w-full">
+                    {barChartData.length === 0 ? (
+                      <div className="w-full h-[350px] flex flex-col items-center justify-center text-center p-4">
+                        <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
+                          <BarChart3 className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <p className="text-sm font-medium text-foreground">
+                          Belum ada data pengeluaran
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Grafik akan muncul setelah Anda mencatat pengeluaran
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="w-full h-[350px]">
+                        <ChartContainer
+                          config={barChartConfig}
+                          className="h-full w-full aspect-auto min-w-[100%]"
+                        >
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart
+                              data={barChartData}
+                              layout="vertical"
+                              margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
+                            >
+                              <CartesianGrid
+                                strokeDasharray="3 3"
+                                className="stroke-muted"
+                                horizontal={false}
+                              />
+                              <XAxis
+                                type="number"
+                                className="text-xs"
+                                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                                tickFormatter={(value) =>
+                                  new Intl.NumberFormat('id-ID', {
+                                    notation: 'compact',
+                                    compactDisplay: 'short',
+                                  }).format(value)
+                                }
+                              />
+                              <YAxis
+                                type="category"
+                                dataKey="category"
+                                width={100}
+                                className="text-xs"
+                                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                              />
+                              <ChartTooltip
+                                content={
+                                  <ChartTooltipContent
+                                    labelFormatter={(value: any) => value}
+                                    formatter={(value: any, name: any) => [
+                                      new Intl.NumberFormat('id-ID', {
+                                        style: 'currency',
+                                        currency: 'IDR',
+                                        minimumFractionDigits: 0,
+                                      }).format(value as number),
+                                      'Total',
+                                    ]}
+                                  />
+                                }
+                              />
+                              <Bar dataKey="amount" radius={[0, 8, 8, 0]}>
+                                {barChartData.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                                ))}
+                              </Bar>
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </ChartContainer>
+                      </div>
+                    )}
+                  </div>
 
                     {/* Footer */}
                     <div className="p-4 border-t border-border flex items-center gap-2 text-xs text-muted-foreground">
                       <TrendingUp className="h-4 w-4" />
                       <span>Showing top 5 spending categories this month</span>
                     </div>
-                  </div>
                 </div>
 
                 {/* Pie Chart - Category Distribution */}
@@ -1014,91 +1034,122 @@ export default function ReportsPage() {
                   </div>
 
                   {/* Content - Chart */}
-                  <div className="p-4 md:p-6 w-full">
-                    <div className="w-full h-[350px]">
-                      <ChartContainer
-                        config={pieChartConfig}
-                        className="h-full w-full aspect-auto min-w-[100%]"
-                      >
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <ChartTooltip
-                              content={
-                                <ChartTooltipContent
-                                  labelFormatter={(value: any) => value}
-                                  formatter={(value: any, name: any) => [
-                                    new Intl.NumberFormat('id-ID', {
-                                      style: 'currency',
-                                      currency: 'IDR',
-                                      minimumFractionDigits: 0,
-                                    }).format(value as number),
-                                    name,
-                                  ]}
-                                />
-                              }
-                            />
-                            <Pie
-                              data={pieChartData}
-                              dataKey="value"
-                              nameKey="name"
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={60}
-                              outerRadius={100}
-                              label={(props: any) => {
-                                const entry = pieChartData.find(
-                                  (e) => e.name === props.name,
-                                )
-                                return entry
-                                  ? `${props.name} (${entry.percentage.toFixed(1)}%)`
-                                  : props.name
-                              }}
-                              labelLine={true}
-                            >
-                              {pieChartData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.fill} />
-                              ))}
-                              <Label
-                                content={({ viewBox }) => {
-                                  if (
-                                    viewBox &&
-                                    'cx' in viewBox &&
-                                    'cy' in viewBox
-                                  ) {
-                                    return (
-                                      <text
-                                        x={viewBox.cx}
-                                        y={viewBox.cy}
-                                        textAnchor="middle"
-                                        dominantBaseline="middle"
-                                      >
-                                        <tspan
-                                          x={viewBox.cx}
-                                          y={(viewBox.cy || 0) - 10}
-                                          className="fill-muted-foreground text-sm"
-                                        >
-                                          Total
-                                        </tspan>
-                                        <tspan
-                                          x={viewBox.cx}
-                                          y={(viewBox.cy || 0) + 15}
-                                          className="fill-foreground text-xl font-semibold"
-                                        >
-                                          {new Intl.NumberFormat('id-ID', {
-                                            notation: 'compact',
-                                            compactDisplay: 'short',
-                                          }).format(totalSpent)}
-                                        </tspan>
-                                      </text>
-                                    )
-                                  }
-                                }}
+                  <div className="py-4 md:py-6 w-full">
+                    {pieChartData.length === 0 ? (
+                      <div className="w-full h-[350px] flex flex-col items-center justify-center text-center p-4">
+                        <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
+                          <Tag className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <p className="text-sm font-medium text-foreground">
+                          Belum ada data kategori
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Grafik distribusi akan muncul setelah ada pengeluaran
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="w-full h-[350px]">
+                        <ChartContainer
+                          config={pieChartConfig}
+                          className="h-full w-full aspect-auto min-w-[100%]"
+                        >
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <ChartTooltip
+                                content={
+                                  <ChartTooltipContent
+                                    labelFormatter={(value: any) => value}
+                                    formatter={(value: any, name: any) => [
+                                      new Intl.NumberFormat('id-ID', {
+                                        style: 'currency',
+                                        currency: 'IDR',
+                                        minimumFractionDigits: 0,
+                                      }).format(value as number),
+                                      name,
+                                    ]}
+                                  />
+                                }
                               />
-                            </Pie>
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </ChartContainer>
-                    </div>
+                              <Pie
+                                data={pieChartData}
+                                dataKey="value"
+                                nameKey="name"
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={90}
+                                paddingAngle={2}
+                              >
+                                {pieChartData.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                                ))}
+                                <Label
+                                  content={({ viewBox }) => {
+                                    if (
+                                      viewBox &&
+                                      'cx' in viewBox &&
+                                      'cy' in viewBox
+                                    ) {
+                                      return (
+                                        <text
+                                          x={viewBox.cx}
+                                          y={viewBox.cy}
+                                          textAnchor="middle"
+                                          dominantBaseline="middle"
+                                        >
+                                          <tspan
+                                            x={viewBox.cx}
+                                            y={(viewBox.cy || 0) - 10}
+                                            className="fill-muted-foreground text-sm"
+                                          >
+                                            Total
+                                          </tspan>
+                                          <tspan
+                                            x={viewBox.cx}
+                                            y={(viewBox.cy || 0) + 15}
+                                            className="fill-foreground text-xl font-semibold"
+                                          >
+                                            {new Intl.NumberFormat('id-ID', {
+                                              notation: 'compact',
+                                              compactDisplay: 'short',
+                                            }).format(totalSpent)}
+                                          </tspan>
+                                        </text>
+                                      )
+                                    }
+                                  }}
+                                />
+                              </Pie>
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </ChartContainer>
+                      </div>
+
+                      {/* Custom Legend */}
+                      <div className="mt-4 grid grid-cols-2 gap-3 px-4">
+                        {pieChartData.map((entry, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-2 text-sm"
+                          >
+                            <div
+                              className="w-3 h-3 rounded-full shrink-0"
+                              style={{ backgroundColor: entry.fill }}
+                            />
+                            <div className="flex flex-col">
+                              <span className="font-medium text-foreground truncate max-w-[100px] md:max-w-[140px]">
+                                {entry.name}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {entry.percentage.toFixed(1)}%
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      </>
+                    )}
                   </div>
 
                   {/* Footer */}
@@ -1128,88 +1179,103 @@ export default function ReportsPage() {
                   </div>
 
                   {/* Content - Chart */}
-                  <div className="p-4 md:p-6 w-full">
-                    <div className="w-full h-[250px] md:h-[350px]">
-                      <ChartContainer
-                        config={lineChartConfig}
-                        className="h-full w-full aspect-auto min-w-[100%]"
-                      >
-                        <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart
-                            data={lineChartData}
-                            margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
-                          >
-                            <defs>
-                              <linearGradient
-                                id="colorAmount"
-                                x1="0"
-                                y1="0"
-                                x2="0"
-                                y2="1"
-                              >
-                                <stop
-                                  offset="5%"
-                                  stopColor={expenseColor}
-                                  stopOpacity={0.8}
-                                />
-                                <stop
-                                  offset="95%"
-                                  stopColor={expenseColor}
-                                  stopOpacity={0}
-                                />
-                              </linearGradient>
-                            </defs>
-                            <CartesianGrid
-                              strokeDasharray="3 3"
-                              className="stroke-muted"
-                              vertical={false}
-                            />
-                            <XAxis
-                              dataKey="date"
-                              height={30}
-                              tickMargin={10}
-                              className="text-xs"
-                              tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                            />
-                            <YAxis
-                              className="text-xs"
-                              tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                              tickFormatter={(value) =>
-                                new Intl.NumberFormat('id-ID', {
-                                  notation: 'compact',
-                                  compactDisplay: 'short',
-                                }).format(value)
-                              }
-                            />
-                            <ChartTooltip
-                              content={
-                                <ChartTooltipContent
-                                  labelFormatter={(value: any) => value}
-                                  formatter={(value: any, name: any) => [
-                                    new Intl.NumberFormat('id-ID', {
-                                      style: 'currency',
-                                      currency: 'IDR',
-                                      minimumFractionDigits: 0,
-                                    }).format(value as number),
-                                    'Pengeluaran',
-                                  ]}
-                                />
-                              }
-                            />
-                            <Area
-                              type="monotone"
-                              dataKey="amount"
-                              stroke={expenseColor}
-                              strokeWidth={2}
-                              fill="url(#colorAmount)"
-                              fillOpacity={0.9}
-                              dot={{ fill: expenseColor, r: 4 }}
-                              activeDot={{ r: 6 }}
-                            />
-                          </AreaChart>
-                        </ResponsiveContainer>
-                      </ChartContainer>
-                    </div>
+                  <div className="py-4 md:py-6 w-full">
+                    {lineChartData.length === 0 ? (
+                      <div className="w-full h-[350px] flex flex-col items-center justify-center text-center p-4">
+                        <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
+                          <TrendingUp className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <p className="text-sm font-medium text-foreground">
+                          Belum ada tren pengeluaran
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Grafik tren akan muncul setelah Anda mencatat pengeluaran
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="w-full h-[350px]">
+                        <ChartContainer
+                          config={lineChartConfig}
+                          className="h-full w-full aspect-auto min-w-[100%]"
+                        >
+                          <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart
+                              data={lineChartData}
+                              margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
+                            >
+                              <defs>
+                                <linearGradient
+                                  id="colorAmount"
+                                  x1="0"
+                                  y1="0"
+                                  x2="0"
+                                  y2="1"
+                                >
+                                  <stop
+                                    offset="5%"
+                                    stopColor={expenseColor}
+                                    stopOpacity={0.8}
+                                  />
+                                  <stop
+                                    offset="95%"
+                                    stopColor={expenseColor}
+                                    stopOpacity={0}
+                                  />
+                                </linearGradient>
+                              </defs>
+                              <CartesianGrid
+                                strokeDasharray="3 3"
+                                className="stroke-muted"
+                                vertical={false}
+                              />
+                              <XAxis
+                                dataKey="date"
+                                height={30}
+                                tickMargin={10}
+                                className="text-xs"
+                                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                              />
+                              <YAxis
+                                width={45}
+                                className="text-xs"
+                                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                                tickFormatter={(value) =>
+                                  new Intl.NumberFormat('id-ID', {
+                                    notation: 'compact',
+                                    compactDisplay: 'short',
+                                  }).format(value)
+                                }
+                              />
+                              <ChartTooltip
+                                content={
+                                  <ChartTooltipContent
+                                    labelFormatter={(value: any) => value}
+                                    formatter={(value: any, name: any) => [
+                                      new Intl.NumberFormat('id-ID', {
+                                        style: 'currency',
+                                        currency: 'IDR',
+                                        minimumFractionDigits: 0,
+                                      }).format(value as number),
+                                      'Pengeluaran',
+                                    ]}
+                                  />
+                                }
+                              />
+                              <Area
+                                type="monotone"
+                                dataKey="amount"
+                                stroke={expenseColor}
+                                strokeWidth={2}
+                                fill="url(#colorAmount)"
+                                fillOpacity={0.9}
+                                dot={{ fill: expenseColor, r: 4 }}
+                                activeDot={{ r: 6 }}
+                              />
+                            </AreaChart>
+                          </ResponsiveContainer>
+                        </ChartContainer>
+                      </div>
+                    )}
                   </div>
 
                   {/* Footer */}
@@ -1229,44 +1295,60 @@ export default function ReportsPage() {
                   </h2>
 
                   <div className="space-y-3 md:space-y-4">
-                    {sortedCategories.map(
-                      ({ category, total, count, percentage }) => (
-                        <div key={category} className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="text-2xl">
-                                {categoryEmoji[category.toLowerCase()] || '📦'}
-                              </span>
-                              <span className="text-sm font-normal text-foreground capitalize">
-                                {category}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                ({count} transaksi)
-                              </span>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm font-normal text-foreground">
-                                {new Intl.NumberFormat('id-ID', {
-                                  style: 'currency',
-                                  currency: 'IDR',
-                                  minimumFractionDigits: 0,
-                                }).format(total)}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {percentage.toFixed(1)}%
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Progress Bar */}
-                          <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-primary/70 rounded-full transition-all duration-500"
-                              style={{ width: `${percentage}%` }}
-                            />
-                          </div>
+                    {sortedCategories.length === 0 ? (
+                      <div className="text-center py-12">
+                        <div className="w-16 h-16 mx-auto rounded-full bg-muted/50 flex items-center justify-center mb-4">
+                          <Tag className="h-8 w-8 text-muted-foreground" />
                         </div>
-                      ),
+                        <h3 className="text-base font-medium text-foreground mb-1">
+                          Belum ada pengeluaran
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Tidak ada data pengeluaran untuk ditampilkan di bulan
+                          ini.
+                        </p>
+                      </div>
+                    ) : (
+                      sortedCategories.map(
+                        ({ category, total, count, percentage }) => (
+                          <div key={category} className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span className="text-2xl">
+                                  {categoryEmoji[category.toLowerCase()] ||
+                                    '📦'}
+                                </span>
+                                <span className="text-sm font-normal text-foreground capitalize">
+                                  {category}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  ({count} transaksi)
+                                </span>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm font-normal text-foreground">
+                                  {new Intl.NumberFormat('id-ID', {
+                                    style: 'currency',
+                                    currency: 'IDR',
+                                    minimumFractionDigits: 0,
+                                  }).format(total)}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {percentage.toFixed(1)}%
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Progress Bar */}
+                            <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-primary/70 rounded-full transition-all duration-500"
+                                style={{ width: `${percentage}%` }}
+                              />
+                            </div>
+                          </div>
+                        ),
+                      )
                     )}
                   </div>
                 </div>
