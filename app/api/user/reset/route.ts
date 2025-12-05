@@ -28,6 +28,18 @@ export async function DELETE(request: NextRequest) {
 
     console.log('🗑️ Resetting all data for user:', user.id)
 
+    // Step 0: Break circular dependencies (foreign key constraints)
+    // We must set related_transaction_id to NULL before deleting to avoid FK violations
+    const { error: updateError } = await supabase
+      .from('transactions')
+      .update({ related_transaction_id: null })
+      .eq('user_id', user.id)
+
+    if (updateError) {
+      console.error('Error breaking circular dependencies:', updateError)
+      // We continue anyway, hoping for the best, but log the error
+    }
+
     // Step 1: Call PostgreSQL function to delete all transactions
     // Function only deletes transactions to avoid trigger conflicts
     const { data, error } = await supabase.rpc('reset_user_data', {

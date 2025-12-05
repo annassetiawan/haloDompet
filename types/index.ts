@@ -62,6 +62,7 @@ export interface Transaction {
   wallet_id?: string | null // Added for multi-wallet support
   type?: 'expense' | 'income' | 'adjustment' // Default: expense
   notes?: string | null // For adjustment notes
+  related_transaction_id?: string | null // For transfers
   created_at: string
 }
 

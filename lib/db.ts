@@ -187,6 +187,7 @@ export async function createTransaction(
     wallet_id?: string | null
     type?: 'income' | 'expense' | 'adjustment'
     notes?: string | null
+    related_transaction_id?: string | null
   }
 ): Promise<Transaction | null> {
   const supabase = await createClient()
@@ -589,7 +590,12 @@ export async function getTransactionStats(
   averageTransaction: number
   categorySummary: { category: string; total: number; count: number }[]
 }> {
-  const transactions = await getTransactions(userId, { startDate, endDate })
+  const allTransactions = await getTransactions(userId, { startDate, endDate })
+  
+  // Filter for expenses only and exclude transfers to get pure spending stats
+  const transactions = allTransactions.filter(
+    (t) => t.type === 'expense' && t.category !== 'Transfer Keluar'
+  )
 
   const totalSpent = transactions.reduce((sum, t) => sum + parseFloat(t.amount.toString()), 0)
   const totalTransactions = transactions.length

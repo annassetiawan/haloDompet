@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react'
-import { Eye, EyeOff, Plus, Wallet as WalletIcon, MoreVertical, Edit, Star, TrendingUp, TrendingDown, ChevronLeft, ChevronRight, DollarSign } from 'lucide-react'
+import { Eye, EyeOff, Plus, Wallet as WalletIcon, MoreVertical, Edit, Star, TrendingUp, TrendingDown, ChevronLeft, ChevronRight, DollarSign, ArrowRightLeft } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -22,6 +22,8 @@ interface WalletCarouselProps {
   isLoading?: boolean
   onAddWallet?: () => void
   onEditWallet?: (wallet: Wallet) => void
+  onTransfer?: (wallet: Wallet) => void
+  onBalanceUpdate?: () => void
 }
 
 export function WalletCarousel({
@@ -30,7 +32,9 @@ export function WalletCarousel({
   growthPercentage = 0,
   isLoading = false,
   onAddWallet,
-  onEditWallet
+  onEditWallet,
+  onTransfer,
+  onBalanceUpdate,
 }: WalletCarouselProps) {
   const [isVisible, setIsVisible] = useState(true)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -225,6 +229,12 @@ export function WalletCarousel({
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
                               <DropdownMenuItem
+                                onClick={() => onTransfer?.(wallet)}
+                                className="cursor-pointer"
+                              >
+                                <ArrowRightLeft className="mr-2 h-4 w-4" /> Transfer
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
                                 onClick={() => setSelectedWalletForBalance(wallet)}
                                 className="cursor-pointer"
                               >
@@ -300,6 +310,8 @@ export function WalletCarousel({
           onSuccess={() => {
             setSelectedWalletForBalance(null)
             // Refresh will be handled by router.refresh() in EditBalanceDialog
+            // AND trigger parent update
+            onBalanceUpdate?.()
           }}
         />
       )}
