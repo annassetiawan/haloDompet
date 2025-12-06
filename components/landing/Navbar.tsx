@@ -47,9 +47,11 @@ export const Navbar: React.FC = () => {
 
           {/* Desktop Links */}
           <div className="hidden md:flex items-center gap-8">
-            <NavLink href="#features">Mengapa Kami</NavLink>
-            <NavLink href="#demo">Coba Demo</NavLink>
-            <NavLink href="#about">Cerita Kita</NavLink>
+            <NavLink href="#about">Tentang</NavLink>
+            <NavLink href="#workflow">Cara Kerja</NavLink>
+            <NavLink href="#features">Fitur</NavLink>
+            <NavLink href="#demo">Demo</NavLink>
+            <NavLink href="#team">Tim</NavLink>
           </div>
 
           {/* CTA */}
@@ -77,6 +79,20 @@ export const Navbar: React.FC = () => {
         <div className="absolute top-full left-0 right-0 p-4 md:hidden">
           <div className="bg-[#111] border border-white/10 rounded-2xl p-6 flex flex-col gap-6 shadow-2xl">
             <a
+              href="#about"
+              className="text-lg text-white/80"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Tentang
+            </a>
+            <a
+              href="#workflow"
+              className="text-lg text-white/80"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Cara Kerja
+            </a>
+            <a
               href="#features"
               className="text-lg text-white/80"
               onClick={() => setMobileMenuOpen(false)}
@@ -91,10 +107,17 @@ export const Navbar: React.FC = () => {
               Demo
             </a>
             <a
-              href="#download"
+              href="#team"
+              className="text-lg text-white/80"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Tim
+            </a>
+            <a
+              href="https://halodompet.vercel.app/login"
               className="bg-violet-600 text-white text-center py-3 rounded-xl font-bold"
             >
-              Download App
+              Mulai Gratis
             </a>
           </div>
         </div>
