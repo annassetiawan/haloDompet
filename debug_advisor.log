@@ -288,3 +288,15 @@
 [2025-12-06T16:49:50.664Z] Chunk received {"length":157,"preview":"4.850**? Kayaknya ka"}
 [2025-12-06T16:49:51.147Z] Chunk received {"length":167,"preview":" ada sisa buat jajan"}
 [2025-12-06T16:49:51.149Z] Stream finished successfully 
+[2025-12-06T16:54:05.996Z] Received advisor request 
+[2025-12-06T16:54:06.192Z] System prompt built 
+[2025-12-06T16:54:06.192Z] Chat initialized, starting stream 
+[2025-12-06T16:54:07.446Z] Stream started 
+[2025-12-06T16:54:07.447Z] Chunk received {"length":1,"preview":"W"}
+[2025-12-06T16:54:07.470Z] Chunk received {"length":54,"preview":"aduh, liat ringkasan"}
+[2025-12-06T16:54:07.867Z] Chunk received {"length":118,"preview":"ak sekaligus geleng-"}
+[2025-12-06T16:54:08.163Z] Chunk received {"length":155,"preview":"... hmm, kayaknya do"}
+[2025-12-06T16:54:08.326Z] Chunk received {"length":125,"preview":" **Rp 5.549.150** ma"}
+[2025-12-06T16:54:08.720Z] Chunk received {"length":160,"preview":"annya sih lumayan he"}
+[2025-12-06T16:54:09.048Z] Chunk received {"length":43,"preview":" pengeluaran buat ta"}
+[2025-12-06T16:54:09.051Z] Stream finished successfully 

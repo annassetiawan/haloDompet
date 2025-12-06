@@ -102,26 +102,14 @@ function sanitizeMessage(message: string): string {
   return message.trim().slice(0, 2000).replace(/[<>]/g, '')
 }
 
-import * as fs from 'fs';
-import * as path from 'path';
-
-function logDebug(message: string, data?: any) {
-  const timestamp = new Date().toISOString();
-  const logLine = `[${timestamp}] ${message} ${data ? JSON.stringify(data) : ''}\n`;
-  const logFile = path.join(process.cwd(), 'debug_advisor.log');
-  fs.appendFileSync(logFile, logLine);
-}
-
 // Streaming endpoint
 export async function POST(request: NextRequest) {
-  logDebug('Received advisor request');
   try {
     // Auth check
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      logDebug('Auth failed', authError);
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }
@@ -284,7 +272,6 @@ export async function POST(request: NextRequest) {
 
     const systemPrompt = buildSystemPrompt(stats, categories, recentTransactions, stats.monthlyCategories) + 
     "\n\nPENTING: Roasting dengan pedas tapi lucu. Gunakan bahasa santai dan emoji. Komentari saldo, pemasukan, dan pengeluaran."
-    logDebug('System prompt built');
 
     // Build history
     const recentHistory = conversationHistory.slice(-10)
@@ -301,12 +288,9 @@ export async function POST(request: NextRequest) {
       ],
     })
 
-    logDebug('Chat initialized, starting stream');
-
     // Streaming response
     if (stream) {
       const result = await chat.sendMessageStream(sanitizedMessage)
-      logDebug('Stream started');
 
       const encoder = new TextEncoder()
       const readableStream = new ReadableStream({
@@ -317,7 +301,6 @@ export async function POST(request: NextRequest) {
               const text = chunk.text()
               if (text) {
                 chunkCount++;
-                logDebug('Chunk received', { length: text.length, preview: text.slice(0, 20) });
                 // Send as Server-Sent Events format
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`))
               }
@@ -330,10 +313,8 @@ export async function POST(request: NextRequest) {
             // Send done signal
             controller.enqueue(encoder.encode(`data: [DONE]\n\n`))
             controller.close()
-            logDebug('Stream finished successfully');
           } catch (error) {
             console.error('[Stream Error]', error)
-            logDebug('Stream error', error);
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'Stream error' })}\n\n`))
             controller.close()
           }
@@ -367,7 +348,6 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('[AI Advisor Error]', error)
-    logDebug('AI Advisor Error', JSON.stringify(error, Object.getOwnPropertyNames(error)));
     const message = error instanceof Error ? error.message : 'Unknown error'
 
     let statusCode = 500
