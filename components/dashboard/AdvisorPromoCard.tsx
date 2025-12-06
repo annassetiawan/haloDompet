@@ -2,9 +2,9 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+
 import { Bot, Sparkles, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { ShinyButton } from '@/components/ui/shiny-button'
 
 interface AdvisorPromoCardProps {
   onAnalyze?: () => void
