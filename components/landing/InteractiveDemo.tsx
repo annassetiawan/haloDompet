@@ -5,6 +5,7 @@ import { Check, ArrowRight, Wallet, Tag, Calendar } from 'lucide-react'
 import { LottieAvatarRecorder } from '@/components/LottieAvatarRecorder'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { motion, useScroll, useTransform } from 'framer-motion'
 
 export const InteractiveDemo: React.FC = () => {
   const [demoState, setDemoState] = useState<'idle' | 'processing' | 'success'>(
@@ -12,6 +13,12 @@ export const InteractiveDemo: React.FC = () => {
   )
   const [demoResult, setDemoResult] = useState<any>(null)
   const [status, setStatus] = useState('Tekan tombol & mulai bicara')
+
+  const { scrollY } = useScroll()
+  // Opacity: Fade in when Hero avatar fades out (600-800)
+  const avatarOpacity = useTransform(scrollY, [600, 800], [0, 1])
+  // Scale: Pop effect (0.8 -> 1) for smoother landing
+  const avatarScale = useTransform(scrollY, [600, 800], [0.8, 1])
 
   const handleTranscript = async (transcript: string) => {
     setDemoState('processing')
@@ -53,7 +60,10 @@ export const InteractiveDemo: React.FC = () => {
       className="py-32 px-6 bg-[#080808] border-y border-white/5 relative overflow-hidden"
       id="demo"
     >
-      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+      
+        
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+        
         <div className="order-2 md:order-1 relative">
           <div className="absolute inset-0 bg-violet-600/20 blur-[100px] rounded-full"></div>
 
@@ -204,16 +214,18 @@ export const InteractiveDemo: React.FC = () => {
                     </div>
 
                     <div className="scale-125">
-                      <LottieAvatarRecorder
-                        onTranscript={handleTranscript}
-                        onStatusChange={handleStatusChange}
-                        isLoading={demoState === 'processing'}
-                        sentiment={
-                          demoState === 'success'
-                            ? demoResult?.sentiment
-                            : undefined
-                        }
-                      />
+                      <motion.div style={{ opacity: avatarOpacity, scale: avatarScale }}>
+                        <LottieAvatarRecorder
+                          onTranscript={handleTranscript}
+                          onStatusChange={handleStatusChange}
+                          isLoading={demoState === 'processing'}
+                          sentiment={
+                            demoState === 'success'
+                              ? demoResult?.sentiment
+                              : undefined
+                          }
+                        />
+                      </motion.div>
                     </div>
 
                     {/* Example Prompts */}
@@ -235,6 +247,10 @@ export const InteractiveDemo: React.FC = () => {
         </div>
 
         <div className="order-1 md:order-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-violet-300 mb-6">
+          <Check size={12} />
+          <span>Demo Interaktif</span>
+        </div>
           <h2 className="font-serif text-4xl md:text-6xl mb-8 leading-tight text-white">
             Lihat AI Bekerja <br />
             <span className="text-white/40">di Depan Matamu.</span>
@@ -270,7 +286,9 @@ export const InteractiveDemo: React.FC = () => {
             </div>
           </div>
         </div>
+      
       </div>
+      
     </section>
   )
 }

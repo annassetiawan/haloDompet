@@ -14,10 +14,10 @@ export function LandingPage() {
     <div className="min-h-screen bg-[#050505] text-white overflow-hidden">
       <Navbar />
       <Hero />
+      <InteractiveDemo />
       <AboutUs />
       <ProcessedSteps />
       <BentoFeatures />
-      <InteractiveDemo />
       <MeetMyTeam />
       <Footer />
     </div>
