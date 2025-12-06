@@ -2,67 +2,91 @@
 
 import React, { useState, useEffect } from 'react'
 import { ArrowRight, Mic } from 'lucide-react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import Lottie from 'lottie-react'
 import avatarIdleAnimation from '@/public/animations/avatar-idle.json'
 import LightRays from '../LightRays'
 
 export const Hero: React.FC = () => {
-  // State untuk menyimpan status apakah ini desktop atau bukan
   const [isDesktop, setIsDesktop] = useState(false)
+  const [targetY, setTargetY] = useState(0)
+  const { scrollY } = useScroll()
+  
+  // Transformasi untuk avatar "Menggelinding"
+  // Stage 1 (0-400): Gelinding ke kanan
+  // Stage 2 (400-800): Jatuh ke bawah ke kolom kanan section About
+  
+  // X: Geser ke kiri untuk masuk ke mockup HP di InteractiveDemo
+  // InteractiveDemo layout: Phone is on the LEFT (order-2 md:order-1)
+  // Grid is max-w-6xl. Left column center is approx -630 from center.
+  // Adjusted to -675 for perfect alignment (was -660)
+  const avatarX = useTransform(scrollY, [0, 800], [0, -730])
+  
+  // Y: Turun ke section InteractiveDemo (Section 2)
+  // InteractiveDemo starts at 100vh. Phone is vertically centered.
+  // Target Y = 100vh + approx 300px (to land in screen center)
+  const avatarY = useTransform(scrollY, [0, 800], [0, targetY])
+  
+  // Rotate: Muter terus sampai 360 derajat (Negative for left movement)
+  const avatarRotate = useTransform(scrollY, [0, 800], [0, -360])
+  
+  // Scale: Shrink to fit inside phone screen (approx 0.4)
+  // Start size reduced from 1.5 to 1.1 as requested
+  const avatarScale = useTransform(scrollY, [0, 800], [1.1, 0.4])
+
+  // Opacity: Fade out at the end to handoff to InteractiveDemo
+  // Extended range for smoother transition (600-800)
+  const avatarOpacity = useTransform(scrollY, [500, 700], [1, 0])
 
   useEffect(() => {
-    // Fungsi untuk cek ukuran layar
     const checkScreenSize = () => {
-      // 768px adalah breakpoint 'md' standar Tailwind
       setIsDesktop(window.innerWidth >= 768)
+      // Calculate target Y: 100vh (start of InteractiveDemo) + offset
+      // Offset adjusted to 230px (was 250px) to move up slightly
+      if (typeof window !== 'undefined') {
+        setTargetY(window.innerHeight + 250)
+      }
     }
-
-    // Cek saat pertama kali load
     checkScreenSize()
-
-    // Cek setiap kali layar di-resize
     window.addEventListener('resize', checkScreenSize)
-
-    // Bersihkan listener saat komponen di-unmount
     return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
 
   return (
-    <section className="relative min-h-[100vh] flex flex-col items-center px-6 overflow-hidden pt-24 md:pt-0 md:justify-center">
-      {/* Ambient Background Elements */}
-      <div className="absolute top-[20%] left-[10%] w-96 h-96 bg-fuchsia-900/30 rounded-full blur-[100px] animate-float opacity-40" />
-      <div className="absolute bottom-[20%] right-[10%] w-[500px] h-[500px] bg-violet-900/30 rounded-full blur-[120px] animate-float-delayed opacity-40" />
-      {/* Grid Pattern */}
-      <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage:
-            'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
-        }}
-      />
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <LightRays
-          // LOGIKA DINAMIS DI SINI:
-          raysOrigin={isDesktop ? 'top-center' : 'right'}
-          raysColor="#AD8BF9"
-          raysSpeed={1.5}
-          lightSpread={3.8}
-          rayLength={1.2}
-          followMouse={true}
-          mouseInfluence={0.1}
-          noiseAmount={0.1}
-          distortion={0.05}
-          className="custom-rays w-full h-full" // Pastikan canvas di dalam komponen juga full
+    <section className="relative min-h-[100vh] flex flex-col items-center px-6 pt-24 md:pt-0 md:justify-center z-50 pointer-events-none md:pointer-events-auto">
+      {/* Background Container with Overflow Hidden */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Ambient Background Elements */}
+        <div className="absolute top-[20%] left-[10%] w-96 h-96 bg-fuchsia-900/30 rounded-full blur-[100px] animate-float opacity-40" />
+        <div className="absolute bottom-[20%] right-[10%] w-[500px] h-[500px] bg-violet-900/30 rounded-full blur-[120px] animate-float-delayed opacity-40" />
+        {/* Grid Pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage:
+              'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)',
+            backgroundSize: '60px 60px',
+          }}
         />
+        <div className="absolute inset-0 z-0">
+          <LightRays
+            raysOrigin={isDesktop ? 'top-center' : 'right'}
+            raysColor="#AD8BF9"
+            raysSpeed={1.5}
+            lightSpread={3.8}
+            rayLength={1.2}
+            followMouse={true}
+            mouseInfluence={0.1}
+            noiseAmount={0.1}
+            distortion={0.05}
+            className="custom-rays w-full h-full"
+          />
+        </div>
       </div>
-      <div className="max-w-5xl mx-auto text-center z-10">
-        {/* Main Heading */}
-        <div className="flex flex-col sm:flex-row items-stretch justify-center gap-4">
-          {/* 1. items-center diganti items-stretch agar tinggi anak-anaknya sama rata */}
 
+      <div className="max-w-5xl mx-auto text-center z-10 w-full pointer-events-auto">
+        <div className="flex flex-col sm:flex-row items-stretch justify-center gap-4">
           <div className="flex-1">
-            {/* 2. Tambahkan flex-1 di sini agar text mengambil sisa ruang yang ada */}
             <div>
               {/* Pill Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md mb-8 hover:border-violet-500/50 transition-colors duration-300 cursor-default">
@@ -115,30 +139,28 @@ export const Hero: React.FC = () => {
             </div>
           </div>
 
-          {/* Wrapper untuk Lottie agar basis bekerja dengan benar saat di-stretch */}
-          <div className="basis-1/3 flex flex-col justify-center">
-            <Lottie
-              animationData={avatarIdleAnimation}
-              loop={true}
-              autoplay={true}
-              // 3. Hapus h-[300px], ganti dengan h-full atau w-full agar mengikuti container
-              className="w-2/3 md:w-full mx-auto h-auto max-h-full drop-shadow-2xl"
-            />
+          {/* Wrapper untuk Lottie dengan Scrollytelling */}
+          <div className="basis-1/3 flex flex-col justify-center relative z-20">
+            <motion.div 
+              style={{ 
+                x: isDesktop ? avatarX : 0,
+                y: isDesktop ? avatarY : 0,
+                rotate: isDesktop ? avatarRotate : 0,
+                scale: isDesktop ? avatarScale : 1,
+                opacity: isDesktop ? avatarOpacity : 1
+              }}
+              className="w-full"
+            >
+              <Lottie
+                animationData={avatarIdleAnimation}
+                loop={true}
+                autoplay={true}
+                className="w-2/3 md:w-full mx-auto h-auto max-h-full drop-shadow-2xl"
+              />
+            </motion.div>
           </div>
         </div>
       </div>
-
-      {/* Container Lottie */}
-      {/* Saya hapus efek perspective/rotate supaya animasinya terlihat jelas (flat). 
-            Jika ingin miring 3D, tambahkan class 'perspective-1000 rotate-x-12' lagi */}
-      {/* <div className="relative z-10 pt-12 p-4 transform-gpu opacity-90 hover:opacity-100 transition-opacity duration-500">
-        <Lottie
-          animationData={avatarIdleAnimation}
-          loop={true}
-          autoplay={true}
-          className="w-full h-[300px] drop-shadow-2xl"
-        />
-      </div> */}
 
       <style jsx>{`
         @keyframes float {
@@ -163,14 +185,6 @@ export const Hero: React.FC = () => {
         .animate-float-delayed {
           animation: float 10s ease-in-out infinite;
           animation-delay: 2s;
-        }
-
-        .perspective-1000 {
-          perspective: 1000px;
-        }
-
-        .rotate-x-12 {
-          transform: rotateX(12deg);
         }
       `}</style>
     </section>
