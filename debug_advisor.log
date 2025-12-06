@@ -255,3 +255,36 @@
 [2025-12-06T16:39:18.252Z] Chunk received {"length":144,"preview":" positif **Rp 5.549."}
 [2025-12-06T16:39:18.636Z] Chunk received {"length":104,"preview":"akananmu cuma **Rp 7"}
 [2025-12-06T16:39:18.638Z] Stream finished successfully 
+[2025-12-06T16:47:16.344Z] Received advisor request 
+[2025-12-06T16:47:16.517Z] System prompt built 
+[2025-12-06T16:47:16.517Z] Chat initialized, starting stream 
+[2025-12-06T16:47:18.155Z] Stream started 
+[2025-12-06T16:47:18.157Z] Chunk received {"length":1,"preview":"W"}
+[2025-12-06T16:47:18.186Z] Chunk received {"length":48,"preview":"aduh, kita lihat nih"}
+[2025-12-06T16:47:18.661Z] Chunk received {"length":119,"preview":" **Rp 6.000.000**, l"}
+[2025-12-06T16:47:19.001Z] Chunk received {"length":142,"preview":"inggu nih! 😅\n\nUntun"}
+[2025-12-06T16:47:19.410Z] Chunk received {"length":136,"preview":"83% buat **tagihan**"}
+[2025-12-06T16:47:19.788Z] Chunk received {"length":123,"preview":"ayan juga ya buat se"}
+[2025-12-06T16:47:19.790Z] Stream finished successfully 
+[2025-12-06T16:47:56.857Z] Received advisor request 
+[2025-12-06T16:47:57.026Z] System prompt built 
+[2025-12-06T16:47:57.026Z] Chat initialized, starting stream 
+[2025-12-06T16:47:58.239Z] Stream started 
+[2025-12-06T16:47:58.240Z] Chunk received {"length":1,"preview":"W"}
+[2025-12-06T16:47:58.319Z] Chunk received {"length":32,"preview":"aduh, pemasukan **Rp"}
+[2025-12-06T16:47:58.678Z] Chunk received {"length":129,"preview":" nih, lumayan buat j"}
+[2025-12-06T16:47:59.023Z] Chunk received {"length":140,"preview":"0** ✅. Tapi hati-hat"}
+[2025-12-06T16:47:59.553Z] Chunk received {"length":147,"preview":" lho! Kayaknya kamu "}
+[2025-12-06T16:47:59.925Z] Chunk received {"length":160,"preview":" deh sesekali trakti"}
+[2025-12-06T16:48:00.507Z] Chunk received {"length":147,"preview":" cuci mulut.\n\nIntiny"}
+[2025-12-06T16:48:00.508Z] Stream finished successfully 
+[2025-12-06T16:49:48.050Z] Received advisor request 
+[2025-12-06T16:49:48.218Z] System prompt built 
+[2025-12-06T16:49:48.218Z] Chat initialized, starting stream 
+[2025-12-06T16:49:49.773Z] Stream started 
+[2025-12-06T16:49:49.775Z] Chunk received {"length":1,"preview":"W"}
+[2025-12-06T16:49:49.926Z] Chunk received {"length":50,"preview":"aduh, dompetmu ini u"}
+[2025-12-06T16:49:50.191Z] Chunk received {"length":134,"preview":"Rp 6.000.000** lumay"}
+[2025-12-06T16:49:50.664Z] Chunk received {"length":157,"preview":"4.850**? Kayaknya ka"}
+[2025-12-06T16:49:51.147Z] Chunk received {"length":167,"preview":" ada sisa buat jajan"}
+[2025-12-06T16:49:51.149Z] Stream finished successfully 

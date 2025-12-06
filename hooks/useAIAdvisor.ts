@@ -76,8 +76,16 @@ export function useAIAdvisor(options: UseAIAdvisorOptions = {}) {
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Request failed')
+        let errorMessage = 'Request failed'
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.error || errorMessage
+        } catch (e) {
+          // If JSON parse fails, try getting text
+          const textError = await response.text().catch(() => '')
+          if (textError) errorMessage = textError
+        }
+        throw new Error(errorMessage)
       }
 
       // Handle streaming response
