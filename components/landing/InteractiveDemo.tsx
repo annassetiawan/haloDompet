@@ -87,6 +87,12 @@ export const InteractiveDemo: React.FC = () => {
 
               {/* Screen Content */}
               <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden bg-[#0c0c0c] p-4 pt-12">
+                {/* Demo Label */}
+                <div className="absolute top-14 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-white/5 border border-white/5 backdrop-blur-sm z-20">
+                  <span className="text-[10px] font-medium text-white/40 uppercase tracking-widest">
+                    Demo Interaktif
+                  </span>
+                </div>
                 {/* Result Card */}
                 {demoState === 'success' && demoResult ? (
                   <div className="w-full animate-in fade-in slide-in-from-bottom-8 duration-500">
@@ -161,7 +167,7 @@ export const InteractiveDemo: React.FC = () => {
                     {/* Bubble Chat */}
                     <div className="relative w-full max-w-[280px] mx-auto mb-2 flex flex-col justify-end items-center transition-all duration-300">
                       <div
-                        className={`relative px-4 py-3 rounded-2xl shadow-sm border transition-all duration-300 w-full ${
+                        className={`relative px-4 py-3 rounded-2xl shadow-sm border transition-all duration-300 ${
                           demoState !== 'idle'
                             ? 'bg-gradient-to-br from-violet-500/10 to-violet-500/5 border-violet-500/20 text-violet-100 scale-100 opacity-100'
                             : 'bg-white/5 border-white/5 text-white/40 scale-95 opacity-80'
@@ -211,7 +217,7 @@ export const InteractiveDemo: React.FC = () => {
                     </div>
 
                     {/* Example Prompts */}
-                    <div className="w-full space-y-2 mt-4">
+                    <div className="space-y-2 mt-4">
                       <p className="text-xs text-white/30 text-center uppercase tracking-wider mb-2">
                         Contoh ucapan:
                       </p>
@@ -239,7 +245,7 @@ export const InteractiveDemo: React.FC = () => {
 
           <div className="space-y-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center font-serif text-xl bg-white/5 text-white">
+              <div className="w-12 h-12 shrink-0 rounded-full border border-white/10 flex items-center justify-center font-serif text-xl bg-white/5 text-white">
                 1
               </div>
               <p className="text-lg text-white/80">
@@ -247,7 +253,7 @@ export const InteractiveDemo: React.FC = () => {
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center font-serif text-xl bg-white/5 text-white">
+              <div className="w-12 h-12 shrink-0 rounded-full border border-white/10 flex items-center justify-center font-serif text-xl bg-white/5 text-white">
                 2
               </div>
               <p className="text-lg text-white/80">
@@ -255,7 +261,7 @@ export const InteractiveDemo: React.FC = () => {
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center font-serif text-xl bg-white/5 text-white">
+              <div className="w-12 h-12 shrink-0 rounded-full border border-white/10 flex items-center justify-center font-serif text-xl bg-white/5 text-white">
                 3
               </div>
               <p className="text-lg text-white/80">
