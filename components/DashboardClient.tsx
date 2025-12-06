@@ -11,6 +11,10 @@ import { TransactionCard } from '@/components/TransactionCard'
 import { DarkModeToggle } from '@/components/DarkModeToggle'
 import { LottieAvatarRecorder } from '@/components/LottieAvatarRecorder'
 import { BottomNav } from '@/components/BottomNav'
+import { AdvisorPromoCard } from '@/components/dashboard/AdvisorPromoCard'
+import { useAIAdvisor } from '@/hooks/useAIAdvisor'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -205,6 +209,60 @@ export function DashboardClient({
   // Receipt scan state
   const [isScanning, setIsScanning] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // AI Advisor Hook
+  const {
+    messages: advisorMessages,
+    isLoading: isAdvisorLoading,
+    sendMessage: sendAdvisorMessage,
+  } = useAIAdvisor({
+    onError: (err) => {
+      toast.error(err)
+      setStatus(`Error: ${err}`)
+    },
+  })
+
+  // Effect to update roastMessage/bubble with advisor stream
+  useEffect(() => {
+    const lastMessage = advisorMessages[advisorMessages.length - 1]
+    if (lastMessage && lastMessage.role === 'assistant') {
+      // Show the streaming content in the bubble
+      setRoastMessage(lastMessage.content)
+      
+      // If streaming finished, keep it visible for longer
+      if (!lastMessage.isStreaming) {
+        // Optional: Clear after a long delay or keep it until user dismisses
+        // For now, let's keep it until user dismisses or new action
+      }
+    }
+  }, [advisorMessages])
+
+  const handleAnalyze = async () => {
+    setStatus('Menganalisa keuangan...')
+    // Clear previous roast message to show loading state effectively
+    setRoastMessage(null) 
+    
+    try {
+      // Add timeout to prevent infinite loading state (increased to 30s)
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Waktu habis, coba lagi ya!')), 30000)
+      )
+
+      const analysisPromise = sendAdvisorMessage("Analisa keuangan saya saat ini dengan gaya 'roasting' yang pedas tapi lucu. Komentari saldo, pemasukan, dan pengeluaran saya. Gunakan bahasa santai dan emoji.")
+      
+      await Promise.race([analysisPromise, timeoutPromise])
+      
+      // Do NOT reset to IDLE_STATUS here.
+      // If success, roastMessage will be shown.
+      // If error, onError will set status.
+    } catch (error) {
+      console.error('Analysis failed:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Gagal menganalisa'
+      setStatus(errorMessage)
+      toast.error(errorMessage)
+      // Do NOT reset to IDLE_STATUS here, let the error persist
+    }
+  }
 
   const router = useRouter()
   const supabase = createClient()
@@ -986,18 +1044,22 @@ export function DashboardClient({
                 </button>
               )}
 
-              <p
+              <div
                 className={`text-center font-medium leading-snug ${
                   isBubbleActive ? 'text-sm' : 'text-xs italic'
-                }`}
+                } max-h-[80px] overflow-y-auto pr-1 custom-scrollbar`}
               >
                 {/* Tampilkan roast message (tanpa kutip) atau status */}
-                {roastMessage
-                  ? roastMessage
-                  : status === IDLE_STATUS
-                    ? status
-                    : `"${status}"`}
-              </p>
+                {roastMessage ? (
+                  <div className="prose prose-sm max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-indigo-700 dark:prose-strong:text-indigo-300 text-left">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {roastMessage}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  status === IDLE_STATUS ? status : `"${status}"`
+                )}
+              </div>
 
               <div
                 className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-b border-r ${
@@ -1061,13 +1123,12 @@ export function DashboardClient({
             </div>
 
             {/* Instruction */}
-            <div className="text-center space-y-2">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border border-border/50">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                <p className="text-xs font-medium text-muted-foreground">
-                  Tekan tombol dan ucapkan pemasukan atau pengeluaran Anda
-                </p>
-              </div>
+            {/* Advisor Promo Card */}
+            <div className="w-full max-w-md">
+              <AdvisorPromoCard 
+                onAnalyze={handleAnalyze}
+                isLoading={isAdvisorLoading}
+              />
             </div>
           </div>
 
