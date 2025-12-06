@@ -1051,8 +1051,13 @@ export function DashboardClient({
               >
                 {/* Tampilkan roast message (tanpa kutip) atau status */}
                 {roastMessage ? (
-                  <div className="prose prose-sm max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-indigo-700 dark:prose-strong:text-indigo-300 text-left">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  <div className="prose prose-sm max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-indigo-700 dark:prose-strong:text-indigo-300 prose-strong:font-bold text-left">
+                    <ReactMarkdown 
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        strong: ({node, ...props}) => <strong className="font-bold text-indigo-700 dark:text-indigo-300" {...props} />
+                      }}
+                    >
                       {roastMessage}
                     </ReactMarkdown>
                   </div>
