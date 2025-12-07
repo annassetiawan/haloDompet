@@ -37,7 +37,7 @@ export function AdvisorPromoCard({ onAnalyze, isLoading = false }: AdvisorPromoC
             <Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-400" />
           )}
           <span className="font-medium text-sm text-zinc-900 dark:text-zinc-100">
-            {isLoading ? 'Menganalisa...' : 'Analisa AI'}
+            {isLoading ? 'Menganalisa...' : 'Analisa Keuangan'}
           </span>
         </div>
       </div>

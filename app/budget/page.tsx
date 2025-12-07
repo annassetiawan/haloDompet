@@ -5,18 +5,21 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { AddBudgetDialog } from '@/components/budget/AddBudgetDialog'
 import { BudgetCard } from '@/components/budget/BudgetCard'
-import { BottomNav } from '@/components/BottomNav'
+import { AppNavigation } from '@/components/AppNavigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ArrowLeft, Loader2, Target, Wallet } from 'lucide-react'
 import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
 import type { Budget, BudgetSummary } from '@/lib/budget'
+import type { Wallet as WalletType } from '@/types'
+import { useScanReceipt } from '@/hooks/useScanReceiptHook'
 
 export default function BudgetPage() {
   const [user, setUser] = useState<User | null>(null)
   const [budgets, setBudgets] = useState<Budget[]>([])
   const [budgetSummary, setBudgetSummary] = useState<BudgetSummary[]>([])
+  const [wallets, setWallets] = useState<WalletType[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   const router = useRouter()
@@ -42,14 +45,16 @@ export default function BudgetPage() {
     try {
       setIsLoading(true)
 
-      // Load both budgets list and summary in parallel
-      const [budgetsResponse, summaryResponse] = await Promise.all([
+      // Load budgets, summary, and wallets in parallel
+      const [budgetsResponse, summaryResponse, walletsResponse] = await Promise.all([
         fetch('/api/budget'),
         fetch('/api/budget/summary'),
+        fetch('/api/wallet'),
       ])
 
       const budgetsData = await budgetsResponse.json()
       const summaryData = await summaryResponse.json()
+      const walletsData = await walletsResponse.json()
 
       if (budgetsResponse.ok && budgetsData.budgets) {
         setBudgets(budgetsData.budgets)
@@ -57,6 +62,10 @@ export default function BudgetPage() {
 
       if (summaryResponse.ok && summaryData.budgets) {
         setBudgetSummary(summaryData.budgets)
+      }
+
+      if (walletsResponse.ok && walletsData.wallets) {
+        setWallets(walletsData.wallets)
       }
     } catch (error) {
       console.error('Error loading data:', error)
@@ -73,6 +82,14 @@ export default function BudgetPage() {
   const handleBudgetDelete = () => {
     loadData()
   }
+
+  // Hook for scan receipt
+  const { handleScanClick, ScanDialog } = useScanReceipt({
+    onSuccess: () => {
+      loadData()
+    },
+    wallets,
+  })
 
   if (isLoading) {
     return (
@@ -225,7 +242,10 @@ export default function BudgetPage() {
         )}
       </div>
 
-      <BottomNav />
+      {/* Scan Dialog Hook */}
+      {ScanDialog()}
+
+      <AppNavigation onScanClick={handleScanClick} />
     </div>
   )
 }

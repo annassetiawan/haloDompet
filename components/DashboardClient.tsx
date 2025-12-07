@@ -10,9 +10,10 @@ import { WalletSelector } from '@/components/WalletSelector'
 import { TransactionCard } from '@/components/TransactionCard'
 import { DarkModeToggle } from '@/components/DarkModeToggle'
 import { LottieAvatarRecorder } from '@/components/LottieAvatarRecorder'
-import { BottomNav } from '@/components/BottomNav'
+import { AppNavigation } from '@/components/AppNavigation'
 import { AdvisorPromoCard } from '@/components/dashboard/AdvisorPromoCard'
 import { useAIAdvisor } from '@/hooks/useAIAdvisor'
+import { useScanReceipt } from '@/hooks/useScanReceiptHook'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Button } from '@/components/ui/button'
@@ -171,15 +172,6 @@ export function DashboardClient({
   const [isReviewOpen, setIsReviewOpen] = useState(false)
   const [editedTranscript, setEditedTranscript] = useState('')
 
-  // Review scan dialog state
-  const [isReviewScanOpen, setIsReviewScanOpen] = useState(false)
-  const [scannedData, setScannedData] = useState<{
-    item: string
-    amount: number
-    category: string
-    note: string | null
-  } | null>(null)
-
   // Wallet management state
   const [isAddWalletOpen, setIsAddWalletOpen] = useState(false)
   const [isEditWalletOpen, setIsEditWalletOpen] = useState(false)
@@ -206,9 +198,25 @@ export function DashboardClient({
     payment_method?: string | null
   } | null>(null)
 
-  // Receipt scan state
-  const [isScanning, setIsScanning] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  // Scan Receipt Hook
+  const { handleScanClick, ScanDialog, isScanning } = useScanReceipt({
+    onSuccess: (transaction) => {
+      loadTransactions() // Alias for loadRecentTransactions
+      loadWallets()
+      
+      if (transaction) {
+        setLastTransactionData(transaction)
+        setShowReceipt(true)
+      }
+    },
+    wallets,
+  })
+
+
+
+  // Alias for consistent naming
+  const loadTransactions = () => loadRecentTransactions()
+
 
   // AI Advisor Hook
   const {
@@ -229,10 +237,9 @@ export function DashboardClient({
       // Show the streaming content in the bubble
       setRoastMessage(lastMessage.content)
       
-      // If streaming finished, keep it visible for longer
+      // If streaming finished, keep it visible until user dismisses
       if (!lastMessage.isStreaming) {
-        // Optional: Clear after a long delay or keep it until user dismisses
-        // For now, let's keep it until user dismisses or new action
+        // Do nothing, wait for user to dismiss via X button
       }
     }
   }, [advisorMessages])
@@ -430,105 +437,6 @@ export function DashboardClient({
     setStatus(IDLE_STATUS)
   }
 
-  const handleConfirmScan = async () => {
-    if (!scannedData) return
-
-    setIsReviewScanOpen(false)
-    setIsProcessing(true)
-    setStatus('Menyimpan transaksi...')
-
-    try {
-      const transactionResponse = await fetch('/api/transaction', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          item: scannedData.item,
-          amount: scannedData.amount,
-          category: scannedData.category,
-          type: 'expense',
-          date: new Date().toISOString().split('T')[0],
-          voice_text: null,
-          note: scannedData.note,
-          wallet_id: selectedWalletId,
-        }),
-      })
-
-      const transactionData = await transactionResponse.json()
-
-      if (!transactionResponse.ok) {
-        const errorMsg = transactionData.error || 'Gagal menyimpan transaksi'
-        throw new Error(errorMsg)
-      }
-
-      // Reload data
-      loadUserProfile()
-      loadWallets()
-      loadRecentTransactions()
-      loadBudgetSummary()
-
-      setStatus('Berhasil! Transaksi tersimpan')
-
-      // Get wallet name if walletId is provided
-      const selectedWalletName = selectedWalletId
-        ? wallets.find((w) => w.id === selectedWalletId)?.name
-        : undefined
-
-      // Prepare transaction data for receipt
-      const receiptData = {
-        item: scannedData.item,
-        amount: scannedData.amount,
-        category: scannedData.category,
-        type: 'expense' as const,
-        date: new Date().toISOString().split('T')[0],
-        wallet_name: selectedWalletName,
-        location: null,
-        payment_method: null,
-      }
-
-      // Show receipt dialog
-      setLastTransactionData(receiptData)
-      setShowReceipt(true)
-
-      toast.success('Transaksi berhasil disimpan!')
-
-      // Reset scan data and wallet selection
-      setScannedData(null)
-      setSelectedWalletId(null)
-
-
-
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      setStatus(IDLE_STATUS)
-    } catch (error) {
-      console.error('Error saving transaction:', error)
-      let errorMessage = 'Gagal menyimpan transaksi. Coba lagi ya'
-
-      if (error instanceof Error) {
-        errorMessage = error.message
-      }
-
-      toast.error(errorMessage)
-      setStatus('Gagal menyimpan')
-
-      setAiSentiment('error')
-      setTimeout(() => setAiSentiment(undefined), 3000)
-
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      setStatus(IDLE_STATUS)
-    } finally {
-      setIsProcessing(false)
-    }
-  }
-
-  const handleCancelScan = () => {
-    setIsReviewScanOpen(false)
-    setScannedData(null)
-    setSelectedWalletId(null)
-    setStatus(IDLE_STATUS)
-  }
-
   const handleAddWallet = () => {
     setIsAddWalletOpen(true)
   }
@@ -718,8 +626,6 @@ export function DashboardClient({
         }, 8000)
       }
 
-
-
       await new Promise((resolve) => setTimeout(resolve, 2000))
       setStatus(IDLE_STATUS)
     } catch (error) {
@@ -741,123 +647,6 @@ export function DashboardClient({
       setStatus('Siap merekam')
     } finally {
       setIsProcessing(false)
-    }
-  }
-
-  // Handle scan receipt button click
-  const handleScanClick = () => {
-    fileInputRef.current?.click()
-  }
-
-  // Convert file to base64
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.readAsDataURL(file)
-      reader.onload = () => resolve(reader.result as string)
-      reader.onerror = (error) => reject(error)
-    })
-  }
-
-  // Handle file selection for receipt scan
-  const handleFileSelect = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('File harus berupa gambar')
-      return
-    }
-
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024 // 5MB in bytes
-    if (file.size > maxSize) {
-      toast.error('Ukuran file maksimal 5MB')
-      return
-    }
-
-    setIsScanning(true)
-    setStatus('Memproses gambar struk...')
-
-    try {
-      // Convert image to base64
-      const base64Image = await convertToBase64(file)
-
-      // Send to scan API
-      const response = await fetch('/api/scan', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          imageBase64: base64Image,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        const errorMsg = data.error || 'Gagal membaca struk'
-        throw new Error(errorMsg)
-      }
-
-      // Combine notes_summary, location, and payment_method into note
-      const noteParts = []
-
-      // Priority 1: Add notes_summary if exists (detail items from receipt)
-      if (data.data.notes_summary) {
-        noteParts.push(data.data.notes_summary)
-      }
-
-      // Priority 2: Add location if exists
-      if (data.data.location) {
-        noteParts.push(`📍 ${data.data.location}`)
-      }
-
-      // Priority 3: Add payment method if exists
-      if (data.data.payment_method) {
-        noteParts.push(`💳 ${data.data.payment_method}`)
-      }
-
-      const combinedNote = noteParts.length > 0 ? noteParts.join('\n') : null
-
-      // Set scanned data for review
-      setScannedData({
-        item: data.data.item || '',
-        amount: data.data.amount || 0,
-        category: data.data.category || 'Lainnya',
-        note: combinedNote,
-      })
-
-      // Open review dialog
-      setIsReviewScanOpen(true)
-      setStatus(IDLE_STATUS)
-    } catch (error) {
-      console.error('Error scanning receipt:', error)
-      let errorMessage =
-        'Gagal membaca struk. Coba foto lebih jelas atau gunakan Input Manual.'
-
-      if (error instanceof Error) {
-        errorMessage = error.message
-      }
-
-      toast.error(errorMessage)
-      setStatus('Gagal memproses')
-
-      setAiSentiment('error')
-      setTimeout(() => setAiSentiment(undefined), 3000)
-
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      setStatus(IDLE_STATUS)
-    } finally {
-      setIsScanning(false)
-      // Reset file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
-      }
     }
   }
 
@@ -884,120 +673,42 @@ export function DashboardClient({
 
   const bubbleLabel = getBubbleLabel()
 
-  // Content bubble: prioritaskan roast message jika ada, kalau tidak tampilkan status
-  const bubbleContent = roastMessage || status
-
-
-
   return (
     <div className="min-h-screen bg-background">
-      {/* Top Navigation - Desktop Only */}
-      <nav className="hidden md:block fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-1">
-              <Link href="/advisor">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9"
-                  title="AI Advisor"
-                >
-                  <Sparkles className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/history">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9"
-                  title="Riwayat"
-                >
-                  <History className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/reports">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9"
-                  title="Laporan"
-                >
-                  <BarChart3 className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/settings">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9"
-                  title="Pengaturan"
-                >
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </Link>
+      <main className="max-w-2xl mx-auto w-full px-4 pb-24 md:pb-8 pt-4 space-y-6">
+          {/* Header Section */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border border-primary/20">
+                {user?.user_metadata?.avatar_url ? (
+                  <img
+                    src={user.user_metadata.avatar_url}
+                    alt={user.user_metadata.full_name || 'User'}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-sm font-bold text-primary">
+                    {user?.email?.charAt(0).toUpperCase() || 'U'}
+                  </span>
+                )}
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Selamat Datang,</p>
+                <h1 className="text-base font-bold text-foreground leading-tight">
+                  {user?.user_metadata?.full_name ||
+                    user?.user_metadata?.name ||
+                    user?.email?.split('@')[0] ||
+                    'Teman Dompet'}
+                </h1>
+              </div>
             </div>
-
             <div className="flex items-center gap-1">
               <DarkModeToggle />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleLogout}
-                className="h-9 w-9"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Bottom Navigation - Mobile Only */}
-      <BottomNav onScanClick={handleScanClick} />
-
-      {/* Main Content */}
-      <main className="md:pt-16 pb-20 md:pb-0">
-        <div className="max-w-2xl mx-auto px-4 pb-6 space-y-6">
-          {/* Header Section */}
-          <div className="md:hidden bg-[#f5f5f5] dark:bg-muted/20 px-6 py-4 -mx-4">
-            <div className="flex justify-between items-center">
-              {/* Left: App Title & Greeting */}
-              <div className="flex items-center gap-3">
-                {/* Placeholder Logo */}
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
-                  <WalletIcon className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold tracking-tight text-foreground">
-                    HaloDompet
-                  </h1>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Hai,{' '}
-                    <span className="font-medium">
-                      {user?.user_metadata?.full_name?.split(' ')[0] ||
-                        user?.user_metadata?.name?.split(' ')[0] ||
-                        user?.email?.split('@')[0]}
-                    </span>{' '}
-                    👋
-                  </p>
-                </div>
-              </div>
-
-              {/* Right: Dark Mode Toggle & Settings */}
-              <div className="flex items-center gap-1">
-                <DarkModeToggle />
-                <Link href="/settings">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9"
-                    title="Pengaturan"
-                  >
-                    <Settings className="h-5 w-5" />
-                  </Button>
-                </Link>
-              </div>
+              <Link href="/settings">
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Settings className="h-5 w-5 text-muted-foreground" />
+                </Button>
+              </Link>
             </div>
           </div>
 
@@ -1036,7 +747,10 @@ export function DashboardClient({
               {/* Close Button - Only show for roast message */}
               {roastMessage && (
                 <button
-                  onClick={() => setRoastMessage(null)}
+                  onClick={() => {
+                    setRoastMessage(null)
+                    setStatus(IDLE_STATUS)
+                  }}
                   className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center text-xs font-bold hover:scale-110 hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all shadow-md"
                   aria-label="Tutup pesan"
                 >
@@ -1105,15 +819,6 @@ export function DashboardClient({
                 Input Manual
               </Button>
             </div>
-
-            {/* Hidden File Input for Scan Receipt */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
 
             {/* Status Card */}
             <div className="w-full max-w-md space-y-3">
@@ -1197,8 +902,9 @@ export function DashboardClient({
               </div>
             </div>
           )}
-        </div>
       </main>
+
+
 
       {/* Review Transcript Dialog */}
       <Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
@@ -1300,134 +1006,8 @@ export function DashboardClient({
         </DialogContent>
       </Dialog>
 
-      {/* Review Scan Dialog */}
-      <Dialog open={isReviewScanOpen} onOpenChange={setIsReviewScanOpen}>
-        <DialogContent className="w-[95%] sm:max-w-md overflow-x-hidden rounded-xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Review Hasil Scan</DialogTitle>
-            <DialogDescription>
-              Periksa dan edit hasil scan struk sebelum menyimpan transaksi.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3 py-4">
-            <div className="space-y-2">
-              <label
-                htmlFor="scan-item"
-                className="text-sm font-medium text-foreground"
-              >
-                Nama Merchant:
-              </label>
-              <Input
-                id="scan-item"
-                value={scannedData?.item || ''}
-                onChange={(e) =>
-                  setScannedData((prev) =>
-                    prev ? { ...prev, item: e.target.value } : null,
-                  )
-                }
-                placeholder="Contoh: Alfamart"
-                className="w-full"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label
-                htmlFor="scan-amount"
-                className="text-sm font-medium text-foreground"
-              >
-                Jumlah (Rp):
-              </label>
-              <Input
-                id="scan-amount"
-                type="number"
-                value={scannedData?.amount || 0}
-                onChange={(e) =>
-                  setScannedData((prev) =>
-                    prev ? { ...prev, amount: Number(e.target.value) } : null,
-                  )
-                }
-                placeholder="0"
-                className="w-full"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label
-                htmlFor="scan-category"
-                className="text-sm font-medium text-foreground"
-              >
-                Kategori:
-              </label>
-              <Input
-                id="scan-category"
-                value={scannedData?.category || ''}
-                onChange={(e) =>
-                  setScannedData((prev) =>
-                    prev ? { ...prev, category: e.target.value } : null,
-                  )
-                }
-                placeholder="Contoh: Makanan"
-                className="w-full"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label
-                htmlFor="scan-note"
-                className="text-sm font-medium text-foreground"
-              >
-                Catatan (Opsional):
-              </label>
-              <Textarea
-                id="scan-note"
-                value={scannedData?.note || ''}
-                onChange={(e) =>
-                  setScannedData((prev) =>
-                    prev ? { ...prev, note: e.target.value } : null,
-                  )
-                }
-                placeholder="Detail item, lokasi, metode pembayaran, dll..."
-                className="min-h-[100px] resize-none"
-              />
-              <p className="text-xs text-muted-foreground">
-                Info tambahan seperti detail belanja, lokasi toko, metode
-                pembayaran, dll.
-              </p>
-            </div>
-
-            {/* Wallet Selector */}
-            <WalletSelector
-              wallets={wallets}
-              selectedWalletId={selectedWalletId}
-              onSelectWallet={setSelectedWalletId}
-              isLoading={false}
-            />
-
-            <p className="text-xs text-muted-foreground bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-lg p-2">
-              💡 Hasil scan mungkin tidak 100% akurat. Silakan periksa dan edit
-              jika diperlukan.
-            </p>
-          </div>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              variant="outline"
-              onClick={handleCancelScan}
-              className="gap-2"
-            >
-              <XCircle className="h-4 w-4" />
-              Batal
-            </Button>
-            <Button
-              onClick={handleConfirmScan}
-              disabled={!scannedData?.item || !scannedData?.amount}
-              className="gap-2"
-            >
-              <CheckCircle2 className="h-4 w-4" />
-              Simpan
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Scan Dialog Hook */}
+      {ScanDialog()}
 
       {/* Transaction Receipt Dialog */}
       <TransactionReceipt
@@ -1438,6 +1018,8 @@ export function DashboardClient({
 
       {/* PWA Help Button - Mobile Only */}
       <PWAHelpButton />
+
+      <AppNavigation onScanClick={handleScanClick} />
     </div>
   )
 }

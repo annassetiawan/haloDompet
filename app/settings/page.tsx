@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { BottomNav } from '@/components/BottomNav'
+import { AppNavigation } from '@/components/AppNavigation'
 import { AddWalletDialog } from '@/components/AddWalletDialog'
 import { EditWalletDialog } from '@/components/EditWalletDialog'
 import { Button } from '@/components/ui/button'
@@ -349,7 +349,7 @@ export default function SettingsPage() {
   const totalBalance = wallets.reduce((sum, wallet) => sum + parseFloat(wallet.balance.toString()), 0)
 
   return (
-    <main className="relative min-h-screen flex flex-col p-4 md:p-8 pb-20 md:pb-8 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
+    <main className="relative min-h-screen flex flex-col p-4 md:p-8 pb-32 md:pb-40 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
       <div className="relative z-10 w-full max-w-2xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3 animate-slide-down">
@@ -376,24 +376,44 @@ export default function SettingsPage() {
           </div>
         ) : (
           <div className="space-y-6 animate-scale-in">
-            {/* Account Info */}
+            {/* Simplified Profile Card */}
             <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-6">
-              <h2 className="text-lg font-normal text-foreground mb-4">
-                Informasi Akun
-              </h2>
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm text-muted-foreground">Email</label>
-                  <p className="text-base font-normal text-foreground mt-1">
+              <div className="flex flex-col items-center text-center space-y-4">
+                {/* Avatar */}
+                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-4 border-background shadow-sm">
+                  {user?.user_metadata?.avatar_url ? (
+                    <img
+                      src={user.user_metadata.avatar_url}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-2xl font-semibold text-muted-foreground">
+                      {user?.user_metadata?.full_name?.charAt(0).toUpperCase() ||
+                       user?.user_metadata?.name?.charAt(0).toUpperCase() ||
+                       user?.email?.charAt(0).toUpperCase() ||
+                       'U'}
+                    </span>
+                  )}
+                </div>
+
+                {/* User Details */}
+                <div className="space-y-1">
+                  <h2 className="text-xl font-semibold text-foreground">
+                    {user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'User HaloDompet'}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
                     {user?.email}
                   </p>
+                  <div className="pt-1">
+                     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-muted text-[10px] font-mono text-muted-foreground">
+                      <Tag className="w-3 h-3" />
+                      ID: {user?.id?.slice(0, 8)}...
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <label className="text-sm text-muted-foreground">User ID</label>
-                  <p className="text-xs font-mono text-muted-foreground mt-1">
-                    {user?.id}
-                  </p>
-                </div>
+
+
               </div>
             </div>
 
@@ -762,7 +782,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Bottom Navigation - Mobile Only */}
-      <BottomNav />
+      <AppNavigation />
 
       {/* Add Wallet Dialog */}
       <AddWalletDialog

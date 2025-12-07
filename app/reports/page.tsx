@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { BottomNav } from '@/components/BottomNav'
+import { AppNavigation } from '@/components/AppNavigation'
 import {
   ArrowLeft,
   TrendingDown,
@@ -21,7 +21,8 @@ import {
   Wallet,
 } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
-import type { Transaction } from '@/types'
+import type { Transaction, Wallet as WalletType } from '@/types'
+import { useScanReceipt } from '@/hooks/useScanReceiptHook'
 import { format, startOfMonth, endOfMonth } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 import {
@@ -57,6 +58,7 @@ export default function ReportsPage() {
   const [previousMonthTransactions, setPreviousMonthTransactions] = useState<
     Transaction[]
   >([])
+  const [wallets, setWallets] = useState<WalletType[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedMonth, setSelectedMonth] = useState(new Date())
   const router = useRouter()
@@ -81,6 +83,20 @@ export default function ReportsPage() {
       router.push('/login')
     } else {
       setUser(user)
+      loadWallets()
+    }
+  }
+
+  const loadWallets = async () => {
+    try {
+      const response = await fetch('/api/wallet')
+      const data = await response.json()
+
+      if (response.ok && data.wallets) {
+        setWallets(data.wallets)
+      }
+    } catch (error) {
+      console.error('Error loading wallets:', error)
     }
   }
 
@@ -525,6 +541,14 @@ export default function ReportsPage() {
     link.click()
     document.body.removeChild(link)
   }
+
+  const { handleScanClick, ScanDialog } = useScanReceipt({
+    onSuccess: () => {
+      loadTransactions()
+      loadWallets()
+    },
+    wallets,
+  })
 
   return (
     <>
@@ -1357,7 +1381,12 @@ export default function ReportsPage() {
           )}
         </div>
       </main>
-      <BottomNav />
+
+      
+      {/* Scan Dialog Hook */}
+      {ScanDialog()}
+
+      <AppNavigation onScanClick={handleScanClick} />
     </>
   )
 }
