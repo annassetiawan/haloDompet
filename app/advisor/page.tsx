@@ -3,13 +3,15 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { BottomNav } from '@/components/BottomNav'
+import { AppNavigation } from '@/components/AppNavigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ArrowLeft, Send, Sparkles, Loader2, TrendingUp, PiggyBank, Target, Lightbulb, X } from 'lucide-react'
 import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
+import type { Wallet } from '@/types'
 import { useAIAdvisor } from '@/hooks/useAIAdvisor'
+import { useScanReceipt } from '@/hooks/useScanReceiptHook'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
@@ -40,6 +42,7 @@ export default function AdvisorPage() {
   const [user, setUser] = useState<User | null>(null)
   const [inputMessage, setInputMessage] = useState('')
   const [isLoadingUser, setIsLoadingUser] = useState(true)
+  const [wallets, setWallets] = useState<Wallet[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const supabase = createClient()
@@ -58,8 +61,18 @@ export default function AdvisorPage() {
     },
   })
 
+  // Hook for scan receipt
+  const { handleScanClick, ScanDialog } = useScanReceipt({
+    onSuccess: () => {
+      // Refresh wallets if needed
+      loadWallets()
+    },
+    wallets,
+  })
+
   useEffect(() => {
     checkUser()
+    loadWallets()
   }, [])
 
   useEffect(() => {
@@ -74,6 +87,19 @@ export default function AdvisorPage() {
       setUser(user)
     }
     setIsLoadingUser(false)
+  }
+
+  const loadWallets = async () => {
+    try {
+      const response = await fetch('/api/wallets')
+      const data = await response.json()
+
+      if (response.ok) {
+        setWallets(data.wallets || [])
+      }
+    } catch (error) {
+      console.error('Error loading wallets:', error)
+    }
   }
 
   const scrollToBottom = () => {
@@ -224,7 +250,7 @@ export default function AdvisorPage() {
         )}
 
         {/* Input Area */}
-        <div className="p-4 border-t border-border/50 bg-background/80 backdrop-blur-sm">
+        <div className="p-4 md:pb-32 border-t border-border/50 bg-background/80 backdrop-blur-sm">
           <div className="flex flex-col gap-2">
             <div className="flex gap-2">
               <Input
@@ -266,9 +292,12 @@ export default function AdvisorPage() {
           </div>
         </div>
       </div>
+      
+      {/* Scan Dialog Hook */}
+      {ScanDialog()}
 
       {/* Bottom Navigation - Mobile Only */}
-      <BottomNav />
+      <AppNavigation onScanClick={handleScanClick} />
     </main>
   )
 }
