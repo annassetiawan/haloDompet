@@ -88,7 +88,7 @@ const DockIcon = ({
 }: DockIconProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
-  const distanceCalc = useTransform(mouseX || new MotionValue(), (val: number) => {
+  const distanceCalc = useTransform(mouseX || new MotionValue(Infinity), (val: number) => {
     const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
     return val - bounds.x - bounds.width / 2;
   });
