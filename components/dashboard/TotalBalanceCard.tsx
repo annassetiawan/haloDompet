@@ -172,7 +172,7 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
                      >
                        <Hand className="w-3 h-3" />
                      </motion.div>
-                     <span className="text-[10px] font-semibold tracking-wide">Geser</span>
+                     <span className="text-[10px] font-semibold tracking-wide">Swipe</span>
                    </motion.div>
                  </div>
                )}
