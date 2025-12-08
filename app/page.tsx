@@ -8,27 +8,7 @@ import { LandingPage } from '@/components/landing/LandingPage'
 import type { User } from '@supabase/supabase-js'
 import type { User as UserProfile } from '@/types'
 
-// OPTIMIZED: Component to fetch ONLY critical data (wallets, balance) for LCP
-async function DashboardCriticalData({ user, userProfile }: { user: User; userProfile: UserProfile }) {
-  // Fetch ONLY critical data for LCP (wallets and balance - user sees these immediately)
-  const [wallets, totalBalance, growthPercentage, monthlyStats] = await Promise.all([
-    getWallets(user.id),
-    getTotalBalance(user.id),
-    getAssetGrowth(user.id),
-    getMonthlyStats(user.id),
-  ])
 
-  return (
-    <DashboardClient
-      initialUser={user}
-      initialUserProfile={userProfile}
-      initialWallets={wallets}
-      initialTotalBalance={totalBalance}
-      initialGrowthPercentage={growthPercentage}
-      initialMonthlyStats={monthlyStats}
-    />
-  )
-}
 
 export default async function DashboardPage() {
   // Create Supabase client
@@ -42,28 +22,38 @@ export default async function DashboardPage() {
     return <LandingPage />
   }
 
-  // Fetch only user profile first (fastest query)
-  const userProfile = await getUserProfile(user.id)
+  // OPTIMIZED: Fetch all critical data in parallel
+  // This reduces the waterfall effect between checking profile and fetching dashboard data
+  const [
+    userProfile,
+    wallets,
+    totalBalance,
+    growthPercentage,
+    monthlyStats
+  ] = await Promise.all([
+    getUserProfile(user.id),
+    getWallets(user.id),
+    getTotalBalance(user.id),
+    getAssetGrowth(user.id),
+    getMonthlyStats(user.id)
+  ])
 
   // Handle user profile checks
   if (!userProfile) {
     redirect('/login')
   }
 
-  // Onboarding is now auto-completed by trigger, skip this check
-  // if (!userProfile.is_onboarded) {
-  //   redirect('/onboarding')
-  // }
-
-  // Trial system disabled - all users have unlimited access
-  // if (isTrialExpired(userProfile)) {
-  //   redirect('/trial-expired')
-  // }
-
-  // Stream the rest of the data with Suspense
+  // Stream the data to the client component
   return (
     <Suspense fallback={<DashboardLoadingFallback />}>
-      <DashboardCriticalData user={user} userProfile={userProfile} />
+      <DashboardClient
+        initialUser={user}
+        initialUserProfile={userProfile}
+        initialWallets={wallets}
+        initialTotalBalance={totalBalance}
+        initialGrowthPercentage={growthPercentage}
+        initialMonthlyStats={monthlyStats}
+      />
     </Suspense>
   )
 }
