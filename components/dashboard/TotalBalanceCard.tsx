@@ -88,15 +88,12 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
 
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     removeHint();
-    const swipe = swipePower(info.offset.x, info.velocity.x);
+    const swipe = swipePower(info.offset.y, info.velocity.y);
 
     // Trigger if swipe power is high OR if dragged far enough (> 100px)
-    if (swipe < -swipeConfidenceThreshold || info.offset.x < -100) {
-      // Swipe Left -> Next Card
+    if (swipe < -swipeConfidenceThreshold || info.offset.y < -100) {
+      // Swipe Up -> Next Card
       rotateNext();
-    } else if (swipe > swipeConfidenceThreshold || info.offset.x > 100) {
-      // Swipe Right -> Previous Card
-      rotatePrev();
     }
   };
 
@@ -137,9 +134,9 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
             <motion.div 
               key={wallet.id}
               onClick={() => handleCardClick(index)}
-              drag="x"  // Always allow horizontal drag capability
+              drag="y"  // Allow vertical drag capability
               dragListener={isDraggable} // But only listen to events if it's the top card
-              dragConstraints={{ left: 0, right: 0 }}
+              dragConstraints={{ top: 0, bottom: 0 }}
               dragElastic={0.7} 
               onDragStart={removeHint}
               onDragEnd={isDraggable ? handleDragEnd : undefined}
@@ -147,7 +144,8 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
                 top: topOffset,
                 scale: scale,
                 zIndex: zIndex,
-                x: 0, // Reset x to 0 (center) relative to left-[20px]
+                y: 0, // Reset y to 0 (center)
+                x: 0,
                 opacity: 1
               }}
               initial={false}
@@ -167,12 +165,12 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
                      className="bg-black/60 text-white px-3 py-1.5 rounded-full flex items-center gap-2 backdrop-blur-md shadow-sm border border-white/10"
                    >
                      <motion.div
-                       animate={{ x: [-3, 3, -3] }}
+                       animate={{ y: [0, -6, 0] }}
                        transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
                      >
                        <Hand className="w-3 h-3" />
                      </motion.div>
-                     <span className="text-[10px] font-semibold tracking-wide">Swipe</span>
+                     <span className="text-[10px] font-semibold tracking-wide">Swipe Up</span>
                    </motion.div>
                  </div>
                )}
@@ -208,7 +206,7 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
               <div className="pt-5 px-6 pointer-events-none"> 
                 {/* Pointer events none on content to prevent interfering with drag? No, text selection maybe. */}
                 <p className={`text-[10px] ${labelColor} font-bold tracking-[0.15em] uppercase mb-1`}>
-                  {index === 0 ? 'Utama' : 'Tersimpan'}
+                  {wallet.is_default ? 'Default' : 'Tambahan'}
                 </p>
                 <h2 className={`text-xl font-extrabold ${textColor} tracking-wide truncate mb-1`}>
                   {wallet.name}
