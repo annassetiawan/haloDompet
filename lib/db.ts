@@ -694,3 +694,49 @@ export async function getAssetGrowth(userId: string): Promise<number> {
     return 0
   }
 }
+
+/**
+ * Get monthly income and expense stats for a user
+ * @param userId - The user ID
+ * @returns Object containing total income and expense for current month
+ */
+export async function getMonthlyStats(userId: string): Promise<{ income: number; expense: number }> {
+  const supabase = await createClient()
+  
+  const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
+
+  const { data: transactions, error } = await supabase
+    .from('transactions')
+    .select('type, amount, category')
+    .eq('user_id', userId)
+    .gte('date', startOfMonth)
+    .lte('date', endOfMonth)
+
+  if (error) {
+    console.error('Error fetching monthly stats:', error)
+    return { income: 0, expense: 0 }
+  }
+
+  let income = 0
+  let expense = 0
+
+  transactions?.forEach((t) => {
+    // Exclude 'Transfer Masuk' and 'Transfer Keluar' to avoid double counting if used for transfers
+    // Also internal transfers if specific types exist, but here we check category just in case
+    if (t.category === 'Transfer Masuk' || t.category === 'Transfer Keluar') return
+
+    // Safety check for amount
+    const rawAmount = t.amount
+    const amount = rawAmount ? parseFloat(rawAmount.toString()) : 0
+    
+    if (t.type === 'income') {
+      income += amount
+    } else if (t.type === 'expense') {
+      expense += amount
+    }
+  })
+
+  return { income, expense }
+}

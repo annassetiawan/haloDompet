@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase/client'
-import { WalletCarousel } from '@/components/WalletCarousel'
+import { TotalBalanceCard } from '@/components/dashboard/TotalBalanceCard'
 import { WalletSelector } from '@/components/WalletSelector'
 import { TransactionCard } from '@/components/TransactionCard'
 import { DarkModeToggle } from '@/components/DarkModeToggle'
@@ -111,7 +111,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
-import type { User as UserProfile, Transaction, Wallet } from '@/types'
+import type { User as UserProfile, Transaction, Wallet, MonthlyStats } from '@/types'
 import type { BudgetSummary } from '@/lib/budget'
 
 // Konstanta untuk status default agar konsisten
@@ -126,6 +126,7 @@ interface DashboardClientProps {
   // OPTIMIZED: Make transactions and budget optional for faster LCP
   initialTransactions?: Transaction[]
   initialBudgetSummary?: BudgetSummary[]
+  initialMonthlyStats?: MonthlyStats
 }
 
 export function DashboardClient({
@@ -136,6 +137,7 @@ export function DashboardClient({
   initialGrowthPercentage,
   initialTransactions = [],
   initialBudgetSummary = [],
+  initialMonthlyStats = { income: 0, expense: 0 },
 }: DashboardClientProps) {
   // State Management
   const [user] = useState<User>(initialUser)
@@ -712,17 +714,16 @@ export function DashboardClient({
             </div>
           </div>
 
-          {/* Wallet Carousel - Multi-Wallet Display */}
-          <WalletCarousel
-            wallets={wallets}
-            totalBalance={totalBalance}
-            growthPercentage={growthPercentage}
-            isLoading={false}
-            onAddWallet={handleAddWallet}
-            onEditWallet={handleEditWallet}
-            onTransfer={handleTransfer}
-            onBalanceUpdate={handleBalanceUpdate}
-          />
+          {/* Total Balance Card */}
+          <div className="flex justify-center">
+            <TotalBalanceCard
+              totalBalance={totalBalance}
+              monthlyStats={initialMonthlyStats}
+              wallets={wallets}
+              onTransfer={handleTransfer}
+              onAdjustBalance={handleEditWallet}
+            />
+          </div>
 
           {/* Area Chat Bubble Status */}
           <div className="relative w-full max-w-[400px] mx-auto mb-4 flex flex-col justify-end items-center transition-all duration-300">

@@ -108,3 +108,8 @@ export interface AIProcessResult {
     | 'motivated'
   message: string
 }
+
+export interface MonthlyStats {
+  income: number
+  expense: number
+}

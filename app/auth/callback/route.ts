@@ -37,6 +37,8 @@ export async function GET(request: Request) {
       console.log('✅ Redirecting to:', redirectUrl)
 
       return NextResponse.redirect(redirectUrl)
+    } else {
+      console.error('❌ Auth Error in Callback:', error)
     }
   }
 
@@ -44,5 +46,5 @@ export async function GET(request: Request) {
   const host = request.headers.get('host') || new URL(request.url).host
   const protocol = request.headers.get('x-forwarded-proto') ||
                   (host.includes('localhost') ? 'http' : 'https')
-  return NextResponse.redirect(`${protocol}://${host}/login?error=auth_failed`)
+  return NextResponse.redirect(`${protocol}://${host}/login?error=auth_failed&details=${encodeURIComponent('Check server logs')}`)
 }
