@@ -50,7 +50,7 @@ export function TransactionCard({ transaction, onClick, onDelete, onEdit, showDe
     <div className="relative group/card">
       <button
         onClick={onClick}
-        className={`w-full text-left p-4 rounded-xl bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all hover:shadow-md group ${showDelete || showEdit ? 'pr-20' : ''}`}
+        className={`w-full text-left p-4 rounded-xl bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all hover:shadow-md group`}
       >
         <div className="flex items-start justify-between gap-3">
           {/* Left side - Icon & Details */}

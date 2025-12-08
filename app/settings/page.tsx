@@ -33,9 +33,7 @@ export default function SettingsPage() {
   const [isLoadingCategories, setIsLoadingCategories] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
 
-  // Form state
-  const [mode, setMode] = useState<'simple' | 'webhook'>('simple')
-  const [webhookUrl, setWebhookUrl] = useState('')
+
 
   // Wallet management state
   const [isAddWalletOpen, setIsAddWalletOpen] = useState(false)
@@ -85,9 +83,9 @@ export default function SettingsPage() {
       const data = await response.json()
 
       if (response.ok && data.user) {
-        setUserProfile(data.user)
-        setMode(data.user.mode || 'simple')
-        setWebhookUrl(data.user.webhook_url || '')
+        if (data.user) {
+          setUserProfile(data.user)
+        }
       }
     } catch (error) {
       console.error('Error loading profile:', error)
@@ -128,41 +126,7 @@ export default function SettingsPage() {
     }
   }
 
-  const handleSave = async () => {
-    try {
-      setIsSaving(true)
 
-      const response = await fetch('/api/user', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          mode,
-          webhook_url: mode === 'webhook' ? webhookUrl : null,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to save settings')
-      }
-
-      // Update localStorage for backward compatibility
-      localStorage.setItem('halodompet_mode', mode)
-      if (mode === 'webhook' && webhookUrl) {
-        localStorage.setItem('halodompet_webhook_url', webhookUrl)
-      }
-
-      toast.success('Pengaturan berhasil disimpan!')
-    } catch (error) {
-      console.error('Error saving settings:', error)
-      toast.error('Gagal menyimpan pengaturan. Silakan coba lagi.')
-    } finally {
-      setIsSaving(false)
-    }
-  }
 
   const handleEditWallet = (wallet: WalletType) => {
     setSelectedWallet(wallet)
@@ -655,85 +619,7 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* Mode Settings */}
-            <div className="bg-card/50 dark:bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-6">
-              <h2 className="text-lg font-normal text-foreground mb-4">
-                Mode Penyimpanan
-              </h2>
-              <div className="space-y-3">
-                {/* Simple Mode */}
-                <Button
-                  type="button"
-                  variant={mode === 'simple' ? 'default' : 'outline'}
-                  onClick={() => setMode('simple')}
-                  className="w-full h-auto p-4 justify-start"
-                >
-                  <div className="flex items-start gap-3 text-left">
-                    <div className="text-2xl">📱</div>
-                    <div className="flex-1">
-                      <h3 className="font-medium text-base">Mode Sederhana</h3>
-                      <p className="text-xs opacity-80 mt-1 font-normal">
-                        Data tersimpan di database Supabase
-                      </p>
-                    </div>
-                  </div>
-                </Button>
 
-                {/* Webhook Mode */}
-                <Button
-                  type="button"
-                  variant={mode === 'webhook' ? 'default' : 'outline'}
-                  onClick={() => setMode('webhook')}
-                  className="w-full h-auto p-4 justify-start"
-                >
-                  <div className="flex items-start gap-3 text-left">
-                    <div className="text-2xl">🔗</div>
-                    <div className="flex-1">
-                      <h3 className="font-medium text-base">Mode Webhook</h3>
-                      <p className="text-xs opacity-80 mt-1 font-normal">
-                        Kirim data ke n8n atau layanan lainnya
-                      </p>
-                    </div>
-                  </div>
-                </Button>
-
-                {/* Webhook URL Input */}
-                {mode === 'webhook' && (
-                  <div className="pt-2">
-                    <label htmlFor="webhook-url" className="text-sm text-muted-foreground mb-2 block">
-                      URL Webhook
-                    </label>
-                    <Input
-                      id="webhook-url"
-                      type="url"
-                      placeholder="https://your-n8n-instance.com/webhook/..."
-                      value={webhookUrl}
-                      onChange={(e) => setWebhookUrl(e.target.value)}
-                      className="h-12"
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Save Button */}
-            <Button
-              onClick={handleSave}
-              disabled={isSaving || (mode === 'webhook' && !webhookUrl)}
-              className="w-full h-12 gap-2"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Menyimpan...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4" />
-                  Simpan Perubahan
-                </>
-              )}
-            </Button>
 
             {/* Danger Zone */}
             <div className="bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 rounded-xl p-5">
