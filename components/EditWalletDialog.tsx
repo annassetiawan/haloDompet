@@ -26,32 +26,10 @@ interface EditWalletDialogProps {
   onSuccess?: () => void
 }
 
-const walletIcons = [
-  { emoji: '💵', label: 'Cash' },
-  { emoji: '🏦', label: 'Bank' },
-  { emoji: '💳', label: 'Card' },
-  { emoji: '📱', label: 'E-Wallet' },
-  { emoji: '💰', label: 'Savings' },
-  { emoji: '🪙', label: 'Coins' },
-  { emoji: '💎', label: 'Investment' },
-  { emoji: '🎯', label: 'Goal' },
-]
 
-const walletColors = [
-  { value: '#10b981', secondary: '#059669', label: 'Emerald' },
-  { value: '#3b82f6', secondary: '#2563eb', label: 'Blue' },
-  { value: '#f59e0b', secondary: '#f97316', label: 'Orange' },
-  { value: '#ef4444', secondary: '#dc2626', label: 'Red' },
-  { value: '#8b5cf6', secondary: '#7c3aed', label: 'Purple' },
-  { value: '#ec4899', secondary: '#db2777', label: 'Pink' },
-  { value: '#06b6d4', secondary: '#0891b2', label: 'Cyan' },
-  { value: '#84cc16', secondary: '#65a30d', label: 'Lime' },
-]
 
 export function EditWalletDialog({ open, onOpenChange, wallet, onSuccess }: EditWalletDialogProps) {
   const [name, setName] = useState('')
-  const [selectedIcon, setSelectedIcon] = useState('💰')
-  const [selectedColor, setSelectedColor] = useState('#10b981')
   const [isLoading, setIsLoading] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -60,8 +38,6 @@ export function EditWalletDialog({ open, onOpenChange, wallet, onSuccess }: Edit
   useEffect(() => {
     if (wallet) {
       setName(wallet.name)
-      setSelectedIcon(wallet.icon || '💰')
-      setSelectedColor(wallet.color || '#10b981')
     }
   }, [wallet])
 
@@ -85,8 +61,8 @@ export function EditWalletDialog({ open, onOpenChange, wallet, onSuccess }: Edit
         },
         body: JSON.stringify({
           name: name.trim(),
-          icon: selectedIcon,
-          color: selectedColor,
+          icon: wallet.icon || '💰', // Maintain existing icon
+          color: '#000000', // Default Black
         }),
       })
 
@@ -224,57 +200,6 @@ export function EditWalletDialog({ open, onOpenChange, wallet, onSuccess }: Edit
                   <p className="text-xs text-muted-foreground mt-1">
                     Saldo diupdate otomatis saat transaksi
                   </p>
-                </div>
-              </div>
-
-              {/* Icon Selection */}
-              <div className="space-y-2">
-                <Label>Icon Dompet</Label>
-                <div className="grid grid-cols-4 gap-2">
-                  {walletIcons.map((icon) => (
-                    <button
-                      key={icon.emoji}
-                      type="button"
-                      onClick={() => setSelectedIcon(icon.emoji)}
-                      disabled={isLoading}
-                      className={`p-3 rounded-lg border-2 transition-all hover:scale-105 ${
-                        selectedIcon === icon.emoji
-                          ? 'border-primary bg-primary/10'
-                          : 'border-border bg-card hover:border-primary/50'
-                      }`}
-                      title={icon.label}
-                    >
-                      <span className="text-2xl">{icon.emoji}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Color Selection */}
-              <div className="space-y-2">
-                <Label>Warna Kartu</Label>
-                <div className="grid grid-cols-4 gap-2">
-                  {walletColors.map((color) => (
-                    <button
-                      key={color.value}
-                      type="button"
-                      onClick={() => setSelectedColor(color.value)}
-                      disabled={isLoading}
-                      className={`h-12 rounded-lg border-2 transition-all hover:scale-105 overflow-hidden ${
-                        selectedColor === color.value
-                          ? 'border-foreground ring-2 ring-offset-2 ring-foreground/50'
-                          : 'border-border'
-                      }`}
-                      title={color.label}
-                    >
-                      <div
-                        className="w-full h-full"
-                        style={{
-                          background: `linear-gradient(135deg, ${color.value} 0%, ${color.secondary} 100%)`
-                        }}
-                      />
-                    </button>
-                  ))}
                 </div>
               </div>
 

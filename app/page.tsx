@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { getWallets, getTotalBalance, getAssetGrowth, getTransactions, getUserProfile } from '@/lib/db'
+import { getWallets, getTotalBalance, getAssetGrowth, getTransactions, getUserProfile, getMonthlyStats } from '@/lib/db'
 import { getUserBudgetSummary } from '@/lib/budget'
 import { DashboardClient } from '@/components/DashboardClient'
 import { LandingPage } from '@/components/landing/LandingPage'
@@ -11,10 +11,11 @@ import type { User as UserProfile } from '@/types'
 // OPTIMIZED: Component to fetch ONLY critical data (wallets, balance) for LCP
 async function DashboardCriticalData({ user, userProfile }: { user: User; userProfile: UserProfile }) {
   // Fetch ONLY critical data for LCP (wallets and balance - user sees these immediately)
-  const [wallets, totalBalance, growthPercentage] = await Promise.all([
+  const [wallets, totalBalance, growthPercentage, monthlyStats] = await Promise.all([
     getWallets(user.id),
     getTotalBalance(user.id),
     getAssetGrowth(user.id),
+    getMonthlyStats(user.id),
   ])
 
   return (
@@ -24,6 +25,7 @@ async function DashboardCriticalData({ user, userProfile }: { user: User; userPr
       initialWallets={wallets}
       initialTotalBalance={totalBalance}
       initialGrowthPercentage={growthPercentage}
+      initialMonthlyStats={monthlyStats}
     />
   )
 }
