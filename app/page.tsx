@@ -109,17 +109,25 @@ function DashboardLoadingFallback() {
             </div>
           </div>
 
-          {/* Wallet Carousel Skeleton */}
-          <div className="space-y-3">
-            <div className="h-10 w-32 bg-muted rounded-xl animate-pulse" />
-            <div className="w-full overflow-x-auto pb-3 scrollbar-hide">
-              <div className="flex gap-4 px-1">
-                {[1, 2].map((i) => (
-                  <div
-                    key={i}
-                    className="w-80 flex-shrink-0 h-40 bg-muted rounded-3xl animate-pulse"
-                  />
-                ))}
+          {/* Wallet Stack Skeleton (Center Card) */}
+          <div className="flex justify-center py-2">
+            <div className="relative w-[340px] h-[290px]">
+              {/* Backing Layer */}
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[250px] bg-muted/50 rounded-[32px] animate-pulse" />
+              
+              {/* Card Placeholder */}
+              <div className="absolute top-[14px] left-[20px] w-[300px] h-[230px] bg-muted rounded-[24px] border border-white/10 shadow-sm animate-pulse">
+                {/* Content lines */}
+                <div className="pt-8 px-6 space-y-4">
+                  <div className="h-3 w-16 bg-black/10 dark:bg-white/10 rounded" />
+                  <div className="h-8 w-32 bg-black/10 dark:bg-white/10 rounded" />
+                  <div className="h-5 w-24 bg-black/10 dark:bg-white/10 rounded" />
+                </div>
+              </div>
+
+              {/* Pocket Shape Imitation (Bottom) */}
+              <div className="absolute bottom-0 w-full h-[220px] pointer-events-none overflow-hidden">
+                <div className="absolute top-[45px] left-0 w-full h-full bg-gradient-to-b from-transparent to-muted/20" />
               </div>
             </div>
           </div>
