@@ -679,7 +679,7 @@ export function DashboardClient({
     <div className="min-h-screen bg-background">
       <main className="max-w-2xl mx-auto w-full px-4 pb-24 md:pb-8 pt-4 space-y-6">
           {/* Header Section */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between bg-white/80 dark:bg-white/5 backdrop-blur-md border border-gray-200 dark:border-white/10 p-4 rounded-2xl shadow-sm transition-all duration-300">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border border-primary/20">
                 {user?.user_metadata?.avatar_url ? (
