@@ -48,6 +48,7 @@ import {
   Area,
   AreaChart,
   Label,
+  LabelList,
   ResponsiveContainer,
 } from 'recharts'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -857,7 +858,7 @@ export default function ReportsPage() {
                   </div>
 
                   {/* Content - Chart */}
-                  <div className="py-4 md:py-6 w-full">
+                  <div className="py-4 px-4 md:py-6 md:px-6 w-full">
                     <div className="w-full h-[350px]">
                       <ChartContainer
                         config={monthlyComparisonConfig}
@@ -956,7 +957,7 @@ export default function ReportsPage() {
                   </div>
 
                   {/* Content - Chart */}
-                  <div className="py-4 md:py-6 w-full">
+                  <div className="py-4 px-4 md:py-6 md:px-6 w-full">
                     {barChartData.length === 0 ? (
                       <div className="w-full h-[350px] flex flex-col items-center justify-center text-center p-4">
                         <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
@@ -998,9 +999,11 @@ export default function ReportsPage() {
                                 }
                               />
                               <YAxis
-                                type="category"
                                 dataKey="category"
-                                width={100}
+                                type="category"
+                                tickLine={false}
+                                axisLine={false}
+                                width={60}
                                 className="text-xs"
                                 tick={{ fill: 'hsl(var(--muted-foreground))' }}
                               />
@@ -1019,7 +1022,7 @@ export default function ReportsPage() {
                                   />
                                 }
                               />
-                              <Bar dataKey="amount" radius={[0, 8, 8, 0]}>
+                              <Bar dataKey="amount" radius={[0, 4, 4, 0]} barSize={32} fillOpacity={1}>
                                 {barChartData.map((entry, index) => (
                                   <Cell key={`cell-${index}`} fill={entry.fill} />
                                 ))}
@@ -1058,7 +1061,7 @@ export default function ReportsPage() {
                   </div>
 
                   {/* Content - Chart */}
-                  <div className="py-4 md:py-6 w-full">
+                  <div className="py-4 px-4 md:py-6 md:px-6 w-full">
                     {pieChartData.length === 0 ? (
                       <div className="w-full h-[350px] flex flex-col items-center justify-center text-center p-4">
                         <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
@@ -1203,7 +1206,7 @@ export default function ReportsPage() {
                   </div>
 
                   {/* Content - Chart */}
-                  <div className="py-4 md:py-6 w-full">
+                  <div className="py-4 px-4 md:py-6 md:px-6 w-full">
                     {lineChartData.length === 0 ? (
                       <div className="w-full h-[350px] flex flex-col items-center justify-center text-center p-4">
                         <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
@@ -1262,6 +1265,8 @@ export default function ReportsPage() {
                               <YAxis
                                 width={45}
                                 className="text-xs"
+                                axisLine={false}
+                                tickLine={false}
                                 tick={{ fill: 'hsl(var(--muted-foreground))' }}
                                 tickFormatter={(value) =>
                                   new Intl.NumberFormat('id-ID', {
