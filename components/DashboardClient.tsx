@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { TotalBalanceCard } from '@/components/dashboard/TotalBalanceCard'
 import { WalletSelector } from '@/components/WalletSelector'
@@ -683,10 +684,13 @@ export function DashboardClient({
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border border-primary/20">
                 {user?.user_metadata?.avatar_url ? (
-                  <img
+                  <Image
                     src={user.user_metadata.avatar_url}
                     alt={user.user_metadata.full_name || 'User'}
+                    width={40}
+                    height={40}
                     className="w-full h-full object-cover"
+                    priority // Critical for LCP as it's above the fold
                   />
                 ) : (
                   <span className="text-sm font-bold text-primary">
