@@ -46,8 +46,8 @@ export function PWAHelpButton() {
               <DialogTitle className="text-xl">Tentang HaloDompet</DialogTitle>
               <div className="space-y-3 text-left text-sm leading-relaxed text-muted-foreground">
                 <p>
-                  <strong className="text-foreground">HaloDompet adalah Progressive Web App (PWA)</strong> -
-                  aplikasi web modern yang bisa diinstall ke home screen perangkat Anda.
+                  <strong className="text-foreground">HaloDompet mengadopsi teknologi Progressive Web App (PWA)</strong> -
+                  untuk memberikan pengalaman pengguna yang cepat dan responsif. Aplikasi ini dapat diinstal langsung ke perangkat Anda layaknya aplikasi native
                 </p>
 
                 <div>

@@ -19,6 +19,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { ArrowLeft, Search, Filter, Mic } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Transaction, Wallet } from '@/types'
@@ -33,6 +40,8 @@ export default function HistoryPage() {
   const [isLoadingWallets, setIsLoadingWallets] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('')
+  const [startDate, setStartDate] = useState<string>('')
+  const [endDate, setEndDate] = useState<string>('')
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null)
   const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -152,7 +161,13 @@ export default function HistoryPage() {
     const matchesCategory = selectedCategory === '' ||
       transaction.category === selectedCategory
 
-    return matchesSearch && matchesCategory
+    const transactionDate = new Date(transaction.date)
+    transactionDate.setHours(0, 0, 0, 0)
+
+    const matchesStartDate = startDate === '' || transactionDate >= new Date(startDate)
+    const matchesEndDate = endDate === '' || transactionDate <= new Date(endDate)
+
+    return matchesSearch && matchesCategory && matchesStartDate && matchesEndDate
   })
 
   // Group transactions
@@ -174,11 +189,70 @@ export default function HistoryPage() {
     <main className="relative min-h-screen flex flex-col p-4 md:p-8 pb-20 md:pb-8 bg-gradient-to-br from-background via-background to-muted/20 dark:to-muted/10">
       <div className="relative z-10 w-full max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between animate-slide-down">
-          {/* ... existing header code ... */}
+        <div className="flex items-center gap-3 animate-slide-down">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => router.push('/')}
+            className="rounded-full hover:bg-background/80"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-xl font-semibold bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-transparent">
+            Riwayat Transaksi
+          </h1>
         </div>
 
-        {/* ... existing Search & Filter code ... */}
+        {/* Search & Filter */}
+        <div className="flex flex-col gap-3 animate-slide-down" style={{ animationDelay: '0.1s' }}>
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Cari transaksi..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 bg-card/50 backdrop-blur-sm border-border/50 focus:bg-background transition-all"
+            />
+          </div>
+          
+          <div className="flex flex-col md:flex-row gap-3">
+            <div className="flex-1 grid grid-cols-2 gap-2">
+               <Input 
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="bg-card/50 backdrop-blur-sm border-border/50 focus:bg-background transition-all"
+               />
+               <Input 
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="bg-card/50 backdrop-blur-sm border-border/50 focus:bg-background transition-all"
+               />
+            </div>
+            <div className="w-full md:w-[200px]">
+              <Select
+                value={selectedCategory === "" ? "ALL" : selectedCategory}
+                onValueChange={(value) => setSelectedCategory(value === "ALL" ? "" : value)}
+              >
+                <SelectTrigger className="bg-card/50 backdrop-blur-sm border-border/50 focus:bg-background transition-all">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Filter className="h-4 w-4" />
+                    <SelectValue placeholder="Kategori" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Semua Kategori</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
 
         {/* ... existing Transaction List code ... */}
         <div className="space-y-6 animate-scale-in">
