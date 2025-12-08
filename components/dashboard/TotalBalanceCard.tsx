@@ -147,32 +147,32 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
                 top: topOffset,
                 scale: scale,
                 zIndex: zIndex,
-                x: "-50%", // Always center horizontally in layout
+                x: 0, // Reset x to 0 (center) relative to left-[20px]
                 opacity: 1
               }}
               initial={false}
               transition={{ type: "spring", stiffness: 260, damping: 20 }}
-              className={`absolute left-1/2 w-[300px] h-[230px] rounded-[24px] shadow-[0_-4px_16px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.5)] border border-gray-200 dark:border-white/5 cursor-pointer
+              className={`absolute left-[20px] w-[300px] h-[230px] rounded-[24px] shadow-[0_-4px_16px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.5)] border border-gray-200 dark:border-white/5 cursor-pointer
                 ${bgColor}
                 ${index !== 0 ? 'hover:-translate-y-2' : ''}
               `}
             >
               {/* Swipe Hint Overlay (On top card only, if multiple wallets exist) */}
               {index === 0 && showSwipeHint && wallets.length > 1 && (
-                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[60]">
+                 <div className="absolute top-16 right-4 flex items-center justify-end pointer-events-none z-[60]">
                    <motion.div
-                     initial={{ opacity: 0 }}
-                     animate={{ opacity: 1 }}
+                     initial={{ opacity: 0, scale: 0.9 }}
+                     animate={{ opacity: 1, scale: 1 }}
                      exit={{ opacity: 0 }}
-                     className="bg-black/50 text-white px-4 py-2 rounded-full flex items-center gap-2 backdrop-blur-sm shadow-lg"
+                     className="bg-black/60 text-white px-3 py-1.5 rounded-full flex items-center gap-2 backdrop-blur-md shadow-sm border border-white/10"
                    >
                      <motion.div
-                       animate={{ x: [-10, 10, -10] }}
+                       animate={{ x: [-3, 3, -3] }}
                        transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
                      >
-                       <Hand className="w-5 h-5" />
+                       <Hand className="w-3 h-3" />
                      </motion.div>
-                     <span className="text-xs font-medium">Geser</span>
+                     <span className="text-[10px] font-semibold tracking-wide">Geser</span>
                    </motion.div>
                  </div>
                )}
