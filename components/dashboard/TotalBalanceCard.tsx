@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Eye, EyeOff, ArrowDown, ArrowUp, MoreHorizontal, Edit2, ArrowRightLeft, Hand } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { MonthlyStats, Wallet } from '@/types';
-import { motion, PanInfo, useAnimation } from 'framer-motion';
+import { motion, PanInfo, useAnimation, useDragControls, DragControls } from 'framer-motion';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +21,158 @@ export interface TotalBalanceCardProps {
   onAdjustBalance?: (wallet: Wallet) => void;
 }
 
+// Sub-component for individual wallet cards
+interface WalletCardProps {
+  wallet: Wallet;
+  index: number;
+  totalWallets: number;
+  showBalance: boolean;
+  showSwipeHint: boolean;
+  removeHint: () => void;
+  rotateNext: () => void;
+  handleCardClick: (index: number) => void;
+  onRegisterControls: (controls: DragControls) => void;
+  onTransfer?: (wallet: Wallet) => void;
+  onAdjustBalance?: (wallet: Wallet) => void;
+}
+
+const WalletCard: React.FC<WalletCardProps> = ({
+  wallet,
+  index,
+  totalWallets,
+  showBalance,
+  showSwipeHint,
+  removeHint,
+  rotateNext,
+  handleCardClick,
+  onRegisterControls,
+  onTransfer,
+  onAdjustBalance
+}) => {
+  const controls = useDragControls();
+  const isDraggable = index === 0;
+
+  // Register controls if this is the top card
+  useEffect(() => {
+    if (isDraggable) {
+      onRegisterControls(controls);
+    }
+  }, [isDraggable, controls, onRegisterControls]);
+
+  const topOffset = 14 - (index * 8);
+  const scale = 1 - (index * 0.05);
+  const zIndex = 30 - (index * 10);
+
+  const bgColor = index === 0
+    ? 'bg-white dark:bg-[#1a1a1a]'
+    : 'bg-gray-100 dark:bg-[#222]';
+
+  const textColor = 'text-gray-900 dark:text-white';
+  const labelColor = 'text-gray-400 dark:text-gray-500';
+
+  // Calculate swipe power to determine intent
+  const swipeConfidenceThreshold = 3000;
+  const swipePower = (offset: number, velocity: number) => {
+    return Math.abs(offset) * velocity;
+  };
+
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    removeHint();
+    const swipe = swipePower(info.offset.y, info.velocity.y);
+
+    if (swipe < -swipeConfidenceThreshold || info.offset.y < -100) {
+      rotateNext();
+    }
+  };
+
+  return (
+    <motion.div
+      onClick={() => handleCardClick(index)}
+      drag="y"
+      dragListener={isDraggable}
+      dragControls={controls}
+      dragConstraints={{ top: 0, bottom: 0 }}
+      dragElastic={{ top: 0.7, bottom: 0 }}
+      onDragStart={removeHint}
+      onDragEnd={isDraggable ? handleDragEnd : undefined}
+      animate={{
+        top: topOffset,
+        scale: scale,
+        zIndex: zIndex,
+        y: 0,
+        x: 0,
+        opacity: 1
+      }}
+      initial={false}
+      transition={{ type: "spring", stiffness: 260, damping: 20 }}
+      className={`absolute left-[20px] w-[300px] h-[230px] rounded-[24px] shadow-[0_-4px_16px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.5)] border border-gray-200 dark:border-white/5 cursor-pointer
+        ${bgColor}
+        ${index !== 0 ? 'hover:-translate-y-2' : ''}
+      `}
+    >
+      {/* Swipe Hint Overlay */}
+      {index === 0 && showSwipeHint && totalWallets > 1 && (
+        <div className="absolute top-16 right-4 flex items-center justify-end pointer-events-none z-[60]">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            className="bg-black/60 text-white px-3 py-1.5 rounded-full flex items-center gap-2 backdrop-blur-md shadow-sm border border-white/10"
+          >
+            <motion.div
+              animate={{ y: [0, -6, 0] }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+            >
+              <Hand className="w-3 h-3" />
+            </motion.div>
+            <span className="text-[10px] font-semibold tracking-wide">Swipe Up</span>
+          </motion.div>
+        </div>
+      )}
+
+      {/* More Actions Button */}
+      {index === 0 && (
+        <div
+          className="absolute top-4 right-4 z-50 rounded-full bg-white/20 dark:bg-black/20 backdrop-blur-sm"
+          onPointerDown={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white rounded-full">
+                <MoreHorizontal className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 z-[60]">
+              <DropdownMenuItem className="cursor-pointer" onClick={() => onAdjustBalance?.(wallet)}>
+                <Edit2 className="mr-2 h-4 w-4" />
+                <span>Sesuaikan Saldo</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => onTransfer?.(wallet)}>
+                <ArrowRightLeft className="mr-2 h-4 w-4" />
+                <span>Transfer</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+
+      <div className="pt-5 px-6 pointer-events-none">
+        <p className={`text-[10px] ${labelColor} font-bold tracking-[0.15em] uppercase mb-1`}>
+          {wallet.is_default ? 'Default' : 'Tambahan'}
+        </p>
+        <h2 className={`text-xl font-extrabold ${textColor} tracking-wide truncate mb-1`}>
+          {wallet.name}
+        </h2>
+        <p className={`text-sm ${labelColor} font-medium tracking-wide`}>
+          {showBalance ? formatCurrency(wallet.balance) : '•••••••••••'}
+        </p>
+      </div>
+    </motion.div>
+  );
+};
+
 export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
   totalBalance,
   monthlyStats,
@@ -31,6 +183,9 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
   const [showBalance, setShowBalance] = useState(true);
   const [orderedWallets, setOrderedWallets] = useState<Wallet[]>([]);
   const [showSwipeHint, setShowSwipeHint] = useState(false);
+  
+  // Ref to hold the drag controls of the current top card
+  const activeDragControlsRef = useRef<DragControls | null>(null);
 
   // Initialize with props
   useEffect(() => {
@@ -60,16 +215,6 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
     });
   };
 
-  const rotatePrev = () => {
-    removeHint();
-    setOrderedWallets(prev => {
-      const newOrder = [...prev];
-      const last = newOrder.pop();
-      if (last) newOrder.unshift(last);
-      return newOrder;
-    });
-  };
-
   const handleCardClick = (index: number) => {
     removeHint();
     if (index === 0) return; 
@@ -78,23 +223,6 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
     const [selected] = newOrder.splice(index, 1);
     newOrder.unshift(selected);
     setOrderedWallets(newOrder);
-  };
-
-  // Calculate swipe power to determine intent (combines distance and velocity)
-  const swipeConfidenceThreshold = 3000;
-  const swipePower = (offset: number, velocity: number) => {
-    return Math.abs(offset) * velocity;
-  };
-
-  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    removeHint();
-    const swipe = swipePower(info.offset.y, info.velocity.y);
-
-    // Trigger if swipe power is high OR if dragged far enough (> 100px)
-    if (swipe < -swipeConfidenceThreshold || info.offset.y < -100) {
-      // Swipe Up -> Next Card
-      rotateNext();
-    }
   };
 
   return (
@@ -114,118 +242,47 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
         -------------------------------------------
       */}
       <div className="absolute inset-x-0 top-0 h-full z-10">
-        {orderedWallets.slice(0, 3).map((wallet, index) => {
-           const topOffset = 14 - (index * 8); 
-           const scale = 1 - (index * 0.05);
-           const zIndex = 30 - (index * 10);
-           
-           const bgColor = index === 0 
-             ? 'bg-white dark:bg-[#1a1a1a]' 
-             : 'bg-gray-100 dark:bg-[#222]';
-             
-           const textColor = 'text-gray-900 dark:text-white';
-           const labelColor = 'text-gray-400 dark:text-gray-500';
-
-           // FIX: Always enable drag="x" but control dragListener based on index.
-           // This prevents Framer Motion from getting stuck when props change.
-           const isDraggable = index === 0;
-
-           return (
-            <motion.div 
-              key={wallet.id}
-              onClick={() => handleCardClick(index)}
-              drag="y"  // Allow vertical drag capability
-              dragListener={isDraggable} // But only listen to events if it's the top card
-              dragConstraints={{ top: 0, bottom: 0 }}
-              dragElastic={0.7} 
-              onDragStart={removeHint}
-              onDragEnd={isDraggable ? handleDragEnd : undefined}
-              animate={{
-                top: topOffset,
-                scale: scale,
-                zIndex: zIndex,
-                y: 0, // Reset y to 0 (center)
-                x: 0,
-                opacity: 1
-              }}
-              initial={false}
-              transition={{ type: "spring", stiffness: 260, damping: 20 }}
-              className={`absolute left-[20px] w-[300px] h-[230px] rounded-[24px] shadow-[0_-4px_16px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.5)] border border-gray-200 dark:border-white/5 cursor-pointer
-                ${bgColor}
-                ${index !== 0 ? 'hover:-translate-y-2' : ''}
-              `}
-            >
-              {/* Swipe Hint Overlay (On top card only, if multiple wallets exist) */}
-              {index === 0 && showSwipeHint && wallets.length > 1 && (
-                 <div className="absolute top-16 right-4 flex items-center justify-end pointer-events-none z-[60]">
-                   <motion.div
-                     initial={{ opacity: 0, scale: 0.9 }}
-                     animate={{ opacity: 1, scale: 1 }}
-                     exit={{ opacity: 0 }}
-                     className="bg-black/60 text-white px-3 py-1.5 rounded-full flex items-center gap-2 backdrop-blur-md shadow-sm border border-white/10"
-                   >
-                     <motion.div
-                       animate={{ y: [0, -6, 0] }}
-                       transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-                     >
-                       <Hand className="w-3 h-3" />
-                     </motion.div>
-                     <span className="text-[10px] font-semibold tracking-wide">Swipe Up</span>
-                   </motion.div>
-                 </div>
-               )}
-
-              {/* More Actions Button (Only Front Card) */}
-              {index === 0 && (
-                <div 
-                  className="absolute top-4 right-4 z-50 rounded-full bg-white/20 dark:bg-black/20 backdrop-blur-sm"
-                  onPointerDown={(e) => e.stopPropagation()}
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                    <DropdownMenu>
-                       <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white rounded-full">
-                            <MoreHorizontal className="h-5 w-5" />
-                          </Button>
-                       </DropdownMenuTrigger>
-                       <DropdownMenuContent align="end" className="w-48 z-[60]">
-                          <DropdownMenuItem className="cursor-pointer" onClick={() => onAdjustBalance?.(wallet)}>
-                            <Edit2 className="mr-2 h-4 w-4" />
-                            <span>Sesuaikan Saldo</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer" onClick={() => onTransfer?.(wallet)}>
-                            <ArrowRightLeft className="mr-2 h-4 w-4" />
-                            <span>Transfer</span>
-                          </DropdownMenuItem>
-                       </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-              )}
-
-              <div className="pt-5 px-6 pointer-events-none"> 
-                {/* Pointer events none on content to prevent interfering with drag? No, text selection maybe. */}
-                <p className={`text-[10px] ${labelColor} font-bold tracking-[0.15em] uppercase mb-1`}>
-                  {wallet.is_default ? 'Default' : 'Tambahan'}
-                </p>
-                <h2 className={`text-xl font-extrabold ${textColor} tracking-wide truncate mb-1`}>
-                  {wallet.name}
-                </h2>
-                <p className={`text-sm ${labelColor} font-medium tracking-wide`}>
-                  {showBalance ? formatCurrency(wallet.balance) : '•••••••••••'}
-                </p>
-              </div>
-            </motion.div>
-           );
-        })}
+        {orderedWallets.slice(0, 3).map((wallet, index) => (
+          <WalletCard
+            key={wallet.id}
+            wallet={wallet}
+            index={index}
+            totalWallets={wallets.length}
+            showBalance={showBalance}
+            showSwipeHint={showSwipeHint}
+            removeHint={removeHint}
+            rotateNext={rotateNext}
+            handleCardClick={handleCardClick}
+            onRegisterControls={(controls) => {
+              activeDragControlsRef.current = controls;
+            }}
+            onTransfer={onTransfer}
+            onAdjustBalance={onAdjustBalance}
+          />
+        ))}
       </div>
+
+      {/* 
+        -------------------------------------------
+        EXPANDED HIT LAYER (Top ~140px)
+        -------------------------------------------
+        Covers the card area + top of pocket (curve), leaving bottom for buttons.
+        This expands the swipe area without covering the inputs below.
+      */}
+      <div 
+        className="absolute top-0 w-full h-[140px] z-[45] touch-none"
+        onPointerDown={(e) => {
+          activeDragControlsRef.current?.start(e);
+        }}
+        style={{ touchAction: 'none' }}
+      />
 
       {/* 
         -------------------------------------------
         Front Pocket Layer (Total Keuangan)
         -------------------------------------------
       */}
-      <div className="absolute bottom-0 w-full h-[220px] z-40 filter drop-shadow-[0_-8px_24px_rgba(0,0,0,0.15)] dark:drop-shadow-[0_-8px_24px_rgba(0,0,0,0.9)] transition-all duration-300 pointer-events-none">
+      <div className="absolute bottom-0 w-full h-[220px] z-40 filter drop-shadow-[0_-8px_24px_rgba(0,0,0,0.15)] dark:drop-shadow-[0_-8px_24px_rgba(0,0,0,0.9)] transition-all duration-300 pointer-events-auto">
         <div className="relative w-full h-full">
             <svg 
               className="absolute top-0 left-0 w-full h-full overflow-visible"
@@ -249,12 +306,13 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
                 />
             </svg>
 
-            {/* Content Container */}
-            <div className="absolute inset-0 pt-[96px] px-8 flex flex-col justify-start pointer-events-auto">
+            {/* Content Container - Set pointer-events-none so swipes hit the layer below */}
+            <div className="absolute inset-0 pt-[96px] px-8 flex flex-col justify-start pointer-events-none">
                 
                 {/* Balance Section */}
                 <div className="flex flex-col mb-5">
-                    <div className="flex items-center gap-2 group/text cursor-pointer w-fit mb-2" onClick={() => setShowBalance(!showBalance)}>
+                    {/* Enable pointer events specifically for the Eye button */}
+                    <div className="flex items-center gap-2 group/text cursor-pointer w-fit mb-2 pointer-events-auto" onClick={() => setShowBalance(!showBalance)}>
                         <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 tracking-wider group-hover/text:text-gray-600 dark:group-hover/text:text-gray-400 transition-colors uppercase">Total Keuangan</span>
                         <div className="text-gray-400 dark:text-gray-500 group-hover/text:text-gray-900 dark:group-hover/text:text-white transition-colors">
                             {showBalance ? <EyeOff size={12} /> : <Eye size={12} />}
