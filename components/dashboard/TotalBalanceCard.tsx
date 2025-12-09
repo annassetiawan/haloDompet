@@ -105,7 +105,7 @@ const WalletCard: React.FC<WalletCardProps> = ({
       }}
       initial={false}
       transition={{ type: "spring", stiffness: 260, damping: 20 }}
-      className={`absolute left-[20px] w-[300px] h-[230px] rounded-[24px] shadow-[0_-4px_16px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.5)] border border-gray-200 dark:border-white/5 cursor-pointer
+      className={`absolute left-[20px] w-[300px] h-[180px] rounded-[24px] shadow-[0_-4px_16px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.5)] border border-gray-200 dark:border-white/5 cursor-pointer
         ${bgColor}
         ${index !== 0 ? 'hover:-translate-y-2' : ''}
       `}
