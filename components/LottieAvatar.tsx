@@ -11,6 +11,8 @@ let avatarProcessingAnimation: any
 let avatarSuccessAnimation: any
 let avatarErrorAnimation: any
 let avatarShockedAnimation: any
+let avatarScanningAnimation: any
+let avatarConcernedAnimation: any
 
 // Dynamic import saat runtime
 if (typeof window !== 'undefined') {
@@ -28,6 +30,12 @@ if (typeof window !== 'undefined') {
     .catch(() => {})
   import('@/public/animations/avatar-shocked.json')
     .then((m) => (avatarShockedAnimation = m.default))
+    .catch(() => {})
+    import('@/public/animations/avatar-scanning.json')
+    .then((m) => (avatarScanningAnimation = m.default))
+    .catch(() => {})
+    import('@/public/animations/avatar-concerned.json')
+    .then((m) => (avatarConcernedAnimation = m.default))
     .catch(() => {})
 }
 
@@ -101,8 +109,23 @@ export function LottieAvatar({
             setAnimationData(scanning.default)
             break
           case 'proud':
+            const proud = await import(
+              '@/public/animations/avatar-success.json'
+            )
+            setAnimationData(proud.default)
+            break
           case 'excited':
+            const excited = await import(
+              '@/public/animations/avatar-success.json'
+            )
+            setAnimationData(excited.default)
+            break
           case 'celebrating':
+            const celebrating = await import(
+              '@/public/animations/avatar-success.json'
+            )
+            setAnimationData(celebrating.default)
+            break
           case 'motivated':
             const motivated = await import(
               '@/public/animations/avatar-success.json'
@@ -121,13 +144,13 @@ export function LottieAvatar({
             break
           case 'disappointed':
             const disappointed = await import(
-              '@/public/animations/avatar-error.json'
+              '@/public/animations/avatar-concerned.json'
             )
             setAnimationData(disappointed.default)
             break
           case 'concerned':
             const concerned = await import(
-              '@/public/animations/avatar-processing.json'
+              '@/public/animations/avatar-concerned.json'
             )
             setAnimationData(concerned.default)
             break
