@@ -107,7 +107,7 @@ const WalletCard: React.FC<WalletCardProps> = ({
       transition={{ type: "spring", stiffness: 260, damping: 20 }}
       className={`absolute left-[20px] w-[300px] h-[180px] rounded-[24px] shadow-[0_-4px_16px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.5)] border border-gray-200 dark:border-white/5 cursor-pointer
         ${bgColor}
-        ${index !== 0 ? 'hover:-translate-y-2' : ''}
+        ${index !== 0 ? 'hover:-translate-y-2' : ''} pointer-events-auto
       `}
     >
       {/* Swipe Hint Overlay */}
@@ -241,7 +241,7 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
         Interactive Card Stack
         -------------------------------------------
       */}
-      <div className="absolute inset-x-0 top-0 h-full z-10">
+      <div className="absolute inset-x-0 top-0 h-full z-[35] pointer-events-none">
         {orderedWallets.slice(0, 3).map((wallet, index) => (
           <WalletCard
             key={wallet.id}
@@ -270,7 +270,7 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
         This expands the swipe area without covering the inputs below.
       */}
       <div 
-        className="absolute top-0 w-full h-[140px] z-[45] touch-none"
+        className="absolute top-0 w-full h-[140px] z-[25] touch-none"
         onPointerDown={(e) => {
           activeDragControlsRef.current?.start(e);
         }}
@@ -282,7 +282,7 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
         Front Pocket Layer (Total Keuangan)
         -------------------------------------------
       */}
-      <div className="absolute bottom-0 w-full h-[220px] z-40 filter drop-shadow-[0_-8px_24px_rgba(0,0,0,0.15)] dark:drop-shadow-[0_-8px_24px_rgba(0,0,0,0.9)] transition-all duration-300 pointer-events-auto">
+      <div className="absolute bottom-0 w-full h-[220px] z-40 filter drop-shadow-[0_-8px_24px_rgba(0,0,0,0.15)] dark:drop-shadow-[0_-8px_24px_rgba(0,0,0,0.9)] transition-all duration-300 pointer-events-none">
         <div className="relative w-full h-full">
             <svg 
               className="absolute top-0 left-0 w-full h-full overflow-visible"

@@ -13,6 +13,7 @@ let avatarErrorAnimation: any
 let avatarShockedAnimation: any
 let avatarScanningAnimation: any
 let avatarConcernedAnimation: any
+let avatarAnalyzingAnimation: any // New analyzing state
 
 // Dynamic import saat runtime
 if (typeof window !== 'undefined') {
@@ -31,11 +32,15 @@ if (typeof window !== 'undefined') {
   import('@/public/animations/avatar-shocked.json')
     .then((m) => (avatarShockedAnimation = m.default))
     .catch(() => {})
-    import('@/public/animations/avatar-scanning.json')
+  import('@/public/animations/avatar-scanning.json')
     .then((m) => (avatarScanningAnimation = m.default))
     .catch(() => {})
-    import('@/public/animations/avatar-concerned.json')
+  import('@/public/animations/avatar-concerned.json')
     .then((m) => (avatarConcernedAnimation = m.default))
+    .catch(() => {})
+  // Placeholder: analyzing uses scanning animation
+  import('@/public/animations/avatar-scanning.json')
+    .then((m) => (avatarAnalyzingAnimation = m.default))
     .catch(() => {})
 }
 
@@ -48,6 +53,7 @@ export type LottieAvatarState =
   | 'error'
   // Image scanning state
   | 'scanning' // Sedang scan/analyze gambar struk
+  | 'analyzing' // Deep analysis steps
   // Sentiment-based states for EXPENSE
   | 'proud' // Pengeluaran hemat/cerdas (warteg, transport umum)
   | 'concerned' // Pengeluaran boros tier sedang (30k-100k lifestyle)
@@ -107,6 +113,13 @@ export function LottieAvatar({
               '@/public/animations/avatar-scanning.json'
             )
             setAnimationData(scanning.default)
+            break
+          case 'analyzing':
+            // Placeholder: use scanning animation for analyzing
+            const analyzing = await import(
+              '@/public/animations/avatar-scanning.json'
+            )
+            setAnimationData(analyzing.default)
             break
           case 'proud':
             const proud = await import(
@@ -192,7 +205,11 @@ export function LottieAvatar({
       // Image scanning state
       case 'scanning':
         // TODO: Ganti dengan avatar-scanning.json saat sudah ada
-        return avatarProcessingAnimation || avatarIdleAnimation // Placeholder: gunakan processing (analyzing)
+        return avatarScanningAnimation || avatarProcessingAnimation || avatarIdleAnimation
+      
+      case 'analyzing':
+        // TODO: Ganti dengan avatar-analyzing.json saat sudah ada
+        return avatarAnalyzingAnimation || avatarScanningAnimation || avatarProcessingAnimation || avatarIdleAnimation
 
       // Sentiment-based states for EXPENSE
       case 'proud':
