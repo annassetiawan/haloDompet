@@ -806,7 +806,9 @@ export function DashboardClient({
                   ? 'processing' // 1. Jika sedang loading API/Simpan -> PROCESSING
                   : isScanning
                     ? 'scanning' // 2. Jika sedang scan struk -> SCANNING
-                    : aiSentiment // 3. Jika selesai & ada hasil -> EMOSI (Shocked/Proud/dll)
+                    : isAdvisorLoading
+                      ? 'analyzing' // 3. Jika sedang analisa advisor -> ANALYZING
+                      : aiSentiment // 4. Jika selesai & ada hasil -> EMOSI (Shocked/Proud/dll)
               }
             />
 
