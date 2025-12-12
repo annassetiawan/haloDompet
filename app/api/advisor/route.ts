@@ -156,8 +156,9 @@ export async function POST(request: NextRequest) {
     const allTransactions = await getTransactions(user.id, { limit: 100 })
 
     // Separate transactions by type
-    const expenseTransactions = allTransactions.filter(t => t.type === 'expense')
-    const incomeTransactions = allTransactions.filter(t => t.type === 'income')
+    // Separate transactions by type
+    const expenseTransactions = allTransactions.filter(t => t.type === 'expense' && t.category !== 'Transfer Keluar')
+    const incomeTransactions = allTransactions.filter(t => t.type === 'income' && t.category !== 'Transfer Masuk')
 
     // Calculate expense stats
     const totalSpent = expenseTransactions.reduce((sum, t) => sum + parseFloat(t.amount.toString()), 0)
