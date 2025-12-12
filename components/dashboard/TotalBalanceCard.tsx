@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Eye, EyeOff, ArrowDown, ArrowUp, MoreHorizontal, Edit2, ArrowRightLeft, Hand } from 'lucide-react';
+import { Eye, EyeOff, ArrowDown, ArrowUp, MoreHorizontal, Edit2, ArrowRightLeft, Hand, DollarSign } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { MonthlyStats, Wallet } from '@/types';
 import { motion, PanInfo, useAnimation, useDragControls, DragControls } from 'framer-motion';
@@ -19,6 +19,7 @@ export interface TotalBalanceCardProps {
   wallets: Wallet[];
   onTransfer?: (wallet: Wallet) => void;
   onAdjustBalance?: (wallet: Wallet) => void;
+  onEditWallet?: (wallet: Wallet) => void;
 }
 
 // Sub-component for individual wallet cards
@@ -34,6 +35,7 @@ interface WalletCardProps {
   onRegisterControls: (controls: DragControls) => void;
   onTransfer?: (wallet: Wallet) => void;
   onAdjustBalance?: (wallet: Wallet) => void;
+  onEditWallet?: (wallet: Wallet) => void;
 }
 
 const WalletCard: React.FC<WalletCardProps> = ({
@@ -47,7 +49,8 @@ const WalletCard: React.FC<WalletCardProps> = ({
   handleCardClick,
   onRegisterControls,
   onTransfer,
-  onAdjustBalance
+  onAdjustBalance,
+  onEditWallet
 }) => {
   const controls = useDragControls();
   const isDraggable = index === 0;
@@ -146,8 +149,12 @@ const WalletCard: React.FC<WalletCardProps> = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 z-[60]">
               <DropdownMenuItem className="cursor-pointer" onClick={() => onAdjustBalance?.(wallet)}>
-                <Edit2 className="mr-2 h-4 w-4" />
+                <DollarSign className="mr-2 h-4 w-4" />
                 <span>Sesuaikan Saldo</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => onEditWallet?.(wallet)}>
+                <Edit2 className="mr-2 h-4 w-4" />
+                <span>Edit Dompet</span>
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer" onClick={() => onTransfer?.(wallet)}>
                 <ArrowRightLeft className="mr-2 h-4 w-4" />
@@ -178,7 +185,8 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
   monthlyStats,
   wallets,
   onTransfer,
-  onAdjustBalance
+  onAdjustBalance,
+  onEditWallet
 }) => {
   const [showBalance, setShowBalance] = useState(true);
   const [orderedWallets, setOrderedWallets] = useState<Wallet[]>([]);
@@ -258,6 +266,7 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
             }}
             onTransfer={onTransfer}
             onAdjustBalance={onAdjustBalance}
+            onEditWallet={onEditWallet}
           />
         ))}
       </div>

@@ -48,6 +48,15 @@ const EditWalletDialog = dynamic(
     ssr: false,
   },
 )
+const EditBalanceDialog = dynamic(
+  () =>
+    import('@/components/EditBalanceDialog').then((mod) => ({
+      default: mod.EditBalanceDialog,
+    })),
+  {
+    ssr: false,
+  },
+)
 const ManualTransactionDialog = dynamic(
   () =>
     import('@/components/ManualTransactionDialog').then((mod) => ({
@@ -176,9 +185,12 @@ export function DashboardClient({
   const [editedTranscript, setEditedTranscript] = useState('')
 
   // Wallet management state
+  // Wallet management state
   const [isAddWalletOpen, setIsAddWalletOpen] = useState(false)
   const [isEditWalletOpen, setIsEditWalletOpen] = useState(false)
+  const [isEditBalanceOpen, setIsEditBalanceOpen] = useState(false)
   const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null)
+  const [selectedWalletForBalance, setSelectedWalletForBalance] = useState<Wallet | null>(null)
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null)
 
   // Manual transaction dialog state
@@ -453,6 +465,11 @@ export function DashboardClient({
     loadWallets()
   }
 
+  const handleAdjustBalance = (wallet: Wallet) => {
+    setSelectedWalletForBalance(wallet)
+    setIsEditBalanceOpen(true)
+  }
+
   // Helper function to convert technical errors to user-friendly messages
   const getFriendlyErrorMessage = (error: string): string => {
     // Handle missing fields error
@@ -725,7 +742,8 @@ export function DashboardClient({
               monthlyStats={initialMonthlyStats}
               wallets={wallets}
               onTransfer={handleTransfer}
-              onAdjustBalance={handleEditWallet}
+              onAdjustBalance={handleAdjustBalance}
+              onEditWallet={handleEditWallet}
             />
           </div>
 
@@ -987,6 +1005,20 @@ export function DashboardClient({
         wallet={selectedWallet}
         onSuccess={handleWalletSuccess}
       />
+
+      {selectedWalletForBalance && (
+        <EditBalanceDialog
+          walletId={selectedWalletForBalance.id}
+          walletName={selectedWalletForBalance.name}
+          currentBalance={selectedWalletForBalance.balance}
+          open={isEditBalanceOpen}
+          onOpenChange={setIsEditBalanceOpen}
+          onSuccess={() => {
+            handleBalanceUpdate()
+            setSelectedWalletForBalance(null)
+          }}
+        />
+      )}
 
       {/* Manual Transaction Dialog */}
       <ManualTransactionDialog
