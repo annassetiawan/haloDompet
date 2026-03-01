@@ -11,6 +11,7 @@ import { WalletSelector } from '@/components/WalletSelector'
 import { TransactionCard } from '@/components/TransactionCard'
 import { DarkModeToggle } from '@/components/DarkModeToggle'
 import { LottieAvatarRecorder } from '@/components/LottieAvatarRecorder'
+import { AvatarWithPedestal } from '@/components/AvatarWithPedestal'
 import { AppNavigation } from '@/components/AppNavigation'
 import { AdvisorPromoCard } from '@/components/dashboard/AdvisorPromoCard'
 import { useAIAdvisor } from '@/hooks/useAIAdvisor'
@@ -748,7 +749,7 @@ export function DashboardClient({
           </div>
 
           {/* Area Chat Bubble Status */}
-          <div className="relative w-full max-w-[400px] mx-auto mb-4 flex flex-col justify-end items-center transition-all duration-300">
+          <div className="relative w-full max-w-[400px] mx-auto mb-2 flex flex-col justify-end items-center transition-all duration-300">
             <div
               className={`relative px-4 py-2.5 rounded-2xl shadow-sm border transition-all duration-300 ${
                 isBubbleActive
@@ -814,24 +815,28 @@ export function DashboardClient({
           </div>
 
           {/* Voice Recording Section */}
-          <div className="flex flex-col items-center gap-2">
-            <LottieAvatarRecorder
-              onTranscript={handleTranscript}
-              onStatusChange={handleStatusChange}
-              isLoading={false}
-              sentiment={
-                isProcessing
-                  ? 'processing' // 1. Jika sedang loading API/Simpan -> PROCESSING
-                  : isScanning
-                    ? 'scanning' // 2. Jika sedang scan struk -> SCANNING
-                    : isAdvisorLoading
-                      ? 'analyzing' // 3. Jika sedang analisa advisor -> ANALYZING
-                      : aiSentiment // 4. Jika selesai & ada hasil -> EMOSI (Shocked/Proud/dll)
-              }
-            />
+          <div className="w-full max-w-[400px] mx-auto !mt-0 flex flex-col items-center gap-2">
+            <div className="relative flex flex-col items-center">
+              <AvatarWithPedestal className="-mt-3 -mb-1">
+                <LottieAvatarRecorder
+                  onTranscript={handleTranscript}
+                  onStatusChange={handleStatusChange}
+                  isLoading={false}
+                  sentiment={
+                    isProcessing
+                      ? 'processing' // 1. Jika sedang loading API/Simpan -> PROCESSING
+                      : isScanning
+                        ? 'scanning' // 2. Jika sedang scan struk -> SCANNING
+                        : isAdvisorLoading
+                          ? 'analyzing' // 3. Jika sedang analisa advisor -> ANALYZING
+                          : aiSentiment // 4. Jika selesai & ada hasil -> EMOSI (Shocked/Proud/dll)
+                  }
+                />
+              </AvatarWithPedestal>
+            </div>
 
             {/* Manual Transaction Button */}
-            <div className="flex gap-3">
+            <div className="w-full flex justify-center gap-3 mt-2">
 
 
               <Button
@@ -846,7 +851,7 @@ export function DashboardClient({
             </div>
 
             {/* Status Card */}
-            <div className="w-full max-w-md space-y-3">
+            <div className="w-full space-y-3">
               {userProfile?.mode === 'webhook' && !webhookUrl && (
                 <Link href="/settings">
                   <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 rounded-xl px-4 py-2 cursor-pointer hover:bg-amber-500/20 transition-colors">
@@ -859,7 +864,7 @@ export function DashboardClient({
 
             {/* Instruction */}
             {/* Advisor Promo Card */}
-            <div className="w-full max-w-md">
+            <div className="w-full">
               <AdvisorPromoCard 
                 onAnalyze={handleAnalyze}
                 isLoading={isAdvisorLoading}
