@@ -62,7 +62,7 @@ const WalletCard: React.FC<WalletCardProps> = ({
     }
   }, [isDraggable, controls, onRegisterControls]);
 
-  const topOffset = 14 - (index * 8);
+  const topOffset = 10 - (index * 6);
   const scale = 1 - (index * 0.05);
   const zIndex = 30 - (index * 10);
 
@@ -108,7 +108,7 @@ const WalletCard: React.FC<WalletCardProps> = ({
       }}
       initial={false}
       transition={{ type: "spring", stiffness: 260, damping: 20 }}
-      className={`absolute left-[20px] w-[300px] h-[180px] rounded-[24px] shadow-[0_-4px_16px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.5)] border border-gray-200 dark:border-white/5 cursor-pointer
+      className={`absolute left-[18px] w-[264px] h-[156px] rounded-[20px] shadow-[0_-4px_16px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.5)] border border-gray-200 dark:border-white/5 cursor-pointer
         ${bgColor}
         ${index !== 0 ? 'hover:-translate-y-2' : ''} pointer-events-auto
       `}
@@ -165,7 +165,7 @@ const WalletCard: React.FC<WalletCardProps> = ({
         </div>
       )}
 
-      <div className="pt-5 px-6 pointer-events-none">
+      <div className="pt-3.5 px-4 pointer-events-none">
         <p className={`text-[10px] ${labelColor} font-bold tracking-[0.15em] uppercase mb-1`}>
           {wallet.is_default ? 'Default' : 'Tambahan'}
         </p>
@@ -234,14 +234,14 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
   };
 
   return (
-    <div className="relative w-[340px] h-[290px] font-sans select-none group">
+    <div className="relative w-[300px] h-[254px] font-sans select-none group">
       
       {/* 
         -------------------------------------------
         Deepest Card Layer (Wallet Backing Body)
         -------------------------------------------
       */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[250px] bg-white dark:bg-[#101010] rounded-t-[32px] rounded-b-[32px] z-0 border border-gray-200 dark:border-white/5 shadow-2xl transition-colors duration-300">
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[216px] bg-white dark:bg-[#101010] rounded-t-[28px] rounded-b-[28px] z-0 border border-gray-200 dark:border-white/5 shadow-2xl transition-colors duration-300">
       </div>
 
       {/* 
@@ -279,7 +279,7 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
         This expands the swipe area without covering the inputs below.
       */}
       <div 
-        className="absolute top-0 w-full h-[140px] z-[25] touch-none"
+        className="absolute top-0 w-full h-[120px] z-[25] touch-none"
         onPointerDown={(e) => {
           activeDragControlsRef.current?.start(e);
         }}
@@ -291,22 +291,22 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
         Front Pocket Layer (Total Keuangan)
         -------------------------------------------
       */}
-      <div className="absolute bottom-0 w-full h-[220px] z-40 filter drop-shadow-[0_-8px_24px_rgba(0,0,0,0.15)] dark:drop-shadow-[0_-8px_24px_rgba(0,0,0,0.9)] transition-all duration-300 pointer-events-none">
+      <div className="absolute bottom-0 w-full h-[192px] z-40 filter drop-shadow-[0_-8px_24px_rgba(0,0,0,0.15)] dark:drop-shadow-[0_-8px_24px_rgba(0,0,0,0.9)] transition-all duration-300 pointer-events-none">
         <div className="relative w-full h-full">
             <svg 
               className="absolute top-0 left-0 w-full h-full overflow-visible"
-              viewBox="0 0 340 220"
+              viewBox="0 0 300 192"
               preserveAspectRatio="none"
             >
                 {/* Pocket Shape */}
                 <path 
-                    d="M0,45 Q170,90 340,45 V196 C340,209.255 329.255,220 316,220 H24 C10.7452,220 0,209.255 0,196 Z" 
+                    d="M0,40 Q150,80 300,40 V171 C300,182.598 290.598,192 279,192 H21 C9.40202,192 0,182.598 0,171 Z" 
                     className="fill-white dark:fill-[#0a0a0a] transition-colors duration-300"
                 />
                 
                 {/* Decorative Stitching */}
                 <path 
-                    d="M12,53 Q170,97 328,53 V196 C328,205 322,210 314,210 H26 C18,210 12,205 12,196 Z" 
+                    d="M10,48 Q150,88 290,48 V171 C290,179 285,183 277,183 H23 C15,183 10,179 10,171 Z" 
                     fill="none" 
                     className="stroke-gray-300 dark:stroke-[#333] transition-colors duration-300"
                     strokeOpacity="0.8" 
@@ -316,10 +316,10 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
             </svg>
 
             {/* Content Container - Set pointer-events-none so swipes hit the layer below */}
-            <div className="absolute inset-0 pt-[96px] px-8 flex flex-col justify-start pointer-events-none">
+            <div className="absolute inset-0 pt-[80px] px-6 flex flex-col justify-start pointer-events-none">
                 
                 {/* Balance Section */}
-                <div className="flex flex-col mb-5">
+                <div className="flex flex-col mb-4">
                     {/* Enable pointer events specifically for the Eye button */}
                     <div className="flex items-center gap-2 group/text cursor-pointer w-fit mb-2 pointer-events-auto" onClick={() => setShowBalance(!showBalance)}>
                         <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 tracking-wider group-hover/text:text-gray-600 dark:group-hover/text:text-gray-400 transition-colors uppercase">Total Keuangan</span>
@@ -327,7 +327,7 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
                             {showBalance ? <EyeOff size={12} /> : <Eye size={12} />}
                         </div>
                     </div>
-                    <div className="text-[28px] font-black text-gray-900 dark:text-white tracking-tight leading-none transition-colors duration-300">
+                    <div className="text-[26px] font-black text-gray-900 dark:text-white tracking-tight leading-none transition-colors duration-300">
                         {showBalance ? formatCurrency(totalBalance) : '•••••••••••'}
                     </div>
                 </div>
